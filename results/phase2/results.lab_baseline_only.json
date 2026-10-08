@@ -1,0 +1,188 @@
+{
+  "table1": [
+    {
+      "row": "Baseline (single-pass CoT)",
+      "available": true,
+      "kind": "mean",
+      "exp": "cot",
+      "overall": 43.42105263157895,
+      "numerical": 39.955357142857146,
+      "ci95": [
+        37.13733552631579,
+        49.87006578947367
+      ],
+      "n_questions": 190,
+      "cost": {
+        "tokens": 2705.2569078947367,
+        "calls": 1.0
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 46.875,
+          "MCQ-Single": 49.59239130434783,
+          "Matching": 35.76388888888889,
+          "Numerical": 39.955357142857146
+        },
+        "language": {
+          "English": 48.48684210526316,
+          "Hindi": 38.35526315789474
+        },
+        "subject": {
+          "Chemistry": 41.69921875,
+          "Mathematics": 55.078125,
+          "Physics": 33.16532258064516
+        },
+        "requires_image": {
+          "False": 48.460144927536234,
+          "True": 30.048076923076923
+        }
+      },
+      "pass_at_1": {
+        "pass1": 43.42105263157895,
+        "runs": 16,
+        "run_mean": 43.421052631578945,
+        "run_std": 1.883004612631403,
+        "run_ci95": [
+          42.4176703001089,
+          44.42443496304899
+        ]
+      }
+    },
+    {
+      "row": "Self-consistency (matched compute)",
+      "available": 16,
+      "kind": "sc_matched",
+      "exp": "cot",
+      "overall": 53.68421052631579,
+      "numerical": 51.19047619047619,
+      "ci95": [
+        45.26315789473684,
+        62.63157894736842
+      ],
+      "n_questions": 190,
+      "cost": {
+        "tokens": 43284.11052631579,
+        "calls": 16.0
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 57.14285714285714,
+          "MCQ-Single": 56.52173913043478,
+          "Matching": 50.0,
+          "Numerical": 51.19047619047619
+        },
+        "language": {
+          "English": 57.89473684210527,
+          "Hindi": 49.473684210526315
+        },
+        "subject": {
+          "Chemistry": 48.4375,
+          "Mathematics": 70.3125,
+          "Physics": 41.935483870967744
+        },
+        "requires_image": {
+          "False": 59.42028985507246,
+          "True": 38.46153846153847
+        }
+      },
+      "n_samples": 16,
+      "n_needed": null,
+      "insufficient": false,
+      "vs_baseline": {
+        "diff": 10.263157894736842,
+        "ci95": [
+          5.953947368421052,
+          14.507401315789469
+        ],
+        "p_le_0": 0.0,
+        "n": 190
+      }
+    },
+    {
+      "row": "+ Code sandbox",
+      "available": false
+    },
+    {
+      "row": "+ Agentic correction (same-model critic)",
+      "available": false
+    },
+    {
+      "row": "+ Agentic correction (cross-model critic)",
+      "available": false
+    },
+    {
+      "row": "+ Learned verifier",
+      "available": false
+    },
+    {
+      "row": "+ Retrieval (RAG)",
+      "available": false
+    },
+    {
+      "row": "Full framework",
+      "available": false
+    }
+  ],
+  "n_test_questions": 190,
+  "sc_curve": {
+    "1": 42.63157894736842,
+    "2": 42.63157894736842,
+    "3": 48.94736842105264,
+    "4": 49.473684210526315,
+    "5": 50.0,
+    "6": 51.05263157894737,
+    "7": 53.1578947368421,
+    "8": 52.63157894736842,
+    "9": 52.10526315789473,
+    "10": 54.21052631578947,
+    "11": 54.736842105263165,
+    "12": 54.21052631578947,
+    "13": 54.736842105263165,
+    "14": 53.68421052631579,
+    "15": 53.68421052631579,
+    "16": 53.68421052631579
+  },
+  "correction": {},
+  "extra": {},
+  "reproduction": {
+    "model": "Qwen/Qwen2.5-VL-7B-Instruct-AWQ",
+    "pass_at_1": {
+      "pass1": 13.789473684210526,
+      "runs": 10,
+      "run_mean": 13.789473684210524,
+      "run_std": 1.8862708850127177,
+      "run_ci95": [
+        12.44011678008528,
+        15.138830588335768
+      ]
+    },
+    "n_questions": 190,
+    "ci95": [
+      10.73684210526316,
+      17.264473684210518
+    ],
+    "paper_pass1": 12.4,
+    "paper_std": 1.9,
+    "breakdown": {
+      "question_type": {
+        "MCQ-Multiple": 6.1904761904761925,
+        "MCQ-Single": 28.695652173913043,
+        "Matching": 27.222222222222225,
+        "Numerical": 6.547619047619048
+      },
+      "language": {
+        "English": 14.947368421052632,
+        "Hindi": 12.63157894736842
+      },
+      "subject": {
+        "Chemistry": 19.53125,
+        "Mathematics": 12.03125,
+        "Physics": 9.677419354838708
+      },
+      "requires_image": {
+        "False": 13.985507246376812,
+        "True": 13.26923076923077
+      }
+    }
+  }
+}

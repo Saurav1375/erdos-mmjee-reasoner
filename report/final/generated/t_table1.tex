@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{SOP Table I: additive evaluation on the 2025 held-out set (190 questions, 95 EN + 95 HI). Pass@1 = mean over samples for single-candidate rows; the verifier rows select one answer per question. CIs: cluster bootstrap over EN/HI twins (2{,}000 resamples). Self-consistency uses the number of CoT samples whose tokens match the full framework.}
+\label{tab:table1}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrcrrr}
+\toprule
+Configuration & Numerical & Overall & 95\% CI & $\Delta$ vs baseline [CI] & Tok/q & Calls/q \\
+\midrule
+Baseline CoT & 40.2 & \textbf{43.2} & [37.0, 49.6] & -- & 2.7k & 1.0 \\
+Self-consistency (matched) (n=20) & 51.2 & \textbf{53.2} & [44.2, 62.6] & +10.0 [+5.3, +14.6] & 54.2k & 20.0 \\
++ Code sandbox (PoT) & 50.4 & \textbf{48.2} & [41.4, 54.9] & +5.0 [+0.4, +9.8] & 3.5k & 1.9 \\
++ Correction, same-model critic & 55.1 & \textbf{51.2} & [44.6, 58.0] & +8.1 [+3.3, +13.1] & 6.1k & 4.4 \\
++ Correction, cross-model critic & 53.0 & \textbf{51.3} & [44.5, 58.1] & +8.2 [+3.5, +13.4] & 6.4k & 4.7 \\
++ Learned verifier & 66.7 & \textbf{63.2} & [55.3, 71.6] & +20.0 [+13.4, +27.0] & 51.5k & 37.6 \\
++ RAG = Full framework & 69.0 & \textbf{65.3} & [57.4, 73.7] & +22.1 [+16.1, +28.5] & 54.1k & 39.2 \\
+\bottomrule
+\end{tabular}
+\end{table*}

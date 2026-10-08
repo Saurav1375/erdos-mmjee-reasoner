@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{RAG knowledge base and the effect of retrieval on PoT accuracy.}
+\label{tab:rag}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lr}
+\toprule
+Retrieval (full run) & Value \\
+\midrule
+Training twin pairs (2019--2024) & 635 \\
+No verified-correct solution & 180 \\
+Near-duplicate of a 2025 question & 1 \\
+KB entries & 454 \\
+Threshold $\tau$ (tuned on 2024) & 0.885 \\
+Dev proxy precision (base rate) & 70.6\% (31.4\%) \\
+2025 questions with exemplars & 30 / 190 \\
+PoT $\to$ RAG-PoT, with exemplars & 30.0 $\to$ 37.9 \\
+PoT $\to$ RAG-PoT, without exemplars & 51.6 $\to$ 53.4 \\
+\bottomrule
+\end{tabular}
+\end{table}

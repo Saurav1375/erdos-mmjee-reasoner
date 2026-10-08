@@ -1,0 +1,769 @@
+{
+  "table1": [
+    {
+      "row": "Baseline (single-pass CoT)",
+      "available": true,
+      "kind": "mean",
+      "exp": "cot",
+      "overall": 29.531249999999996,
+      "numerical": 19.444444444444446,
+      "ci95": [
+        17.8125,
+        41.5625
+      ],
+      "n_questions": 40,
+      "cost": {
+        "tokens": 2694.7625,
+        "calls": 1.0
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 32.8125,
+          "MCQ-Single": 44.375,
+          "Matching": 31.25,
+          "Numerical": 19.444444444444446
+        },
+        "language": {
+          "English": 34.375,
+          "Hindi": 24.6875
+        },
+        "subject": {
+          "Chemistry": 31.25,
+          "Mathematics": 33.125,
+          "Physics": 27.604166666666668
+        },
+        "requires_image": {
+          "False": 33.59375,
+          "True": 23.4375
+        }
+      },
+      "pass_at_1": {
+        "pass1": 29.531249999999996,
+        "runs": 16,
+        "run_mean": 29.53125,
+        "run_std": 4.849291185317706,
+        "run_ci95": [
+          26.947245126691886,
+          32.11525487330811
+        ]
+      }
+    },
+    {
+      "row": "Self-consistency (matched compute)",
+      "available": 16,
+      "kind": "sc_matched",
+      "exp": "cot",
+      "overall": 35.0,
+      "numerical": 33.33333333333333,
+      "ci95": [
+        20.0,
+        52.5
+      ],
+      "n_questions": 40,
+      "cost": {
+        "tokens": 43116.2,
+        "calls": 16.0
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 37.5,
+          "MCQ-Single": 40.0,
+          "Matching": 25.0,
+          "Numerical": 33.33333333333333
+        },
+        "language": {
+          "English": 35.0,
+          "Hindi": 35.0
+        },
+        "subject": {
+          "Chemistry": 50.0,
+          "Mathematics": 40.0,
+          "Physics": 29.166666666666668
+        },
+        "requires_image": {
+          "False": 41.66666666666667,
+          "True": 25.0
+        }
+      },
+      "n_samples": 16,
+      "n_needed": 18,
+      "insufficient": true,
+      "vs_baseline": {
+        "diff": 5.46875,
+        "ci95": [
+          -2.5,
+          13.28125
+        ],
+        "p_le_0": 0.099,
+        "n": 40
+      }
+    },
+    {
+      "row": "+ Code sandbox",
+      "available": true,
+      "kind": "mean",
+      "exp": "pot",
+      "overall": 41.25,
+      "numerical": 38.88888888888889,
+      "ci95": [
+        28.125,
+        54.37499999999999
+      ],
+      "n_questions": 40,
+      "cost": {
+        "tokens": 3520.278125,
+        "calls": 1.80625
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 39.0625,
+          "MCQ-Single": 45.0,
+          "Matching": 46.875,
+          "Numerical": 38.88888888888889
+        },
+        "language": {
+          "English": 53.125,
+          "Hindi": 29.375
+        },
+        "subject": {
+          "Chemistry": 37.5,
+          "Mathematics": 53.75,
+          "Physics": 36.97916666666667
+        },
+        "requires_image": {
+          "False": 46.875,
+          "True": 32.8125
+        }
+      },
+      "pass_at_1": {
+        "pass1": 41.25,
+        "runs": 8,
+        "run_mean": 41.25,
+        "run_std": 5.3452248382484875,
+        "run_ci95": [
+          36.78128020440948,
+          45.71871979559052
+        ]
+      },
+      "vs_baseline": {
+        "diff": 11.71875,
+        "ci95": [
+          3.4335937500000004,
+          21.40625
+        ],
+        "p_le_0": 0.002,
+        "n": 40
+      }
+    },
+    {
+      "row": "+ Agentic correction (same-model critic)",
+      "available": true,
+      "kind": "mean",
+      "exp": "pot_corr_same",
+      "overall": 46.5625,
+      "numerical": 43.05555555555556,
+      "ci95": [
+        32.8125,
+        60.32031249999996
+      ],
+      "n_questions": 40,
+      "cost": {
+        "tokens": 7696.453125,
+        "calls": 5.7375
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 42.1875,
+          "MCQ-Single": 55.00000000000001,
+          "Matching": 50.0,
+          "Numerical": 43.05555555555556
+        },
+        "language": {
+          "English": 56.875,
+          "Hindi": 36.25
+        },
+        "subject": {
+          "Chemistry": 41.66666666666667,
+          "Mathematics": 61.25000000000001,
+          "Physics": 41.66666666666667
+        },
+        "requires_image": {
+          "False": 51.041666666666664,
+          "True": 39.84375
+        }
+      },
+      "pass_at_1": {
+        "pass1": 46.5625,
+        "runs": 8,
+        "run_mean": 46.5625,
+        "run_std": 3.7648515432692884,
+        "run_ci95": [
+          43.41500534299697,
+          49.70999465700303
+        ]
+      },
+      "vs_baseline": {
+        "diff": 17.03125,
+        "ci95": [
+          8.125,
+          27.03515624999998
+        ],
+        "p_le_0": 0.0,
+        "n": 40
+      }
+    },
+    {
+      "row": "+ Agentic correction (cross-model critic)",
+      "available": true,
+      "kind": "mean",
+      "exp": "pot_corr_cross",
+      "overall": 43.125,
+      "numerical": 43.05555555555556,
+      "ci95": [
+        29.6875,
+        56.25
+      ],
+      "n_questions": 40,
+      "cost": {
+        "tokens": 5502.965625,
+        "calls": 3.9125
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 32.8125,
+          "MCQ-Single": 48.75,
+          "Matching": 50.0,
+          "Numerical": 43.05555555555556
+        },
+        "language": {
+          "English": 55.625,
+          "Hindi": 30.625000000000004
+        },
+        "subject": {
+          "Chemistry": 41.66666666666667,
+          "Mathematics": 56.25,
+          "Physics": 38.02083333333333
+        },
+        "requires_image": {
+          "False": 49.47916666666667,
+          "True": 33.59375
+        }
+      },
+      "pass_at_1": {
+        "pass1": 43.125,
+        "runs": 8,
+        "run_mean": 43.125,
+        "run_std": 4.771567577102639,
+        "run_ci95": [
+          39.135869676572206,
+          47.114130323427794
+        ]
+      },
+      "vs_baseline": {
+        "diff": 13.593749999999998,
+        "ci95": [
+          5.0,
+          22.81640624999998
+        ],
+        "p_le_0": 0.0,
+        "n": 40
+      }
+    },
+    {
+      "row": "+ Learned verifier",
+      "available": true,
+      "kind": "verifier",
+      "exp": "pot_corr_cross",
+      "overall": 50.0,
+      "numerical": 50.0,
+      "ci95": [
+        32.5,
+        67.5
+      ],
+      "n_questions": 40,
+      "cost": {
+        "tokens": 44023.725,
+        "calls": 31.3
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 37.5,
+          "MCQ-Single": 50.0,
+          "Matching": 75.0,
+          "Numerical": 50.0
+        },
+        "language": {
+          "English": 60.0,
+          "Hindi": 40.0
+        },
+        "subject": {
+          "Chemistry": 50.0,
+          "Mathematics": 60.0,
+          "Physics": 45.83333333333333
+        },
+        "requires_image": {
+          "False": 54.166666666666664,
+          "True": 43.75
+        }
+      },
+      "selection": "weighted_vote",
+      "pool_size": 16,
+      "sel_max_prob": 50.0,
+      "sel_weighted_vote": 50.0,
+      "sel_majority": 50.0,
+      "sel_random_expected": 42.1875,
+      "sel_oracle": 80.0,
+      "vs_baseline": {
+        "diff": 20.46875,
+        "ci95": [
+          7.187499999999999,
+          33.4375
+        ],
+        "p_le_0": 0.0,
+        "n": 40
+      }
+    },
+    {
+      "row": "+ Retrieval (RAG)",
+      "available": true,
+      "kind": "verifier",
+      "exp": "full",
+      "overall": 57.49999999999999,
+      "numerical": 55.55555555555556,
+      "ci95": [
+        40.0,
+        72.5
+      ],
+      "n_questions": 40,
+      "cost": {
+        "tokens": 46571.997368421056,
+        "calls": 33.15
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 50.0,
+          "MCQ-Single": 60.0,
+          "Matching": 75.0,
+          "Numerical": 55.55555555555556
+        },
+        "language": {
+          "English": 65.0,
+          "Hindi": 50.0
+        },
+        "subject": {
+          "Chemistry": 66.66666666666666,
+          "Mathematics": 70.0,
+          "Physics": 50.0
+        },
+        "requires_image": {
+          "False": 66.66666666666666,
+          "True": 43.75
+        }
+      },
+      "selection": "weighted_vote",
+      "pool_size": 16,
+      "sel_max_prob": 55.00000000000001,
+      "sel_weighted_vote": 57.49999999999999,
+      "sel_majority": 55.00000000000001,
+      "sel_random_expected": 44.53125,
+      "sel_oracle": 75.0,
+      "vs_baseline": {
+        "diff": 27.968749999999996,
+        "ci95": [
+          15.78125,
+          39.6875
+        ],
+        "p_le_0": 0.0,
+        "n": 40
+      }
+    },
+    {
+      "row": "Full framework",
+      "available": true,
+      "kind": "verifier",
+      "exp": "full",
+      "overall": 57.49999999999999,
+      "numerical": 55.55555555555556,
+      "ci95": [
+        40.0,
+        72.5
+      ],
+      "n_questions": 40,
+      "cost": {
+        "tokens": 46571.997368421056,
+        "calls": 33.15
+      },
+      "breakdown": {
+        "question_type": {
+          "MCQ-Multiple": 50.0,
+          "MCQ-Single": 60.0,
+          "Matching": 75.0,
+          "Numerical": 55.55555555555556
+        },
+        "language": {
+          "English": 65.0,
+          "Hindi": 50.0
+        },
+        "subject": {
+          "Chemistry": 66.66666666666666,
+          "Mathematics": 70.0,
+          "Physics": 50.0
+        },
+        "requires_image": {
+          "False": 66.66666666666666,
+          "True": 43.75
+        }
+      },
+      "selection": "weighted_vote",
+      "pool_size": 16,
+      "sel_max_prob": 55.00000000000001,
+      "sel_weighted_vote": 57.49999999999999,
+      "sel_majority": 55.00000000000001,
+      "sel_random_expected": 44.53125,
+      "sel_oracle": 75.0,
+      "vs_baseline": {
+        "diff": 27.968749999999996,
+        "ci95": [
+          15.78125,
+          39.6875
+        ],
+        "p_le_0": 0.0,
+        "n": 40
+      }
+    }
+  ],
+  "n_test_questions": 190,
+  "full_vs_sc_matched": {
+    "diff": 22.5,
+    "ci95": [
+      7.5,
+      37.5
+    ],
+    "p_le_0": 0.0,
+    "n": 40
+  },
+  "full_vs_sc_matched_mcnemar": {
+    "a_only": 10,
+    "b_only": 1,
+    "p": 0.01171875
+  },
+  "sc_curve": {
+    "1": 22.5,
+    "2": 22.5,
+    "3": 25.0,
+    "4": 30.0,
+    "5": 32.5,
+    "6": 30.0,
+    "7": 37.5,
+    "8": 35.0,
+    "9": 35.0,
+    "10": 32.5,
+    "11": 37.5,
+    "12": 35.0,
+    "13": 37.5,
+    "14": 32.5,
+    "15": 32.5,
+    "16": 35.0
+  },
+  "correction": {
+    "pot_corr_same": {
+      "n_chains": 320,
+      "acc_before": 41.25,
+      "acc_after": 46.5625,
+      "detect_rate": 79.25531914893617,
+      "false_alarm_rate": 53.03030303030303,
+      "fix_rate_of_detected": 16.778523489932887,
+      "wrong_to_right": 25,
+      "right_to_wrong": 8,
+      "answer_changed": 20.9375,
+      "mean_rounds": 1.859375,
+      "stop_reasons": {
+        "critic_ok": 151,
+        "unchanged": 131,
+        "max_rounds": 38
+      },
+      "critic_unparsed": 0
+    },
+    "pot_corr_cross": {
+      "n_chains": 320,
+      "acc_before": 41.25,
+      "acc_after": 43.125,
+      "detect_rate": 35.1063829787234,
+      "false_alarm_rate": 23.484848484848484,
+      "fix_rate_of_detected": 19.696969696969695,
+      "wrong_to_right": 13,
+      "right_to_wrong": 7,
+      "answer_changed": 10.3125,
+      "mean_rounds": 1.346875,
+      "stop_reasons": {
+        "critic_ok": 278,
+        "unchanged": 38,
+        "max_rounds": 4
+      },
+      "critic_unparsed": 76
+    },
+    "full": {
+      "n_chains": 320,
+      "acc_before": 42.8125,
+      "acc_after": 46.25,
+      "detect_rate": 40.43715846994536,
+      "false_alarm_rate": 21.16788321167883,
+      "fix_rate_of_detected": 20.27027027027027,
+      "wrong_to_right": 15,
+      "right_to_wrong": 4,
+      "answer_changed": 10.3125,
+      "mean_rounds": 1.378125,
+      "stop_reasons": {
+        "critic_ok": 280,
+        "unchanged": 38,
+        "max_rounds": 2
+      },
+      "critic_unparsed": 76
+    }
+  },
+  "verifier_test": {
+    "pot": {
+      "logreg/handcrafted": {
+        "n": 320,
+        "pos_rate": 0.4125,
+        "threshold": 0.34,
+        "f1": 0.6666666666666666,
+        "precision": 0.5737704918032787,
+        "recall": 0.7954545454545454,
+        "auc": 0.7958575112830432,
+        "ap": 0.7230915409875734,
+        "sel_max_prob": 50.0,
+        "sel_weighted_vote": 50.0
+      },
+      "logreg/embedding": {
+        "n": 320,
+        "pos_rate": 0.4125,
+        "threshold": 0.418,
+        "f1": 0.5538461538461539,
+        "precision": 0.46632124352331605,
+        "recall": 0.6818181818181818,
+        "auc": 0.6024339136041263,
+        "ap": 0.5143390573274802,
+        "sel_max_prob": 42.5,
+        "sel_weighted_vote": 52.5
+      },
+      "logreg/all": {
+        "n": 320,
+        "pos_rate": 0.4125,
+        "threshold": 0.534,
+        "f1": 0.6950354609929078,
+        "precision": 0.6533333333333333,
+        "recall": 0.7424242424242424,
+        "auc": 0.7935606060606061,
+        "ap": 0.76174274127562,
+        "sel_max_prob": 52.5,
+        "sel_weighted_vote": 50.0
+      },
+      "xgboost/handcrafted": {
+        "n": 320,
+        "pos_rate": 0.4125,
+        "threshold": 0.184,
+        "f1": 0.6708860759493671,
+        "precision": 0.5760869565217391,
+        "recall": 0.803030303030303,
+        "auc": 0.7919890393294649,
+        "ap": 0.7459488861933006,
+        "sel_max_prob": 50.0,
+        "sel_weighted_vote": 50.0
+      },
+      "xgboost/embedding": {
+        "n": 320,
+        "pos_rate": 0.4125,
+        "threshold": 0.202,
+        "f1": 0.5572916666666666,
+        "precision": 0.4246031746031746,
+        "recall": 0.8106060606060606,
+        "auc": 0.5991295938104448,
+        "ap": 0.5641625403969208,
+        "sel_max_prob": 37.5,
+        "sel_weighted_vote": 50.0
+      },
+      "xgboost/all": {
+        "n": 320,
+        "pos_rate": 0.4125,
+        "threshold": 0.287,
+        "f1": 0.6821192052980133,
+        "precision": 0.6058823529411764,
+        "recall": 0.7803030303030303,
+        "auc": 0.775346550612508,
+        "ap": 0.7026686048272061,
+        "sel_max_prob": 50.0,
+        "sel_weighted_vote": 50.0
+      },
+      "majority": 50.0,
+      "oracle": 80.0
+    },
+    "pot_corr_cross": {
+      "logreg/handcrafted": {
+        "n": 640,
+        "pos_rate": 0.421875,
+        "threshold": 0.34,
+        "f1": 0.6728971962616822,
+        "precision": 0.5806451612903226,
+        "recall": 0.8,
+        "auc": 0.7987687687687687,
+        "ap": 0.7350999951192447,
+        "sel_max_prob": 50.0,
+        "sel_weighted_vote": 50.0
+      },
+      "logreg/embedding": {
+        "n": 640,
+        "pos_rate": 0.421875,
+        "threshold": 0.418,
+        "f1": 0.5658093797276853,
+        "precision": 0.4782608695652174,
+        "recall": 0.6925925925925925,
+        "auc": 0.6063963963963964,
+        "ap": 0.5329761075238068,
+        "sel_max_prob": 42.5,
+        "sel_weighted_vote": 47.5
+      },
+      "logreg/all": {
+        "n": 640,
+        "pos_rate": 0.421875,
+        "threshold": 0.534,
+        "f1": 0.7015706806282722,
+        "precision": 0.6633663366336634,
+        "recall": 0.7444444444444445,
+        "auc": 0.8012312312312311,
+        "ap": 0.773198049988275,
+        "sel_max_prob": 50.0,
+        "sel_weighted_vote": 50.0
+      },
+      "xgboost/handcrafted": {
+        "n": 640,
+        "pos_rate": 0.421875,
+        "threshold": 0.184,
+        "f1": 0.6926677067082684,
+        "precision": 0.5983827493261455,
+        "recall": 0.8222222222222222,
+        "auc": 0.8018918918918918,
+        "ap": 0.7657834451465969,
+        "sel_max_prob": 55.00000000000001,
+        "sel_weighted_vote": 50.0
+      },
+      "xgboost/embedding": {
+        "n": 640,
+        "pos_rate": 0.421875,
+        "threshold": 0.202,
+        "f1": 0.5655526992287918,
+        "precision": 0.4330708661417323,
+        "recall": 0.8148148148148148,
+        "auc": 0.6107107107107107,
+        "ap": 0.586594156522399,
+        "sel_max_prob": 40.0,
+        "sel_weighted_vote": 50.0
+      },
+      "xgboost/all": {
+        "n": 640,
+        "pos_rate": 0.421875,
+        "threshold": 0.287,
+        "f1": 0.6967741935483871,
+        "precision": 0.6171428571428571,
+        "recall": 0.8,
+        "auc": 0.7813013013013014,
+        "ap": 0.7229925912956026,
+        "sel_max_prob": 50.0,
+        "sel_weighted_vote": 50.0
+      },
+      "majority": 50.0,
+      "oracle": 80.0
+    },
+    "full": {
+      "logreg/handcrafted": {
+        "n": 640,
+        "pos_rate": 0.4453125,
+        "threshold": 0.34,
+        "f1": 0.7021943573667712,
+        "precision": 0.6345609065155807,
+        "recall": 0.7859649122807018,
+        "auc": 0.7805386706202124,
+        "ap": 0.7499458283546844,
+        "sel_max_prob": 52.5,
+        "sel_weighted_vote": 55.00000000000001
+      },
+      "logreg/embedding": {
+        "n": 640,
+        "pos_rate": 0.4453125,
+        "threshold": 0.418,
+        "f1": 0.5307346326836582,
+        "precision": 0.46335078534031415,
+        "recall": 0.6210526315789474,
+        "auc": 0.570219915987151,
+        "ap": 0.5334091788674963,
+        "sel_max_prob": 40.0,
+        "sel_weighted_vote": 57.49999999999999
+      },
+      "logreg/all": {
+        "n": 640,
+        "pos_rate": 0.4453125,
+        "threshold": 0.534,
+        "f1": 0.6950354609929078,
+        "precision": 0.7025089605734767,
+        "recall": 0.6877192982456141,
+        "auc": 0.7941784037558686,
+        "ap": 0.7600473681801208,
+        "sel_max_prob": 55.00000000000001,
+        "sel_weighted_vote": 57.49999999999999
+      },
+      "xgboost/handcrafted": {
+        "n": 640,
+        "pos_rate": 0.4453125,
+        "threshold": 0.184,
+        "f1": 0.7202472952086554,
+        "precision": 0.643646408839779,
+        "recall": 0.8175438596491228,
+        "auc": 0.7937336298492711,
+        "ap": 0.7600660028716263,
+        "sel_max_prob": 52.5,
+        "sel_weighted_vote": 55.00000000000001
+      },
+      "xgboost/embedding": {
+        "n": 640,
+        "pos_rate": 0.4453125,
+        "threshold": 0.202,
+        "f1": 0.5788787483702738,
+        "precision": 0.4605809128630705,
+        "recall": 0.7789473684210526,
+        "auc": 0.6025105016061281,
+        "ap": 0.5671467267427384,
+        "sel_max_prob": 50.0,
+        "sel_weighted_vote": 55.00000000000001
+      },
+      "xgboost/all": {
+        "n": 640,
+        "pos_rate": 0.4453125,
+        "threshold": 0.287,
+        "f1": 0.7363494539781591,
+        "precision": 0.6629213483146067,
+        "recall": 0.8280701754385965,
+        "auc": 0.8074623177662466,
+        "ap": 0.7730436904216921,
+        "sel_max_prob": 52.5,
+        "sel_weighted_vote": 55.00000000000001
+      },
+      "majority": 55.00000000000001,
+      "oracle": 75.0
+    }
+  },
+  "extra": {
+    "pot_rag": {
+      "overall": 42.8125,
+      "pass_at_1": {
+        "pass1": 42.8125,
+        "runs": 8,
+        "run_mean": 42.8125,
+        "run_std": 7.126096406869614,
+        "run_ci95": [
+          36.85493431430669,
+          48.77006568569331
+        ]
+      }
+    }
+  }
+}

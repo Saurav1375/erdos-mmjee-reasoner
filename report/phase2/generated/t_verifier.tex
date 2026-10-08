@@ -1,0 +1,21 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Learned verifier in the pilot (1,200 auto-labelled solutions, 47.6\% correct). CV: GroupKFold by twin pair on 2019--2023; dev: 2024; test: the 2025 pilot pool (16 candidates per question). Test sel.\ = selection accuracy (weighted vote).}
+\label{tab:verifier}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrr}
+\toprule
+Model / features & CV AUC & Dev AUC & F1 & Test AUC & Test sel. \\
+\midrule
+LR / handcrafted & 0.858 & 0.867 & 0.736 & 0.781 & 55.0 \\
+LR / embedding & 0.704 & 0.608 & 0.619 & 0.570 & 57.5 \\
+LR / all & 0.863 & 0.876 & 0.743 & 0.794 & 57.5 \\
+XGB / handcrafted & 0.855 & 0.874 & 0.754 & 0.794 & 55.0 \\
+XGB / embedding & 0.622 & 0.591 & 0.588 & 0.603 & 55.0 \\
+XGB / all & 0.847 & 0.870 & 0.785 & 0.807 & 55.0 \\
+Majority vote &  &  &  &  & 55.0 \\
+Oracle (any correct) &  &  &  &  & 75.0 \\
+\bottomrule
+\end{tabular}
+\end{table}

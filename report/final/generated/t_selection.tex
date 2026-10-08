@@ -1,0 +1,16 @@
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Answer selection on the 2025 pools (accuracy \%). $^\star$ = primary verifier chosen on 2024. Reported only; no choice was made on 2025.}
+\label{tab:selection}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+2025 candidate pool & Majority & LR max-p.$^\star$ & LR w.-vote & XGB max-p. & Oracle & LR AUC \\
+\midrule
+8 PoT samples & 60.5 & 61.6 & 61.6 & 65.3 & 78.9 & 0.834 \\
+8 PoT + 8 corrected (cross) & 61.6 & 63.2 & 63.2 & 66.8 & 82.6 & 0.828 \\
+8 RAG-PoT + 8 corrected (full) & 65.8 & 65.3 & 66.8 & 67.9 & 85.3 & 0.836 \\
+\bottomrule
+\end{tabular}
+\end{table*}

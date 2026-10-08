@@ -1,0 +1,136 @@
+\paragraph{Baseline (base paper, English)}
+\begin{small}\begin{verbatim}
+Please analyze the image carefully, reason
+step-by-step and provide your answer at the
+end.
+
+For this question:
+- Provide a numerical value
+- Round to appropriate decimal places if
+needed
+- Format your answer in \boxed{} (e.g.,
+\boxed{2.5} or \boxed{42})
+\end{verbatim}\end{small}
+
+\paragraph{PoT solver instructions}
+\begin{small}\begin{verbatim}
+How to solve:
+- Write the solution as numbered steps, each
+starting on a new line with "Step 1:", "Step
+2:", and so on.
+- Explain the physics/chemistry/mathematics of
+each step in words.
+- Do NOT do calculations in your head.
+Whenever a step needs a calculation
+(arithmetic, algebra, solving equations,
+derivatives, integrals, limits, unit
+conversions, or checking each option), write a
+short Python program in a ```python code block
+that prints the result. You may use math,
+fractions, sympy and numpy.
+- End the code block with ```. The code will
+be run and its printed output will be given
+back to you in an ```output block. Then
+continue the solution using that output. Never
+invent the output yourself.
+- Use at most 3 code blocks.
+- Be concise: do not re-check the same step
+again and again.
+- Finish with exactly one final answer in
+\boxed{}. Do not use \boxed anywhere else. For
+a numerical answer write a plain decimal
+number inside the box (no units, no fractions,
+no LaTeX), rounded to two decimal places if it
+is not an integer.
+
+Required format (example):
+Step 1: <which law / concept applies and the
+equation to use>
+```python
+import sympy as sp
+x = sp.symbols('x')
+print(sp.solve(2*x - 6, x))
+```
+```output
+[3]
+```
+Step 2: <interpret the printed result, check
+the options>
+\boxed{<answer>}
+\end{verbatim}\end{small}
+
+\paragraph{Critic}
+\begin{small}\begin{verbatim}
+You are a strict examiner checking a student's
+solution to a JEE Advanced question. The
+question is in the attached image{lang_note}.
+
+Instructions the student was given:
+{type_instruction}
+
+Student's solution (steps are numbered):
+<solution>
+{solution}
+</solution>
+
+Check the steps in order: reading of the
+question and figure, chosen concept and
+equations, algebra and arithmetic (the
+```output blocks are real program outputs),
+and the final option or number. Find the FIRST
+step that contains an error. Do not solve the
+whole problem again. Keep your check short (at
+most about 250 words), then end your reply
+with exactly these three lines:
+VERDICT: CORRECT or ERROR
+FIRST_ERROR_STEP: <step number, or NONE>
+EXPLANATION: <one or two sentences: what is
+wrong and how to fix it>
+\end{verbatim}\end{small}
+
+\paragraph{Corrector feedback}
+\begin{small}\begin{verbatim}
+A reviewer checked an earlier attempt at this
+question. The steps before Step {k} were
+accepted and are already written at the start
+of your answer. The reviewer found an error in
+Step {k}:
+"{explanation}"
+Continue the solution from Step {k}: re-derive
+that step correctly (do not repeat the error)
+and complete the solution, following the same
+rules (Python code for every calculation, one
+final \boxed{{}} answer).
+\end{verbatim}\end{small}
+
+\paragraph{Concept tagger}
+\begin{small}\begin{verbatim}
+Look at this JEE Advanced exam question (it
+may be written in English or Hindi). Do not
+solve it. In English, describe what is needed
+to solve it, using exactly this format on one
+line:
+SUBJECT: <Physics/Chemistry/Mathematics> |
+TOPIC: <specific topic, 2-6 words> | METHOD:
+<key concept or solution technique, at most 15
+words>
+\end{verbatim}\end{small}
+
+\paragraph{Transcriber}
+\begin{small}\begin{verbatim}
+Transcribe this exam question exactly as plain
+text in its original language. Write
+mathematical expressions in LaTeX. Include all
+answer options. If there is a figure, add one
+line "[Figure: <short description>]". Output
+only the transcription.
+\end{verbatim}\end{small}
+
+\paragraph{Exemplar header}
+\begin{small}\begin{verbatim}
+Below are worked solutions of earlier JEE
+Advanced problems that use a similar method.
+Use them only as guidance on the method. They
+are DIFFERENT problems: do not copy their
+numbers or answers.
+\end{verbatim}\end{small}

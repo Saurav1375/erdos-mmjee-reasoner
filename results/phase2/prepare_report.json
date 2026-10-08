@@ -1,0 +1,34 @@
+{
+  "duplicate_question_ids": [
+    "2023_P2_Hindi_Mathematics_Numerical_q1_Numerical_page5",
+    "2023_P2_Hindi_Mathematics_Numerical_q2_Numerical_page5",
+    "2023_P2_Hindi_Mathematics_Numerical_q3_Numerical_page5",
+    "2023_P2_Hindi_Mathematics_Numerical_q4_Numerical_page5"
+  ],
+  "retyped_mcq_single_to_multiple": [
+    "2023_P1_English_Mathematics_MCQ-Single_q1_MCQ-Multiple_page1",
+    "2023_P1_English_Mathematics_MCQ-Single_q2_MCQ-Multiple_page2",
+    "2023_P1_English_Mathematics_MCQ-Single_q3_MCQ-Multiple_page2",
+    "2023_P1_English_Physics_MCQ-Single_q1_MCQ-Multiple_page12",
+    "2023_P1_English_Physics_MCQ-Single_q2_MCQ-Multiple_page13",
+    "2023_P1_English_Physics_MCQ-Single_q3_MCQ-Multiple_page13",
+    "2023_P1_Hindi_Mathematics_MCQ-Multiple_q1_MCQ-Multiple_page1",
+    "2023_P1_Hindi_Mathematics_MCQ-Multiple_q2_MCQ-Multiple_page2",
+    "2023_P1_Hindi_Mathematics_MCQ-Multiple_q3_MCQ-Multiple_page2",
+    "2023_P1_Hindi_Physics_MCQ-Multiple_q1_MCQ-Multiple_page12",
+    "2023_P1_Hindi_Physics_MCQ-Multiple_q2_MCQ-Multiple_page12",
+    "2023_P1_Hindi_Physics_MCQ-Multiple_q3_MCQ-Multiple_page13"
+  ],
+  "expanded_numerical_golds": 107,
+  "counts": {
+    "train": 1270,
+    "test": 190,
+    "excluded": 102
+  },
+  "test_by_type": {
+    "Numerical": 84,
+    "MCQ-Single": 46,
+    "MCQ-Multiple": 42,
+    "Matching": 18
+  }
+}

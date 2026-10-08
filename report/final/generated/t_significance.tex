@@ -1,0 +1,19 @@
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Paired cluster-bootstrap tests of key steps; McNemar where both rows give one answer per question.}
+\label{tab:sig}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrr}
+\toprule
+Comparison & $\Delta$ [95\% CI] & $P(\Delta\le0)$ & McNemar (a only / b only) \\
+\midrule
+Code sandbox (PoT) vs Baseline CoT & +5.0 [+0.4, +9.8] & 0.0120 & -- \\
+Correction, cross-model critic vs Code sandbox (PoT) & +3.2 [+1.3, +5.0] & 0.0005 & -- \\
+Learned verifier vs Correction, cross-model critic & +11.8 [+6.8, +16.6] & 0.0000 & -- \\
+RAG = Full framework vs Learned verifier & +2.1 [-3.2, +6.8] & 0.2235 & 13 / 9, $p$=0.5235 \\
+RAG = Full framework vs Self-consistency (matched) & +12.1 [+4.2, +20.0] & 0.0015 & 35 / 12, $p$=0.0011 \\
+RAG = Full framework vs Baseline CoT & +22.1 [+15.9, +28.6] & 0.0000 & -- \\
+\bottomrule
+\end{tabular}
+\end{table*}

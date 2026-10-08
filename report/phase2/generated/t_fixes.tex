@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Verification run of the fixes on the same pilot questions.}
+\label{tab:fixes}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrr}
+\toprule
+Pilot check (40 q, cross critic) & v1 & v2 \\
+\midrule
+Code blocks executed OK & 119 & 138 \\
+Blocked by sandbox whitelist & 13 & 0 \\
+NameError (state lost) & 3 & 0 \\
+PoT accuracy (320 traj.) & 41.2 & 41.2 \\
+Critic calls / unparsed & 431 / 76 & 501 / 1 \\
+Verdicts via verdict forcing & -- & 69 \\
+Critic detection rate & 35.1 & 56.4 \\
+Critic false-alarm rate & 23.5 & 29.5 \\
+Acc.\ before $\to$ after & 41.2 $\to$ 43.1 & 41.2 $\to$ 41.9 \\
+\bottomrule
+\end{tabular}
+\end{table}

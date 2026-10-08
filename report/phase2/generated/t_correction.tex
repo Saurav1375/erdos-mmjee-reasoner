@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Correction loop in the pilot (v1, 320 chains each). Detect = critic flags an originally wrong solution; False al. = flags a correct one; Fix$|$det. = detected wrong solutions that end correct.}
+\label{tab:corr}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Critic & Before $\to$ after & Detect & False al. & Fix$|$det. & W$\to$R / R$\to$W & Unparsed \\
+\midrule
+Same-model (Qwen3-VL) & 41.2 $\to$ 46.6 & 79.3 & 53.0 & 16.8 & 25 / 8 & 0 \\
+Cross-model (InternVL3.5) & 41.2 $\to$ 43.1 & 35.1 & 23.5 & 19.7 & 13 / 7 & 76 \\
+Full (RAG, cross) & 42.8 $\to$ 46.2 & 40.4 & 21.2 & 20.3 & 15 / 4 & 76 \\
+Base paper (single pass) &  &  &  & 1.1--5.2 &  &  \\
+\bottomrule
+\end{tabular}
+\end{table*}

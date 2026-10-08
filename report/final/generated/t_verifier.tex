@@ -1,0 +1,22 @@
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Learned verifier trained on 10,160 auto-labelled solutions of 1,270 training questions (45.5\% correct). CV: GroupKFold by twin pair on 2019--2023; dev: 2024; test: the 2025 full pool (16 candidates per question). Sel.\ = accuracy of the max-probability candidate. $^\star$ = primary model, chosen on dev only.}
+\label{tab:verifier}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Model / features & CV AUC & CV F1 & Dev AUC & Dev F1 & Dev sel. & Test AUC & Test F1 & Test sel. \\
+\midrule
+LR / handcrafted & 0.893 & 0.796 & 0.916 & 0.844 & 60.3 & 0.838 & 0.776 & 64.2 \\
+LR / embedding & 0.672 & 0.641 & 0.706 & 0.698 & 50.0 & 0.652 & 0.688 & 59.5 \\
+LR / all $^\star$ & 0.891 & 0.794 & 0.915 & 0.847 & 61.8 & 0.836 & 0.774 & 65.3 \\
+XGB / handcrafted & 0.901 & 0.801 & 0.913 & 0.831 & 59.3 & 0.889 & 0.802 & 67.4 \\
+XGB / embedding & 0.677 & 0.646 & 0.689 & 0.687 & 51.5 & 0.640 & 0.694 & 52.1 \\
+XGB / all & 0.902 & 0.804 & 0.911 & 0.819 & 59.8 & 0.882 & 0.815 & 67.9 \\
+\midrule
+Majority vote &  &  &  &  & 59.3 &  &  & 65.8 \\
+Oracle (any correct) &  &  &  &  & 77.0 &  &  & 85.3 \\
+\bottomrule
+\end{tabular}
+\end{table*}

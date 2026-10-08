@@ -1,0 +1,17 @@
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Agentic correction. Detect = critic flags an originally wrong solution; False al. = flags a correct one; Fix$|$det. = detected wrong solutions that end correct.}
+\label{tab:correction}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Run (1{,}520 chains) & Acc. before $\to$ after & Detect & False al. & Fix$|$det. & W$\to$R / R$\to$W & Rounds & Stop: ok / unch. / max \\
+\midrule
+Same-model critic, PoT source & 48.2 $\to$ 51.2 & 57.9 & 19.3 & 14.3 & 65 / 18 & 1.47 & 1151 / 308 / 61 \\
+Cross-model critic, PoT source & 48.2 $\to$ 51.3 & 59.3 & 25.7 & 18.6 & 87 / 39 & 1.53 & 1137 / 328 / 55 \\
+Cross-model critic, RAG-PoT source & 50.9 $\to$ 54.7 & 60.7 & 28.6 & 19.2 & 87 / 29 & 1.53 & 1124 / 345 / 51 \\
+Base paper (single pass, EP$\to$EC) &  &  &  & 1.1--5.2 &  & 1 &  \\
+\bottomrule
+\end{tabular}
+\end{table*}

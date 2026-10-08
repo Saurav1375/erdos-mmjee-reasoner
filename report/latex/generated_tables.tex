@@ -1,0 +1,23 @@
+\begin{table}[t]\centering\caption{Additive evaluation on the 2025 held-out subset (Pass@1, \%). $\Delta$: points vs.\ single-pass CoT.}\label{tab:main}
+\begin{tabular}{lccc}\toprule
+Configuration & Num. & Overall & $\Delta$ \\\midrule
+Baseline (single-pass CoT) & 40.2 & 43.2 & -- \\
+Self-consistency (matched compute) ($n{=}20$) & 51.2 & 53.2 & +10.0 \\
++ Code sandbox & 50.4 & 48.2 & +5.0 \\
++ Agentic correction (same-model critic) & 55.1 & 51.2 & +8.1 \\
++ Agentic correction (cross-model critic) & 53.0 & 51.3 & +8.2 \\
++ Learned verifier & 66.7 & 63.2 & +20.0 \\
++ Retrieval (RAG) & 69.0 & 65.3 & +22.1 \\
+Full framework & 69.0 & 65.3 & +22.1 \\
+\bottomrule\end{tabular}\end{table}
+
+\begin{table}[t]\centering\caption{Verifier comparison (CV on 2019--2023, dev = 2024). Dev majority vote: 59.3\%.}\label{tab:verifier}
+\begin{tabular}{llcccc}\toprule
+Model & Feat. & CV AUC & Dev AUC & Dev F1 & Dev sel. \\\midrule
+logreg & handcrafted & 0.893 & 0.916 & 0.844 & 61.3 \\
+logreg & embedding & 0.672 & 0.706 & 0.698 & 59.3 \\
+logreg & all & 0.891 & 0.915 & 0.847 & 61.8 \\
+xgboost & handcrafted & 0.901 & 0.913 & 0.831 & 60.3 \\
+xgboost & embedding & 0.677 & 0.689 & 0.687 & 57.8 \\
+xgboost & all & 0.902 & 0.911 & 0.819 & 61.3 \\
+\bottomrule\end{tabular}\end{table}

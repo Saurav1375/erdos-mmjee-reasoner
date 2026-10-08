@@ -1,0 +1,22 @@
+\begin{table}[t]
+\centering
+\footnotesize
+\caption{Wall-clock time of the full run (supervisor log); no stage needed a retry.}
+\label{tab:compute}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lr}
+\toprule
+Stage (one RTX 3060, 12\,GB) & Hours \\
+\midrule
+CoT, 20 $\times$ 190 (16 cached) & 1.5 \\
+PoT, 8 $\times$ 190 & 3.3 \\
+Correction, same-model critic & 5.4 \\
+Correction, cross-model critic & 5.9 \\
+PoT on train, 8 $\times$ 1{,}270 & 23.9 \\
+RAG-PoT, 8 $\times$ 190 & 3.8 \\
+Full correction (RAG-PoT) & 7.7 \\
+CoT on train, 1 $\times$ 1{,}270 & 2.8 \\
+\textbf{Total} & \textbf{54.4} \\
+\bottomrule
+\end{tabular}
+\end{table}

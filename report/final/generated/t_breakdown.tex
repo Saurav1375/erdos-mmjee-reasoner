@@ -1,0 +1,20 @@
+\begin{table*}[t]
+\centering
+\footnotesize
+\caption{Accuracy (\%) by question type (84 / 46 / 42 / 18 questions), language, subject and diagram dependence.}
+\label{tab:breakdown}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrrrrrrrr}
+\toprule
+Configuration & Num. & MCQ-S & MCQ-M & Match. & EN & HI & Math & Chem & Phys & No diag. & Diag. \\
+\midrule
+Baseline CoT & 40.2 & 48.5 & 46.0 & 36.7 & 48.1 & 38.3 & 53.9 & 41.6 & 33.6 & 48.2 & 29.7 \\
+Self-consistency (matched) & 51.2 & 56.5 & 54.8 & 50.0 & 57.9 & 48.4 & 70.3 & 48.4 & 40.3 & 58.7 & 38.5 \\
++ Code sandbox (PoT) & 50.4 & 51.9 & 44.9 & 35.4 & 54.7 & 41.6 & 64.6 & 42.4 & 37.1 & 54.1 & 32.5 \\
++ Correction, same-model critic & 55.1 & 52.7 & 46.4 & 41.0 & 58.0 & 44.5 & 68.8 & 44.7 & 39.9 & 58.2 & 32.9 \\
++ Correction, cross-model critic & 53.0 & 55.2 & 47.6 & 42.4 & 58.8 & 43.8 & 71.1 & 44.5 & 37.9 & 58.2 & 32.9 \\
++ Learned verifier & 66.7 & 65.2 & 54.8 & 61.1 & 72.6 & 53.7 & 76.6 & 57.8 & 54.8 & 68.8 & 48.1 \\
++ RAG = Full framework & 69.0 & 67.4 & 59.5 & 55.6 & 73.7 & 56.8 & 79.7 & 60.9 & 54.8 & 72.5 & 46.2 \\
+\bottomrule
+\end{tabular}
+\end{table*}
