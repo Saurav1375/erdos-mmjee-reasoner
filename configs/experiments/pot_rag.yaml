@@ -1,0 +1,6 @@
+# Module D on top of A: PoT solver with retrieved worked exemplars, 2025 test set.
+kind: solve
+mode: pot
+rag: true
+split: test
+n_samples: 8
