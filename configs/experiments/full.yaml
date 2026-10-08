@@ -1,0 +1,4 @@
+# Full framework: RAG + PoT solver -> cross-model correction loop -> learned verifier (best-of-N).
+kind: correct
+source: pot_rag
+critic: critic_cross

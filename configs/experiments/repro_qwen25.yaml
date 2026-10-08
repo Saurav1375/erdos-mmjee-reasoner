@@ -1,0 +1,10 @@
+# Reproduction check: base-paper protocol (verbatim prompt + scorer) with Qwen2.5-VL-7B, which the
+# paper reports at 12.4 +- 1.9 % Pass@1 on the 2025 set (mean of 10 runs). 10 samples = 10 runs.
+# Not part of Table I; validates that our evaluation harness reproduces the paper.
+kind: solve
+mode: cot
+split: test
+n_samples: 10
+model: repro
+paper_pass1: 12.4
+paper_std: 1.9

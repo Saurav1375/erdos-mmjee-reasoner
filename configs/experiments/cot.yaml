@@ -1,0 +1,6 @@
+# Baseline: base-paper single-pass CoT prompt, N independent samples per 2025 question.
+# Pass@1 = mean over samples; the same samples feed self-consistency (majority vote).
+kind: solve
+mode: cot
+split: test
+n_samples: 20   # pilot: matched compute needed n=18 > 16
