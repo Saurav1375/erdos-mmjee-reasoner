@@ -1,0 +1,42 @@
+# mmJEE-Reasoner (team Erdős) - exact library versions used in this project.
+#
+# CPU / development environment (laptop): data preparation, verifier training,
+# knowledge-base build, evaluation, reports and the full test suite.
+# Python 3.12 (3.12.13 used). Install:
+#   uv venv --python 3.12 .venv
+#   uv pip install --python .venv/bin/python --torch-backend cpu -r requirements.txt
+#   uv pip install --python .venv/bin/python --no-deps -e .
+# GPU generation (vLLM) on the lab PC uses requirements-gpu.txt instead.
+# The fully resolved dependency tree is recorded in uv.lock.
+
+# --- data ---
+datasets==5.0.1              # loads the HF dataset ArkaMukherjee/mmJEE-Eval
+huggingface-hub==1.33.0
+pandas==3.0.6
+pyarrow==25.0.1              # parquet question table
+numpy==2.5.3
+pillow==12.3.0               # question images
+pyyaml==6.0.3                # configs/*.yaml
+
+# --- machine learning (verifier, embeddings, retrieval) ---
+scikit-learn==1.9.1          # logistic regression, PCA, GroupKFold, metrics
+xgboost==3.4.1               # gradient-boosted verifier
+scipy==1.18.1                # statistics; also whitelisted inside the code sandbox
+joblib==1.6.0                # verifier model persistence
+torch==2.14.1                # CPU build (+cpu) - backend of sentence-transformers
+transformers==5.18.0
+tokenizers==0.23.2
+safetensors==0.8.0
+sentence-transformers==6.1.0 # BAAI/bge-small-en-v1.5 embeddings (verifier + RAG)
+faiss-cpu==1.15.1            # vector index for the RAG knowledge base
+
+# --- code sandbox (imported by model-written programs) ---
+sympy==1.14.0
+
+# --- reporting ---
+matplotlib==3.11.2
+tqdm==4.70.1
+
+# --- development ---
+pytest==9.1.1
+ruff==0.16.10

@@ -1,0 +1,41 @@
+# mmJEE-Reasoner (team Erdős) - exact versions on the lab GPU PC
+# (RTX 3060 12 GB, CUDA driver 595.91, Ubuntu 24.04, Python 3.12.3).
+#
+# Used for all model generation (solver, critic, tagger, transcriber) with vLLM.
+# vLLM pins its own torch / transformers; install it first, then this project:
+#   uv venv --python 3.12 .venv
+#   uv pip install --python .venv/bin/python -r requirements-gpu.txt
+#   uv pip install --python .venv/bin/python -e ".[dev]"
+# (scripts/lab/setup_lab.sh does exactly this over ssh.)
+
+# --- inference engine ---
+vllm==0.30.0
+torch==2.13.0                # CUDA build pulled in by vLLM
+torchvision==0.28.0
+torchaudio==2.11.0
+triton==3.7.1
+flashinfer-python==0.6.18.post1   # installed by vLLM; its sampler is disabled (VLLM_USE_FLASHINFER_SAMPLER=0)
+compressed-tensors==0.17.0        # AWQ 4-bit checkpoints (cyankiwi/*-AWQ-4bit)
+transformers==5.18.0
+tokenizers==0.23.2
+safetensors==0.8.0
+einops==0.8.2                     # InternVL3.5 remote code
+huggingface-hub==1.33.0
+joblib==1.6.0
+
+# --- project dependencies (same as requirements.txt; numpy as resolved by vLLM) ---
+datasets==5.0.1
+pandas==3.0.6
+pyarrow==25.0.1
+numpy==2.3.5
+pillow==12.3.0
+pyyaml==6.0.3
+scikit-learn==1.9.1
+xgboost==3.4.1
+scipy==1.18.1
+sentence-transformers==6.1.0
+faiss-cpu==1.15.1
+sympy==1.14.0
+matplotlib==3.11.2
+tqdm==4.70.1
+pytest==9.1.1
