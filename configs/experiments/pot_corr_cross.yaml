@@ -1,0 +1,4 @@
+# Module B on top of A: Solver/Critic/Corrector loop, critic = different VLM (InternVL3.5-8B).
+kind: correct
+source: pot
+critic: critic_cross
