@@ -1,0 +1,5 @@
+# Verifier training data + KB worked solutions: PoT samples on 2019-2024 questions.
+kind: solve
+mode: pot
+split: train
+n_samples: 8

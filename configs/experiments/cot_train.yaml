@@ -1,0 +1,6 @@
+# Contamination check (base paper Sec. 4.5 / Table 7): the baseline protocol on the 2019-2024
+# questions, 1 sample each, compared with 2025 accuracy. Not used for any training or selection.
+kind: solve
+mode: cot
+split: train
+n_samples: 1
