@@ -1,0 +1,42 @@
+# Model roles. Every role is loaded into vLLM on its own (12 GB GPU: one model at a time).
+models:
+  solver:                              # frozen substrate VLM (Solver, Corrector, tagger, transcriber)
+    name: qwen3vl8b-awq
+    hf_id: cyankiwi/Qwen3-VL-8B-Instruct-AWQ-4bit
+    trust_remote_code: false
+    max_model_len: 12288
+    gpu_memory_utilization: 0.88   # headroom for sampler temporaries (0.92 OOMed)
+    max_num_seqs: 32
+    max_num_batched_tokens: 4096   # smaller profiling activations -> more KV cache on 12 GB
+    enable_prefix_caching: true
+    kv_cache_dtype: fp8            # 1.9x KV capacity / throughput on the 3060 (measured)
+    # Dataset images are <= 1.5 MP; capping the processor at 1.7 MP keeps them intact
+    # while stopping vLLM from reserving encoder memory for 16k-token images.
+    mm_processor_kwargs: {max_pixels: 1700000}
+    limit_mm_per_prompt: {image: 1}
+  critic_cross:                        # different-family VLM for the cross-model Critic
+    name: internvl3.5-8b-awq
+    hf_id: cyankiwi/InternVL3_5-8B-AWQ-4bit
+    trust_remote_code: true
+    max_model_len: 12288
+    gpu_memory_utilization: 0.88   # headroom for sampler temporaries (0.92 OOMed)
+    max_num_seqs: 32
+    max_num_batched_tokens: 4096   # smaller profiling activations -> more KV cache on 12 GB
+    enable_prefix_caching: true
+    kv_cache_dtype: fp8            # 1.9x KV capacity / throughput on the 3060 (measured)
+    # vLLM's InternVL processor rejects max_dynamic_patch (also forwarded to its video
+    # processor) -> default tiling.
+    mm_processor_kwargs: {}
+    limit_mm_per_prompt: {image: 1}
+  repro:                               # reproduction check only: a model the base paper evaluated
+    name: qwen2.5vl7b-awq-kvauto     # new name: outputs cached with the fp8 KV cache were garbage
+    hf_id: Qwen/Qwen2.5-VL-7B-Instruct-AWQ
+    trust_remote_code: false
+    max_model_len: 12288
+    gpu_memory_utilization: 0.88
+    max_num_seqs: 32
+    max_num_batched_tokens: 4096
+    enable_prefix_caching: true
+    kv_cache_dtype: auto           # fp8 KV cache produces garbage tokens with Qwen2.5-VL AWQ
+    mm_processor_kwargs: {max_pixels: 1700000}
+    limit_mm_per_prompt: {image: 1}
