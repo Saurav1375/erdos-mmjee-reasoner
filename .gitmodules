@@ -1,0 +1,3 @@
+[submodule "third_party/mmJEE-Eval"]
+	path = third_party/mmJEE-Eval
+	url = https://github.com/ArkaMukherjee0/mmJEE-Eval.git
