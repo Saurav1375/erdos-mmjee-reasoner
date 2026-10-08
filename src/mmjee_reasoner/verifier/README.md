@@ -1,7 +1,5 @@
 # Module C: Learned Solution Verifier (`verifier/`), the core ML component
 
-**Owners:** shared module (SOP §I). This code was committed by Saurav Gupta.
-
 This is the only trained component. A classifier predicts **P(candidate solution is correct)**
 and selects the final answer from a pool of N candidates (best-of-N). Self-selection and plain
 majority voting are not reliable, because correction can also turn right answers into wrong

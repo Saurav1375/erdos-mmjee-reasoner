@@ -1,6 +1,6 @@
 # Module B: Agentic Iterative Correction (`agents/`)
 
-**Owner:** Saurav Gupta (SOP §I). Driver stage: [`pipeline/correct.py`](../pipeline/correct.py).
+Driver stage: [`pipeline/correct.py`](../pipeline/correct.py).
 
 The base paper evaluates error correction in **one pass**. It finds that models detect errors
 in 21–73% of cases but fix only 1.1–5.2%. This module turns correction into an **iterative,

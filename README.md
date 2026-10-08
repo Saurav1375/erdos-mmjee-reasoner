@@ -83,16 +83,6 @@ From the SOP (§I, "Team composition and individual contributions"):
 - **Saurav Gupta (12341940):** responsible for the **Agentic Iterative Correction** module (Solver/Critic/Corrector orchestration).
 - **Both members (shared work):** the **Code-Sandbox Tool Use** module and the **Learned Solution Verifier** (the core ML component), including data generation, feature design, training and evaluation.
 
-Code ownership in this repository follows that split:
-
-| Area | Code | Committed by |
-|---|---|---|
-| Module D: RAG | `src/mmjee_reasoner/rag/`, `configs/experiments/pot_rag.yaml`, `tests/test_rag.py` | Arpit Kumar |
-| Module A: Code sandbox (shared) | `src/mmjee_reasoner/sandbox/`, `configs/experiments/pot.yaml`, `tests/test_sandbox.py` | Arpit Kumar |
-| Module B: Agentic correction | `src/mmjee_reasoner/agents/`, `configs/experiments/pot_corr_*.yaml`, `tests/test_agents.py` | Saurav Gupta |
-| Module C: Learned verifier (shared) | `src/mmjee_reasoner/verifier/`, `configs/experiments/{pot,cot}_train.yaml`, `tests/test_verifier.py` | Saurav Gupta |
-| Harness and infrastructure | data, scoring, llm, prompts, pipeline, report, CLI, lab scripts, docs | Saurav Gupta |
-
 ## 4. Pipeline overview
 
 ### 4.1 Inference pipeline (per test question)
