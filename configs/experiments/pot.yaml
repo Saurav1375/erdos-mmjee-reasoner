@@ -1,0 +1,5 @@
+# Module A: program-of-thoughts with the code sandbox (CoT fallback), 2025 test set.
+kind: solve
+mode: pot
+split: test
+n_samples: 8
