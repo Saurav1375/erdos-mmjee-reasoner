@@ -1,0 +1,17 @@
+\begin{table}[!t]
+\centering
+\footnotesize
+\caption{Primary verifier on its own 16-answer test pool: AUC and accuracy of the picked answer vs.\ pool baselines (\%).}
+\label{tab:ver}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{llrrrrr}
+\toprule
+Pool & Verifier & AUC & Pick & Maj. & Rand. & Oracle \\
+\midrule
+2026 v3 & xgb\_ranker/handcrafted & 0.902 & \textbf{58.8} & 59.3 & 50.9 & 79.4 \\
+2026 v2 & logreg/all & 0.913 & \textbf{55.4} & 53.9 & 46.7 & 76.5 \\
+2025 v3 & xgb\_ranker/handcrafted & 0.872 & \textbf{72.1} & 65.8 & 57.1 & 87.4 \\
+2025 v2 & logreg/all & 0.836 & \textbf{65.3} & 65.8 & 52.8 & 85.3 \\
+\bottomrule
+\end{tabular}
+\end{table}

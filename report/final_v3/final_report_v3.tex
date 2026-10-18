@@ -1,0 +1,334 @@
+% Final report (v3). Build: .venv/bin/python scripts/final_report_v3.py && cd report/final_v3 && tectonic final_report_v3.tex
+% All numbers in generated tables and \Macros come from scripts/final_report_v3.py (artifacts only).
+\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx,booktabs,amsmath,amssymb,xcolor,tikz,hyperref,cite,array}
+\usetikzlibrary{arrows.meta,positioning}
+\hypersetup{colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black}
+\graphicspath{{figures/}}
+\input{generated/macros.tex}
+
+\begin{document}
+\title{Inference-Time Scientific Reasoning for Vision-Language Models on mmJEE-Eval:
+Code Sandboxes, Agentic Correction, Learned Verification and Retrieval, Tested on a Clean Exam Year}
+\author{\IEEEauthorblockN{Arpit Kumar (12340350) \quad Saurav Gupta (12341940)}
+\IEEEauthorblockA{Team Erd\H{o}s, Machine Learning course project, IIT Bhilai}}
+\maketitle
+
+\begin{abstract}
+mmJEE-Eval shows that open vision-language models (VLMs) solve few JEE-Advanced problems and
+rarely fix their own errors. We wrap a \emph{frozen} 4-bit Qwen3-VL-8B in a training-free
+framework: a code sandbox for program-of-thought solving, a cross-model Critic/Corrector loop, a
+learned verifier that selects the final answer, and retrieval of verified worked solutions. Our
+earlier version (v2) was developed with the 2025 exam as test set. Because 2025 was also used for
+piloting, and the model may have seen it, we froze an improved version (v3) on 2019--2024 data
+only and evaluated both versions on a \emph{clean} test set: JEE-Advanced 2026 (\NTest{} questions,
+English and Hindi), which postdates the model. On 2026 the v3 framework reaches \ThreeAcc\% (95\%
+CI [\ThreeLo, \ThreeHi]) vs.\ \ThreeBase\% for chain-of-thought, and beats self-consistency at
+the same generated-token budget by \ThreeVsSc{} points (CI [\ThreeVsScLo, \ThreeVsScHi], McNemar
+$p{=}$\ThreeVsScP). The frozen v2 framework reaches \TwoAcc\% and also beats matched
+self-consistency (\TwoVsSc{}). So the central claim holds on unseen data. v3 improves the solver
+(\PotVsDiff{} points for PoT), but its overall advantage over v2 (\VsDiff) is not significant.
+On 2026 the new verifier selects no better than majority voting over the same pool, so the gain
+comes from a better candidate pool.
+\end{abstract}
+
+% ----------------------------------------------------------------------------------------------
+\section{Introduction}
+JEE-Advanced questions combine a diagram, multi-step physical or chemical reasoning, and exact
+answers. mmJEE-Eval~\cite{mmjee} turns them into an image-only, bilingual benchmark and reports
+two weaknesses of open VLMs: low accuracy, and single-pass self-correction that turns a detected
+error into a correct answer only 1.1--5.2\% of the time.
+
+Our SOP proposed to attack both at inference time, without fine-tuning. The v2 system did so on
+the 2025 exam. Two threats remained. First, 2025 was used to pilot the system, so design choices
+may fit it. Second, Qwen3-VL may have seen the 2025 papers. This report addresses both:
+\begin{itemize}
+\item A \textbf{clean test year}. JEE-Advanced 2026 postdates the model. Its English questions are in
+the dataset; we built the Hindi twins ourselves from the official papers.
+\item A \textbf{pre-registered freeze}. Every v3 change was chosen on 2019--2024 data, by
+leave-one-year-out (LOYO) cross-validation or on the 2024 dev year, with inclusion rules fixed
+in advance. It was then frozen (\texttt{V3\_FREEZE.md}) before any 2026 or 2025 run.
+\item \textbf{Both frameworks on 2026}. The frozen v2 system is re-run unchanged next to v3, with
+compute-matched self-consistency (SC)~\cite{selfconsistency}, cluster-bootstrap CIs and McNemar
+tests for every claim.
+\item \textbf{Analyses}: correction dynamics in the paper's terms, a learned correction gate, the
+verifier's distribution shift, a bridge to the paper's Qwen2.5-VL-7B, and memorisation probes.
+\end{itemize}
+
+% ----------------------------------------------------------------------------------------------
+\section{Related work}
+\textbf{Tool-augmented reasoning.} Program-of-thought~\cite{pot} and PAL~\cite{pal} move
+arithmetic into an interpreter.
+\textbf{Sampling and voting.} Self-consistency~\cite{selfconsistency} votes over sampled chains
+and is our compute-matched baseline.
+\textbf{Self-correction.} Self-Refine~\cite{selfrefine} and CRITIC~\cite{critic} iterate critique
+and revision, but intrinsic self-correction often fails without external
+signal~\cite{cannotselfcorrect}. We add code execution, step localisation and a cross-model critic.
+\textbf{Verifiers.} Outcome and process verifiers~\cite{cobbe,lightman} rank sampled solutions;
+ours is a light gradient-boosted ranker trained on automatically labelled training-year pools.
+\textbf{Retrieval.} RAG~\cite{rag} supplies context. We retrieve verified worked solutions with
+FAISS~\cite{faiss} and bge~\cite{bge} embeddings.
+
+% ----------------------------------------------------------------------------------------------
+\section{Data and evaluation protocol}
+\textbf{Splits.} 2019--2024 (1{,}270 questions) are used for training and development; 2024 is the
+dev year.
+\textbf{Clean test:} 2026, \NTest{} questions (102 English from the dataset plus their 102 Hindi
+twins). We cropped the Hindi twins from the official Hindi papers, matched them by paper, subject
+and number, took answers from the English key. Automatic checks match every twin, and 14 crops,
+including every size outlier, were checked by hand against their English twins. Their style
+differs from the dataset's images, so results are also reported per language.
+\textbf{Post-hoc set:} 2025, \NPost{} questions. It was the v2 test set and was used to pilot
+v1/v2, so it is reported separately and labelled post-hoc.
+
+\textbf{Scoring and metrics.} We use the paper's \texttt{extract\_answer} and
+\texttt{is\_answer\_correct}, copied verbatim and checked by tests. Pass@1 is the mean over samples.
+Selected-answer rows report the accuracy of the selected answer. CIs use a cluster bootstrap over
+EN/HI twin pairs (2{,}000 resamples), and differences use the paired version. McNemar treats
+questions as independent, so its $p$ is optimistic.
+\textbf{Compute matching:} SC uses the smallest number of CoT samples whose generated tokens reach
+the framework's (capped at the 20 samples drawn).
+
+\textbf{Leakage control.} No test question or twin is in any training pool. KB entries close to any
+2025 or 2026 question are removed (de-duplication against both years). The v3 freeze used no
+2025 or 2026 data.
+
+% ----------------------------------------------------------------------------------------------
+\section{Method}
+\begin{figure*}[t]
+\centering
+\begin{tikzpicture}[font=\footnotesize, node distance=4mm and 9mm,
+  box/.style={draw=black!60, rounded corners=2pt, fill=#1, align=center, minimum height=8.5mm,
+  inner sep=3pt}, box/.default=white, arr/.style={-{Stealth[length=2mm]}, black!70}]
+\node[box=black!5] (img) {Question image\\(EN or HI)};
+\node[box=blue!8, right=of img] (tag) {Tagger + transcriber\\(same VLM)};
+\node[box=blue!8, right=of tag] (kb) {\textbf{D.} FAISS KB\\2019--24 + JEEBench\\hybrid tag+text};
+\node[box=orange!12, below=13mm of tag, minimum width=34mm] (solver)
+  {\textbf{A. Solver + code sandbox}\\Qwen3-VL-8B, PoT, $N{=}8$\\+ transcript, +4k continuation};
+\node[box=black!5, left=of solver] (exec) {Sandbox\\\texttt{python -I}, AST\\whitelist, limits};
+\node[box=teal!12, right=19mm of solver] (critic) {\textbf{B. Critic}\\InternVL3.5-8B\\first wrong step};
+\node[box=teal!12, right=of critic] (corr) {\textbf{Corrector}\\re-derive from\\step $k$ ($\le$3 rounds)};
+\node[box=violet!10, below=7mm of critic, minimum width=40mm] (ver)
+  {\textbf{C. Verifier v3}\\XGBoost ranker, critic features\\pool: 8 original + 8 corrected};
+\node[box=black!5, left=10mm of ver] (out) {Final answer\\$\to$ verbatim scorer};
+\draw[arr] (img) -- (tag); \draw[arr] (tag) -- node[above]{\scriptsize tag, text} (kb);
+\draw[arr] (kb.south) -- ++(0,-5mm) -| node[pos=0.12,below]{\scriptsize top-2 exemplars if sim $\ge\tau$} ([xshift=10mm]solver.north);
+\draw[arr] (img.south) -- ++(0,-5mm) -| ([xshift=-10mm]solver.north);
+\draw[arr, <->] (exec) -- (solver);
+\draw[arr] (solver) -- node[above]{\scriptsize 8 traject.} (critic);
+\draw[arr] (critic) -- node[above]{\scriptsize step $k$} (corr);
+\draw[arr] (corr.north) to[bend right=35] node[above]{\scriptsize new trajectory} (critic.north);
+\draw[arr] (critic) -- node[right]{\scriptsize NO\_ERROR / stop} (ver);
+\draw[arr] (ver) -- (out);
+\end{tikzpicture}
+\caption{The v3 framework around a frozen VLM. Only the verifier (C) is trained, on
+automatically labelled 2019--2024 pools. The v3 changes from v2 are the transcript, the
+continuation, hybrid retrieval with JEEBench, and the verifier v3 with its correction gate.}
+\label{fig:arch}
+\end{figure*}
+
+\textbf{Shared core (v2).} \emph{A. Code sandbox:} the solver writes numbered steps and puts every
+calculation in a \texttt{python} block. The block runs in an isolated subprocess (AST whitelist,
+no I/O, resource limits), and its output is fed back before generation continues. If no
+\verb|\boxed{}| answer appears, a plain-CoT fallback answers.
+\emph{B. Correction:} a cross-model critic (InternVL3.5-8B~\cite{internvl35}) names the first
+wrong step or says \texttt{NO\_ERROR}. The corrector keeps the earlier steps and re-derives from
+the flagged one, for up to 3 rounds; it stops early when the critic accepts the solution or the
+answer is unchanged for two rounds.
+\emph{C. Verifier:} a classifier over handcrafted and embedding features picks one answer from 16
+candidates (8 originals + 8 corrected).
+\emph{D. Retrieval:} a one-line concept tag retrieves up to two verified worked solutions from
+2019--2024 as exemplars.
+
+\textbf{v3 changes} (Table~\ref{tab:devab}):
+(i) \emph{Adaptive budget.} A cut-off answer is continued once for 4{,}096 more tokens. This
+applies to every row, including the baselines, so comparisons stay fair.
+(ii) \emph{Transcript block.} The solver prompt also contains the VLM's own English
+transcription of the question (Hindi is translated), to help it read.
+(iii) \emph{RAG v3.} Hybrid tag + problem-text similarity, a KB extended with JEEBench
+2016--2018, and $\tau$ tuned by LOYO. LOYO coverage is \RagCovThree\% vs.\ \RagCovTwo\% for the
+v2 recipe at the same proxy precision.
+(iv) \emph{Verifier v3.} An XGBoost pairwise ranker, selected by LOYO over 2019--2024. It is
+trained on pools that, like the test pools, contain corrected solutions, and it gets critic
+features (flagged, rounds, answer changed) and agreement over the whole pool and its halves. LOYO
+pick accuracy is \VerLoyo\% vs.\ \VerLoyoMaj\% for majority voting (oracle \VerLoyoOracle\%).
+(v) \emph{Correction gate.} A chain keeps its corrected answer only if the verifier score rises
+by more than $\delta{=}$\GateDelta{}, with $\delta$ chosen out-of-year. This is reported as its
+own row; the framework's final answer is still the verifier's pick from the full pool.
+
+\input{generated/t_devab.tex}
+
+\textbf{Setup.} Qwen3-VL-8B-Instruct~\cite{qwen3vl} and InternVL3.5-8B (AWQ 4-bit) run with
+vLLM~\cite{vllm} on one RTX 3060, one model at a time. Sampling uses $T{=}0.7$, top-$p$ 0.8 and
+top-$k$ 20, the same for all rows. CoT takes 20 samples per question; PoT and correction take 8.
+Every call is cached in SQLite and seeds are deterministic, so the three lab shutdowns during the
+final batch resumed without changing any result.
+
+% ----------------------------------------------------------------------------------------------
+\section{Results on the clean 2026 test}
+\input{generated/t_table1_2026.tex}
+
+\subsection{Main result}
+Table~\ref{tab:t26} and Fig.~\ref{fig:t26} give the SOP's Table~I for both frameworks. The v3 framework
+reaches \textbf{\ThreeAcc\%} vs.\ \ThreeBase\% for single-pass CoT (\ThreeGain{} points). At
+\ThreeTok{} generated tokens per question, matched SC uses \ThreeScN{} samples and reaches
+\ThreeSc\%. The framework is \ThreeVsSc{} points better (CI [\ThreeVsScLo, \ThreeVsScHi]): it
+answers \ThreeFwOnly{} questions that SC misses, against \ThreeScOnly{} the other way. The frozen
+v2 framework reaches \TwoAcc\%, also \TwoVsSc{} points above its matched SC (CI
+[\TwoVsScLo, \TwoVsScHi], $p{=}$\TwoVsScP). \emph{The main v2 claim, beating compute-matched
+self-consistency, therefore holds on an exam the model cannot have seen.} Fig.~\ref{fig:compute}
+shows that every framework row lies above the SC curve at its cost.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{table1_2026.pdf}
+\caption{2026 clean test: matching rows of the v2 and v3 frameworks, with 95\% cluster-bootstrap
+CIs.}
+\label{fig:t26}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{compute_2026.pdf}
+\caption{2026: accuracy vs.\ generated tokens. Dashed: SC over $n$ CoT samples (majority vote).
+Dots: Table~I rows; large dots: the full frameworks.}
+\label{fig:compute}
+\end{figure}
+
+\subsection{v3 vs.\ v2}
+\input{generated/t_compare.tex}
+Table~\ref{tab:cmp} gives the paired tests. The v3 solver is clearly better: v3 PoT beats v2 PoT
+by \PotVsDiff{} points (CI [\PotVsLo, \PotVsHi]). The adaptive budget alone lifts CoT by
+\ExtVsDiff. The full v3 framework is \VsDiff{} points above v2 (CI [\VsLo, \VsHi],
+$p{=}$\VsP), which is \emph{not} significant on \NTest{} questions. On the post-hoc 2025 set the
+same comparison is \PostVsDiff{} (CI [\PostVsLo, \PostVsHi]). The difference between the two
+years is largely the verifier (Sec.~\ref{sec:ver}).
+
+\subsection{Where the frameworks win and lose}
+\input{generated/t_breakdown.tex}
+Table~\ref{tab:bd} shows that v3 improves on most groups, but the gaps the paper reports remain.
+For v3 on 2026, English reaches \ThreeEn\% and Hindi \ThreeHin\%; text-only questions reach
+\ThreeTxt\% and diagram questions only \ThreeImg\%. Inference-time reasoning does not fix
+perception. Part of the Hindi gap on 2026 may come from our own crops.
+
+\subsection{Correction loop and the correction gate}
+\input{generated/t_correction.tex}
+\input{generated/t_gate.tex}
+In the paper's terms (Table~\ref{tab:corr}), the cross-model critic flags \EpThree\% of wrong v3
+solutions in round 1 (\EpTwo\% for v2). Round-1 correction fixes \EcThree\% of the detected errors
+(\EcTwo\% for v2), well above the paper's 1.1--5.2\% single-pass rate. The critic also flags
+\FaThree\% of \emph{correct} solutions. Because the v3 solver is stronger, fewer wrong solutions
+remain, and the correction loop gains less in absolute terms.
+
+The gate (Table~\ref{tab:gate}) does what it was trained for. On 2026 it cuts right$\to$wrong
+flips from \GateRtwU{} to \GateRtwG{} while keeping most fixes (\GateWtrU$\to$\GateWtrG{}
+wrong$\to$right). Per-chain accuracy goes from \GateAccU\% to \GateAccG\% (\GateVsDiff{}, CI
+[\GateVsLo, \GateVsHi]); the change is small and not significant. The flip pattern carries over
+from the training years to both test years.
+
+\subsection{Verifier: classifier vs.\ selector}\label{sec:ver}
+\input{generated/t_verifier.tex}
+As a classifier, verifier v3 transfers well: its AUC on the 2026 pool is \VerAucTest{}.
+\emph{As a selector, on the clean year, it adds nothing}: it picks \ThreePick\% vs.\ \ThreeMaj\%
+for majority voting over the same 16 answers (\ThreePickVsMaj), with an oracle of
+\ThreeOracle\%. On 2025 it beats majority by \PostPickVsMaj{} points. So the v3 gain on 2026 comes
+from a better candidate pool (transcript, continuation, correction), not from selection. Picking
+among the 8 PoT samples alone already reaches \ThreePotVer\%.
+
+The shift stated before the runs is visible in Table~\ref{tab:shift}. The verifier was trained on
+plain PoT solutions of about \TokTrain{} tokens (\TruncTrain\% cut off). The 2026 v3 solutions are
+\TokTest{} long because of the transcript and continuation, and \TruncTest\% are cut off. This is a
+plausible reason the selector gain does not carry over to the clean year.
+
+\input{generated/t_shift.tex}
+
+% ----------------------------------------------------------------------------------------------
+\section{Post-hoc 2025, model bridge and memorisation}
+\input{generated/t_table1_2025.tex}
+\textbf{2025 (post-hoc).} The v3 framework reaches \PostAcc\% (Table~\ref{tab:t25}) vs.\
+\PostTwoAcc\% for the frozen v2 run, and beats matched SC by \PostVsSc{} points. Since 2025 shaped
+earlier design choices and may be in the model's training data, we do not base claims on it. The
+larger gaps on 2025 than on 2026 are consistent with some optimism on that year.
+
+\input{generated/t_q25.tex}
+\textbf{Bridge to the paper's model.} With Qwen2.5-VL-7B (2025 is clean for this model), the
+framework does not help: \QBase\% for CoT, \QSc\% for matched SC and \QFull\% for the framework
+(\QVsSc{} vs.\ SC, CI [\QVsScLo, \QVsScHi]; Table~\ref{tab:q25}). At about 14\% accuracy, most
+candidates are wrong, so agreement, critique and verification carry little signal. The framework
+needs a solver that is right often enough.
+
+\input{generated/t_probes.tex}
+\textbf{Memorisation probes.} Asked for the answer only, Qwen3-VL scores \ProbeOldLo--\ProbeOldHi\%
+on 2019--2024, \ProbeTwentyFive\% on 2025 and \ProbeTwentySix\% on the clean 2026
+(Table~\ref{tab:probes}). The clean year is not lower, so we see no memorisation signal. Pass@5 of
+v3 PoT on 2026 is \PassFiveThree\%, well above any selector, so there is
+still headroom in the pool.
+
+% ----------------------------------------------------------------------------------------------
+\section{Discussion}
+\textbf{What holds on clean data.} Code-based sampling, cross-model correction and selection beat
+voting on plain CoT at the same cost, for both v2 and v3. The transcript block and the adaptive
+budget give a significantly stronger solver.
+
+\textbf{What does not.} Verifier v3 beat majority voting under LOYO and on 2025, but not on 2026.
+Its features shift with the longer v3 solutions, and its selector gain does not survive the
+change. The correction gate removes most harmful flips but barely moves accuracy. Retrieval stays
+a small effect.
+
+\textbf{Remaining failures.} Diagram questions and Hindi questions still lag far behind, and
+about two in five PoT trajectories still end cut off.
+
+\section{Limitations}
+One substrate model; one clean year of \NTest{} questions (CIs about $\pm$8 points), so
+differences of a few points are not resolvable. The Hindi 2026 crops are our own. The transcript
+and the KB texts come from the same VLM. Compute matching counts generated tokens, not prompt
+tokens or code execution. The verifier was not retrained for the v3 distribution.
+
+\section{Conclusion}
+On an exam year the model cannot have seen, a frozen 8B VLM with a code sandbox, cross-model
+correction and answer selection improves accuracy from \ThreeBase\% to \ThreeAcc\% and beats
+compute-matched self-consistency by \ThreeVsSc{} points. The v2 framework's claim reproduces on
+the clean year (\TwoVsSc). v3's pre-registered changes make the solver stronger, but its total
+advantage over v2 is not significant, and its verifier does not beat majority voting there. The
+next steps are a selector robust to solution-length shift and better perception for diagrams and
+Hindi.
+
+\section*{Reproducibility}
+Code, configs and tests are in \texttt{mmjee-reasoner/}. The frozen v3 config is
+\texttt{configs/v3\_final.yaml} (\texttt{V3\_FREEZE.md}). Evaluation uses
+\texttt{configs/v3\_eval.yaml} and \texttt{configs/v3\_eval\_v2fw.yaml}, and
+\texttt{scripts/final\_report\_v3.py} regenerates every table, macro and figure of this report.
+
+\begin{thebibliography}{99}\footnotesize
+\bibitem{mmjee} A.~Mukherjee and S.~Ghosh, ``mmJEE-Eval: A bilingual multimodal benchmark for
+evaluating scientific reasoning in vision-language models,'' in \emph{Proc.\ IJCNLP-AACL}, 2025.
+\bibitem{selfconsistency} X.~Wang \emph{et al.}, ``Self-consistency improves chain of thought
+reasoning in language models,'' in \emph{Proc.\ ICLR}, 2023.
+\bibitem{pot} W.~Chen \emph{et al.}, ``Program of thoughts prompting: Disentangling computation
+from reasoning for numerical reasoning tasks,'' \emph{TMLR}, 2023.
+\bibitem{pal} L.~Gao \emph{et al.}, ``PAL: Program-aided language models,'' in \emph{Proc.\
+ICML}, 2023.
+\bibitem{selfrefine} A.~Madaan \emph{et al.}, ``Self-Refine: Iterative refinement with
+self-feedback,'' in \emph{Proc.\ NeurIPS}, 2023.
+\bibitem{critic} Z.~Gou \emph{et al.}, ``CRITIC: Large language models can self-correct with
+tool-interactive critiquing,'' in \emph{Proc.\ ICLR}, 2024.
+\bibitem{cannotselfcorrect} J.~Huang \emph{et al.}, ``Large language models cannot self-correct
+reasoning yet,'' in \emph{Proc.\ ICLR}, 2024.
+\bibitem{cobbe} K.~Cobbe \emph{et al.}, ``Training verifiers to solve math word problems,''
+arXiv:2110.14168, 2021.
+\bibitem{lightman} H.~Lightman \emph{et al.}, ``Let's verify step by step,'' in \emph{Proc.\
+ICLR}, 2024.
+\bibitem{rag} P.~Lewis \emph{et al.}, ``Retrieval-augmented generation for knowledge-intensive
+NLP tasks,'' in \emph{Proc.\ NeurIPS}, 2020.
+\bibitem{faiss} J.~Johnson, M.~Douze and H.~J\'egou, ``Billion-scale similarity search with
+GPUs,'' \emph{IEEE Trans.\ Big Data}, 2019.
+\bibitem{bge} S.~Xiao \emph{et al.}, ``C-Pack: Packed resources for general Chinese
+embeddings,'' in \emph{Proc.\ SIGIR}, 2024.
+\bibitem{vllm} W.~Kwon \emph{et al.}, ``Efficient memory management for large language model
+serving with PagedAttention,'' in \emph{Proc.\ SOSP}, 2023.
+\bibitem{qwen3vl} Qwen Team, ``Qwen3-VL,'' model release and technical report, 2025.
+\bibitem{internvl35} OpenGVLab, ``InternVL3.5,'' model release and technical report, 2025.
+\end{thebibliography}
+\end{document}

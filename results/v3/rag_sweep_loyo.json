@@ -1,0 +1,82 @@
+{
+ "ext=False w=1.0": {
+  "value": 0.902,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.084,
+  "proxy_precision": 0.701,
+  "base_precision": 0.269
+ },
+ "ext=False w=0.9": {
+  "value": 0.888,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.088,
+  "proxy_precision": 0.705,
+  "base_precision": 0.273
+ },
+ "ext=False w=0.8": {
+  "value": 0.883,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.076,
+  "proxy_precision": 0.701,
+  "base_precision": 0.274
+ },
+ "ext=False w=0.7": {
+  "value": 0.876,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.061,
+  "proxy_precision": 0.701,
+  "base_precision": 0.269
+ },
+ "ext=False w=0.5": {
+  "value": 0.866,
+  "method": "loyo-best",
+  "dev_queries": 1270,
+  "coverage": 0.05,
+  "proxy_precision": 0.641,
+  "base_precision": 0.253
+ },
+ "ext=True w=1.0": {
+  "value": 0.902,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.113,
+  "proxy_precision": 0.701,
+  "base_precision": 0.3
+ },
+ "ext=True w=0.9": {
+  "value": 0.888,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.117,
+  "proxy_precision": 0.703,
+  "base_precision": 0.306
+ },
+ "ext=True w=0.8": {
+  "value": 0.878,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.112,
+  "proxy_precision": 0.704,
+  "base_precision": 0.309
+ },
+ "ext=True w=0.7": {
+  "value": 0.873,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.093,
+  "proxy_precision": 0.703,
+  "base_precision": 0.304
+ },
+ "ext=True w=0.5": {
+  "value": 0.869,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.05,
+  "proxy_precision": 0.703,
+  "base_precision": 0.281
+ }
+}

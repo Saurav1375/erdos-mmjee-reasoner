@@ -1,0 +1,768 @@
+{
+  "n_rows": 12096,
+  "n_questions": 1270,
+  "n_questions_16pool": 242,
+  "pos_rate": 0.4583333333333333,
+  "baselines_16pool": {
+    "majority": 53.71900826446281,
+    "random_expected": 45.99690082644628,
+    "oracle": 78.51239669421489
+  },
+  "baselines_8pool": {
+    "majority": 54.280155642023345,
+    "random_expected": 45.75632295719844,
+    "oracle": 72.66536964980544
+  },
+  "configs": [
+    {
+      "model": "logreg",
+      "feature_set": "handcrafted",
+      "loyo": {
+        "n": 12096,
+        "pos_rate": 0.4583333333333333,
+        "threshold": 0.479,
+        "f1": 0.8052949943017446,
+        "precision": 0.7833873443629541,
+        "recall": 0.8284632034632035,
+        "auc": 0.8950357953334145,
+        "ap": 0.8780978162850148
+      },
+      "sel_16pool": {
+        "max_prob": 57.85123966942148,
+        "weighted_vote": 57.02479338842975,
+        "log_odds_vote": 54.958677685950406
+      },
+      "sel_8pool": {
+        "max_prob": 55.6420233463035,
+        "weighted_vote": 56.22568093385214,
+        "log_odds_vote": 54.96108949416343
+      },
+      "sel_16pool_by_year": {
+        "2019": {
+          "max_prob": 62.5,
+          "weighted_vote": 65.0,
+          "log_odds_vote": 60.0
+        },
+        "2020": {
+          "max_prob": 50.0,
+          "weighted_vote": 47.5,
+          "log_odds_vote": 40.0
+        },
+        "2021": {
+          "max_prob": 59.09090909090909,
+          "weighted_vote": 61.36363636363637,
+          "log_odds_vote": 59.09090909090909
+        },
+        "2022": {
+          "max_prob": 57.49999999999999,
+          "weighted_vote": 57.49999999999999,
+          "log_odds_vote": 55.00000000000001
+        },
+        "2023": {
+          "max_prob": 60.0,
+          "weighted_vote": 55.00000000000001,
+          "log_odds_vote": 50.0
+        },
+        "2024": {
+          "max_prob": 57.89473684210527,
+          "weighted_vote": 55.26315789473685,
+          "log_odds_vote": 65.78947368421053
+        }
+      }
+    },
+    {
+      "model": "logreg",
+      "feature_set": "all",
+      "loyo": {
+        "n": 12096,
+        "pos_rate": 0.4583333333333333,
+        "threshold": 0.49,
+        "f1": 0.8064601070832967,
+        "precision": 0.7854334074200718,
+        "recall": 0.8286435786435786,
+        "auc": 0.8951432716313669,
+        "ap": 0.8791534100339023
+      },
+      "sel_16pool": {
+        "max_prob": 57.02479338842975,
+        "weighted_vote": 57.85123966942148,
+        "log_odds_vote": 57.02479338842975
+      },
+      "sel_8pool": {
+        "max_prob": 55.83657587548638,
+        "weighted_vote": 55.83657587548638,
+        "log_odds_vote": 54.37743190661478
+      },
+      "sel_16pool_by_year": {
+        "2019": {
+          "max_prob": 62.5,
+          "weighted_vote": 65.0,
+          "log_odds_vote": 62.5
+        },
+        "2020": {
+          "max_prob": 45.0,
+          "weighted_vote": 47.5,
+          "log_odds_vote": 37.5
+        },
+        "2021": {
+          "max_prob": 61.36363636363637,
+          "weighted_vote": 61.36363636363637,
+          "log_odds_vote": 59.09090909090909
+        },
+        "2022": {
+          "max_prob": 60.0,
+          "weighted_vote": 57.49999999999999,
+          "log_odds_vote": 60.0
+        },
+        "2023": {
+          "max_prob": 57.49999999999999,
+          "weighted_vote": 55.00000000000001,
+          "log_odds_vote": 55.00000000000001
+        },
+        "2024": {
+          "max_prob": 55.26315789473685,
+          "weighted_vote": 60.526315789473685,
+          "log_odds_vote": 68.42105263157895
+        }
+      }
+    },
+    {
+      "model": "xgboost",
+      "feature_set": "handcrafted",
+      "loyo": {
+        "n": 12096,
+        "pos_rate": 0.4583333333333333,
+        "threshold": 0.376,
+        "f1": 0.7995208351159407,
+        "precision": 0.7605404525476152,
+        "recall": 0.8427128427128427,
+        "auc": 0.895178950238474,
+        "ap": 0.8769962451470079
+      },
+      "sel_16pool": {
+        "max_prob": 59.917355371900825,
+        "weighted_vote": 59.09090909090909,
+        "log_odds_vote": 57.02479338842975
+      },
+      "sel_8pool": {
+        "max_prob": 55.447470817120625,
+        "weighted_vote": 56.42023346303502,
+        "log_odds_vote": 54.37743190661478
+      },
+      "sel_16pool_by_year": {
+        "2019": {
+          "max_prob": 62.5,
+          "weighted_vote": 65.0,
+          "log_odds_vote": 60.0
+        },
+        "2020": {
+          "max_prob": 47.5,
+          "weighted_vote": 45.0,
+          "log_odds_vote": 45.0
+        },
+        "2021": {
+          "max_prob": 65.9090909090909,
+          "weighted_vote": 63.63636363636363,
+          "log_odds_vote": 56.81818181818182
+        },
+        "2022": {
+          "max_prob": 67.5,
+          "weighted_vote": 60.0,
+          "log_odds_vote": 62.5
+        },
+        "2023": {
+          "max_prob": 55.00000000000001,
+          "weighted_vote": 60.0,
+          "log_odds_vote": 50.0
+        },
+        "2024": {
+          "max_prob": 60.526315789473685,
+          "weighted_vote": 60.526315789473685,
+          "log_odds_vote": 68.42105263157895
+        }
+      }
+    },
+    {
+      "model": "xgboost",
+      "feature_set": "all",
+      "loyo": {
+        "n": 12096,
+        "pos_rate": 0.4583333333333333,
+        "threshold": 0.399,
+        "f1": 0.8073441502988898,
+        "precision": 0.7666234187479728,
+        "recall": 0.8526334776334776,
+        "auc": 0.9011420127491555,
+        "ap": 0.8912122889619694
+      },
+      "sel_16pool": {
+        "max_prob": 60.74380165289256,
+        "weighted_vote": 58.67768595041323,
+        "log_odds_vote": 58.67768595041323
+      },
+      "sel_8pool": {
+        "max_prob": 56.71206225680934,
+        "weighted_vote": 56.809338521400775,
+        "log_odds_vote": 53.89105058365759
+      },
+      "sel_16pool_by_year": {
+        "2019": {
+          "max_prob": 65.0,
+          "weighted_vote": 62.5,
+          "log_odds_vote": 62.5
+        },
+        "2020": {
+          "max_prob": 47.5,
+          "weighted_vote": 45.0,
+          "log_odds_vote": 40.0
+        },
+        "2021": {
+          "max_prob": 63.63636363636363,
+          "weighted_vote": 63.63636363636363,
+          "log_odds_vote": 68.18181818181817
+        },
+        "2022": {
+          "max_prob": 62.5,
+          "weighted_vote": 60.0,
+          "log_odds_vote": 62.5
+        },
+        "2023": {
+          "max_prob": 62.5,
+          "weighted_vote": 60.0,
+          "log_odds_vote": 55.00000000000001
+        },
+        "2024": {
+          "max_prob": 63.1578947368421,
+          "weighted_vote": 60.526315789473685,
+          "log_odds_vote": 63.1578947368421
+        }
+      }
+    },
+    {
+      "model": "xgb_ranker",
+      "feature_set": "handcrafted",
+      "loyo": {
+        "n": 12096,
+        "pos_rate": 0.4583333333333333,
+        "threshold": 0.583,
+        "f1": 0.7755278643129111,
+        "precision": 0.7453426480372588,
+        "recall": 0.8082611832611832,
+        "auc": 0.8645455074026502,
+        "ap": 0.8394378065772736
+      },
+      "sel_16pool": {
+        "max_prob": 61.98347107438017,
+        "weighted_vote": 58.67768595041323,
+        "log_odds_vote": 59.50413223140496
+      },
+      "sel_8pool": {
+        "max_prob": 55.15564202334631,
+        "weighted_vote": 55.83657587548638,
+        "log_odds_vote": 54.08560311284047
+      },
+      "sel_16pool_by_year": {
+        "2019": {
+          "max_prob": 65.0,
+          "weighted_vote": 67.5,
+          "log_odds_vote": 67.5
+        },
+        "2020": {
+          "max_prob": 52.5,
+          "weighted_vote": 45.0,
+          "log_odds_vote": 45.0
+        },
+        "2021": {
+          "max_prob": 63.63636363636363,
+          "weighted_vote": 65.9090909090909,
+          "log_odds_vote": 63.63636363636363
+        },
+        "2022": {
+          "max_prob": 65.0,
+          "weighted_vote": 57.49999999999999,
+          "log_odds_vote": 60.0
+        },
+        "2023": {
+          "max_prob": 62.5,
+          "weighted_vote": 55.00000000000001,
+          "log_odds_vote": 55.00000000000001
+        },
+        "2024": {
+          "max_prob": 63.1578947368421,
+          "weighted_vote": 60.526315789473685,
+          "log_odds_vote": 65.78947368421053
+        }
+      }
+    },
+    {
+      "model": "xgb_ranker",
+      "feature_set": "all",
+      "loyo": {
+        "n": 12096,
+        "pos_rate": 0.4583333333333333,
+        "threshold": 0.624,
+        "f1": 0.7885867142220241,
+        "precision": 0.7797566566743079,
+        "recall": 0.7976190476190477,
+        "auc": 0.8784655324833897,
+        "ap": 0.8583773423272023
+      },
+      "sel_16pool": {
+        "max_prob": 60.74380165289256,
+        "weighted_vote": 56.611570247933884,
+        "log_odds_vote": 58.26446280991735
+      },
+      "sel_8pool": {
+        "max_prob": 55.54474708171207,
+        "weighted_vote": 55.35019455252919,
+        "log_odds_vote": 54.08560311284047
+      },
+      "sel_16pool_by_year": {
+        "2019": {
+          "max_prob": 65.0,
+          "weighted_vote": 62.5,
+          "log_odds_vote": 65.0
+        },
+        "2020": {
+          "max_prob": 52.5,
+          "weighted_vote": 45.0,
+          "log_odds_vote": 40.0
+        },
+        "2021": {
+          "max_prob": 63.63636363636363,
+          "weighted_vote": 61.36363636363637,
+          "log_odds_vote": 65.9090909090909
+        },
+        "2022": {
+          "max_prob": 60.0,
+          "weighted_vote": 52.5,
+          "log_odds_vote": 57.49999999999999
+        },
+        "2023": {
+          "max_prob": 62.5,
+          "weighted_vote": 60.0,
+          "log_odds_vote": 62.5
+        },
+        "2024": {
+          "max_prob": 60.526315789473685,
+          "weighted_vote": 57.89473684210527,
+          "log_odds_vote": 57.89473684210527
+        }
+      }
+    }
+  ],
+  "primary": {
+    "model": "xgb_ranker",
+    "feature_set": "handcrafted",
+    "selection": "max_prob"
+  },
+  "primary_beats_majority_16pool": true,
+  "gate": {
+    "delta": -0.08,
+    "chosen": {
+      "delta": -0.08,
+      "n_chains": 1936,
+      "acc_original": 44.3698347107438,
+      "acc_corrected": 47.62396694214876,
+      "acc_gated": 48.192148760330575,
+      "accepted": 1809,
+      "wrong_to_right_ungated": 95,
+      "right_to_wrong_ungated": 32,
+      "wrong_to_right_gated": 88,
+      "right_to_wrong_gated": 14
+    },
+    "grid": [
+      {
+        "delta": -0.3,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.03719008264463,
+        "accepted": 1899,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 91,
+        "right_to_wrong_gated": 20
+      },
+      {
+        "delta": -0.28,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.03719008264463,
+        "accepted": 1898,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 91,
+        "right_to_wrong_gated": 20
+      },
+      {
+        "delta": -0.26,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.03719008264463,
+        "accepted": 1893,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 90,
+        "right_to_wrong_gated": 19
+      },
+      {
+        "delta": -0.24,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.985537190082646,
+        "accepted": 1888,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 89,
+        "right_to_wrong_gated": 19
+      },
+      {
+        "delta": -0.22,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.03719008264463,
+        "accepted": 1882,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 89,
+        "right_to_wrong_gated": 18
+      },
+      {
+        "delta": -0.2,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.03719008264463,
+        "accepted": 1876,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 89,
+        "right_to_wrong_gated": 18
+      },
+      {
+        "delta": -0.18,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.14049586776859,
+        "accepted": 1871,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 89,
+        "right_to_wrong_gated": 16
+      },
+      {
+        "delta": -0.16,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.192148760330575,
+        "accepted": 1865,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 89,
+        "right_to_wrong_gated": 15
+      },
+      {
+        "delta": -0.14,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.14049586776859,
+        "accepted": 1861,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 88,
+        "right_to_wrong_gated": 15
+      },
+      {
+        "delta": -0.12,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.14049586776859,
+        "accepted": 1842,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 88,
+        "right_to_wrong_gated": 15
+      },
+      {
+        "delta": -0.1,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.14049586776859,
+        "accepted": 1830,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 88,
+        "right_to_wrong_gated": 15
+      },
+      {
+        "delta": -0.08,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.192148760330575,
+        "accepted": 1809,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 88,
+        "right_to_wrong_gated": 14
+      },
+      {
+        "delta": -0.06,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.14049586776859,
+        "accepted": 1777,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 86,
+        "right_to_wrong_gated": 13
+      },
+      {
+        "delta": -0.04,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.14049586776859,
+        "accepted": 1721,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 86,
+        "right_to_wrong_gated": 13
+      },
+      {
+        "delta": -0.02,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.08884297520662,
+        "accepted": 1637,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 84,
+        "right_to_wrong_gated": 12
+      },
+      {
+        "delta": 0.0,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.03719008264463,
+        "accepted": 748,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 83,
+        "right_to_wrong_gated": 12
+      },
+      {
+        "delta": 0.02,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 48.03719008264463,
+        "accepted": 349,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 82,
+        "right_to_wrong_gated": 11
+      },
+      {
+        "delta": 0.04,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.985537190082646,
+        "accepted": 275,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 81,
+        "right_to_wrong_gated": 11
+      },
+      {
+        "delta": 0.06,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.985537190082646,
+        "accepted": 247,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 81,
+        "right_to_wrong_gated": 11
+      },
+      {
+        "delta": 0.08,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.93388429752066,
+        "accepted": 223,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 80,
+        "right_to_wrong_gated": 11
+      },
+      {
+        "delta": 0.1,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.882231404958674,
+        "accepted": 206,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 78,
+        "right_to_wrong_gated": 10
+      },
+      {
+        "delta": 0.12,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.985537190082646,
+        "accepted": 190,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 77,
+        "right_to_wrong_gated": 7
+      },
+      {
+        "delta": 0.14,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.882231404958674,
+        "accepted": 174,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 75,
+        "right_to_wrong_gated": 7
+      },
+      {
+        "delta": 0.16,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.83057851239669,
+        "accepted": 166,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 74,
+        "right_to_wrong_gated": 7
+      },
+      {
+        "delta": 0.18,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.83057851239669,
+        "accepted": 154,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 73,
+        "right_to_wrong_gated": 6
+      },
+      {
+        "delta": 0.2,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.675619834710744,
+        "accepted": 146,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 70,
+        "right_to_wrong_gated": 6
+      },
+      {
+        "delta": 0.22,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.72727272727273,
+        "accepted": 140,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 70,
+        "right_to_wrong_gated": 5
+      },
+      {
+        "delta": 0.24,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.72727272727273,
+        "accepted": 136,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 70,
+        "right_to_wrong_gated": 5
+      },
+      {
+        "delta": 0.26,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.72727272727273,
+        "accepted": 134,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 70,
+        "right_to_wrong_gated": 5
+      },
+      {
+        "delta": 0.28,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.72727272727273,
+        "accepted": 128,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 70,
+        "right_to_wrong_gated": 5
+      },
+      {
+        "delta": 0.3,
+        "n_chains": 1936,
+        "acc_original": 44.3698347107438,
+        "acc_corrected": 47.62396694214876,
+        "acc_gated": 47.62396694214876,
+        "accepted": 122,
+        "wrong_to_right_ungated": 95,
+        "right_to_wrong_ungated": 32,
+        "wrong_to_right_gated": 68,
+        "right_to_wrong_gated": 5
+      }
+    ],
+    "nested_loyo": {
+      "n_chains": 1936,
+      "accepted": 1761,
+      "wrong_to_right_ungated": 95,
+      "right_to_wrong_ungated": 32,
+      "wrong_to_right_gated": 85,
+      "right_to_wrong_gated": 15,
+      "deltas_by_year": {
+        "2019": -0.08,
+        "2020": -0.02,
+        "2021": -0.08,
+        "2022": -0.04,
+        "2023": -0.08,
+        "2024": -0.16
+      },
+      "acc_original": 44.3698347107438,
+      "acc_corrected": 47.62396694214876,
+      "acc_gated": 47.985537190082646
+    }
+  }
+}

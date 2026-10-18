@@ -15,3 +15,17 @@ models), so they are not in git. They can be regenerated from the cache-backed p
 | `verifier_report.json` | Verifier model selection: CV and 2024-dev metrics for each model × feature set, and the primary choice |
 | `kb_meta.json` | RAG knowledge-base build: entry counts, de-duplication, tuned τ |
 | `prepare_report.json` | Dataset preparation: split sizes and applied data fixes |
+
+## `v3/`: Phase 3, clean 2026 test and 2025 post-hoc
+
+| File | Contents |
+|---|---|
+| `results.y2026.v3.json`, `per_question.y2026.v3.csv` | v3 Table I on the clean 2026 test (204 questions), with SC matching, correction, gate and verifier statistics |
+| `results.y2026.v2fw.json`, `per_question.y2026.v2fw.csv` | The frozen v2 framework re-run on 2026 |
+| `results.v3.json`, `per_question.v3.csv` | v3 Table I on 2025 (**post-hoc**) |
+| `results.q25.json`, `per_question.q25.csv` | Bridge: the framework with Qwen2.5-VL-7B on 2025 (clean for that model) |
+| `verifier_v3_report.json` | Verifier v3 LOYO model selection, primary choice and correction-gate δ |
+| `analysis.json` | Paper-style metacognition (EP/EC), pass@k, critic gating, memorisation probes |
+| `dev_ab.json` | 2024 dev A/B tests behind the freeze (transcript block, adaptive budget, RAG v2 vs v3) |
+| `rag_sweep_loyo.json` | RAG v3 LOYO sweep (coverage at fixed proxy precision) |
+
