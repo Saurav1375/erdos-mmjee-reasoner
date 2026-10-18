@@ -5,6 +5,7 @@ Stages, in pipeline order (see README for the full workflow):
     prepare          download dataset, export images, build splits + scorer columns
     solve --exp E    sample solutions (cot, pot, pot_train, pot_rag)
     tag / transcribe concept tags / transcriptions of question images (RAG)
+    probe-completion v3 memorisation probe (continue the first half of a transcription)
     build-kb         knowledge base + FAISS index from 2019-2024 solved problems
     correct --exp E  Solver/Critic/Corrector loop (pot_corr_same, pot_corr_cross, full)
     train-verifier   train and select the learned verifier on 2019-2024 samples
@@ -100,6 +101,14 @@ def _questions_for(cfg, args):
     from mmjee_reasoner.data.dataset import load_questions
     from mmjee_reasoner.pipeline.common import select_questions
 
+    if getattr(args, "dataset", None):  # v3 external text-only questions
+        from mmjee_reasoner.data.external import load_external
+
+        return load_external(cfg, args.dataset)
+    if getattr(args, "years", None):    # v3: explicit years, whatever their split
+        qs = load_questions(cfg)
+        return qs[qs["year"].isin(args.years)].reset_index(drop=True)
+
     if args.split == "all":
         import pandas as pd
 
@@ -120,6 +129,24 @@ def cmd_transcribe(cfg, args):
     run_transcribe_stage(cfg, _questions_for(cfg, args), _engine(cfg, "solver", args.mock))
 
 
+def cmd_translate(cfg, args):
+    from mmjee_reasoner.rag.tagger import run_translate_stage
+
+    run_translate_stage(cfg, _questions_for(cfg, args), _engine(cfg, "solver", args.mock))
+
+
+def cmd_probe_completion(cfg, args):
+    from mmjee_reasoner.analysis.probes import completion_probe
+    from mmjee_reasoner.data.dataset import load_questions
+    from mmjee_reasoner.rag.tagger import load_transcripts
+
+    qs = load_questions(cfg)
+    if args.limit:
+        qs = qs.sample(n=min(args.limit, len(qs)), random_state=cfg["seed"])
+    completion_probe(cfg, _engine(cfg, args.model, args.mock), qs, load_transcripts(cfg),
+                     args.model)
+
+
 def cmd_build_kb(cfg, args):
     from mmjee_reasoner.rag.kb import build_kb
 
@@ -130,6 +157,12 @@ def cmd_train_verifier(cfg, args):
     from mmjee_reasoner.verifier.train import train_verifier
 
     train_verifier(cfg)
+
+
+def cmd_train_verifier_v3(cfg, args):
+    from mmjee_reasoner.verifier.v3 import train_verifier_v3
+
+    train_verifier_v3(cfg)
 
 
 def cmd_evaluate(cfg, args):
@@ -160,8 +193,9 @@ def cmd_status(cfg, args):
 
 COMMANDS = {
     "prepare": cmd_prepare, "solve": cmd_solve, "correct": cmd_correct, "phase": cmd_phase,
-    "tag": cmd_tag, "transcribe": cmd_transcribe, "build-kb": cmd_build_kb,
-    "train-verifier": cmd_train_verifier, "evaluate": cmd_evaluate, "report": cmd_report,
+    "tag": cmd_tag, "transcribe": cmd_transcribe, "probe-completion": cmd_probe_completion,
+    "translate": cmd_translate, "build-kb": cmd_build_kb,
+    "train-verifier": cmd_train_verifier, "train-verifier-v3": cmd_train_verifier_v3, "evaluate": cmd_evaluate, "report": cmd_report,
     "status": cmd_status,
 }
 
@@ -190,9 +224,15 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("--exp", required=True)
     sp.add_argument("--phase", required=True, choices=["critic", "corrector"])
     sp.add_argument("--round", type=int, required=True)
-    for name in ("tag", "transcribe"):
-        add(name).add_argument("--split", default="all", choices=["all", "train", "test"])
-    for name in ("build-kb", "train-verifier", "evaluate", "report", "status"):
+    for name in ("tag", "transcribe", "translate"):
+        sp = add(name)
+        sp.add_argument("--split", default="all", choices=["all", "train", "test"])
+        sp.add_argument("--years", type=int, nargs="+", default=None, help="v3: these years")
+        sp.add_argument("--dataset", default=None, help="v3: external dataset (jeebench)")
+    add("probe-completion", help="v3 memorisation probe").add_argument(
+        "--model", default="solver", help="model role (solver | repro)")
+    for name in ("build-kb", "train-verifier", "train-verifier-v3", "evaluate", "report",
+                 "status"):
         add(name)
     return p
 

@@ -43,11 +43,20 @@ log = logging.getLogger(__name__)
 
 
 def chains_path(cfg: dict, exp: dict, suffix: str) -> Path:
-    return exp_dir(cfg, exp["name"]) / f"chains{suffix}.json"
+    from mmjee_reasoner.pipeline.common import year_tag
+
+    return exp_dir(cfg, exp["name"]) / f"chains{suffix}{year_tag(cfg, exp['name'])}.json"
 
 
 def init_chains(cfg: dict, exp: dict, suffix: str) -> list[Chain]:
     src = load_candidates(cfg, exp["source"], suffix)
+    if exp.get("subset_pairs"):
+        # Fixed stratified subset of EN/HI twin pairs (e.g. verifier training data).
+        from mmjee_reasoner.pipeline.common import experiment_split, pilot_twins
+
+        keys = set(pilot_twins(load_questions(cfg), experiment_split(exp["source"]),
+                               int(exp["subset_pairs"]), cfg["seed"]))
+        src = src[src["twin_key"].isin(keys)].reset_index(drop=True)
     chains = []
     for _, c in src.iterrows():
         chain = Chain(
@@ -71,7 +80,7 @@ def run_phase(cfg: dict, exp: dict, phase: str, round_idx: int, suffix: str) -> 
         engine = make_engine(cfg, exp["critic"])
         n = critic_phase(chains, engine, cfg, round_idx)
     else:
-        engine = make_engine(cfg, "solver")
+        engine = make_engine(cfg, exp.get("model", "solver"))
         exec_cache = ExecCache(str(artifacts_dir(cfg, "cache", "generations.sqlite")))
         n = corrector_phase(chains, engine, cfg, round_idx, exec_cache)
     save_chains(chains, path)
@@ -93,7 +102,8 @@ def run_correct_stage(cfg: dict, exp: dict, limit: int | None = None,
 
     if exp["critic"] == "solver" or mock_engines is not None:
         mocks = mock_engines or {}
-        solver = make_engine(cfg, "solver", mock=mocks.get("solver"))
+        # `critic: solver` means "the same model as the solver" (exp key `model`, default solver).
+        solver = make_engine(cfg, exp.get("model", "solver"), mock=mocks.get("solver"))
         critic = solver if exp["critic"] == "solver" else make_engine(
             cfg, exp["critic"], mock=mocks.get(exp["critic"]))
         exec_cache = ExecCache(str(artifacts_dir(cfg, "cache", "generations.sqlite")))

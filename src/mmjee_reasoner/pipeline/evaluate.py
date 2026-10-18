@@ -26,7 +26,7 @@ import pandas as pd
 
 from mmjee_reasoner.config import artifacts_dir, load_experiment
 from mmjee_reasoner.data.dataset import load_questions
-from mmjee_reasoner.pipeline.common import candidates_path, load_candidates
+from mmjee_reasoner.pipeline.common import candidates_path, load_candidates, test_tag
 from mmjee_reasoner.scoring.metrics import (
     bootstrap_ci,
     breakdown,
@@ -126,9 +126,12 @@ class Evaluator:
         key = which or (prim["model"], prim["feature_set"])
         # Agreement features are computed within each source's sub-pool (8 originals,
         # 8 corrected) so they match the 8-sample pools the verifier was trained on.
+        model = v["all"][key]
+        if hasattr(model, "predict_pool"):  # v3 verifier builds its own pool features
+            return model.predict_pool(df, self.cfg, verifier_dir(self.cfg) / "emb_cache")
         fm = build_features(df, self.cfg, cache_dir=verifier_dir(self.cfg) / "emb_cache",
                             pool_cols=("uid", "source"))
-        return v["all"][key].predict(fm)
+        return model.predict(fm)
 
     # ------------------------------------------------------------------ rows
     def row_scores(self, spec: dict, sc_n: int | None = None) -> tuple[pd.Series, dict]:
@@ -153,13 +156,28 @@ class Evaluator:
             for m in SELECTION_METHODS:
                 extra[f"sel_{m}"] = selection_accuracy(pool, scores, m)[0] * 100
             return ser, extra
+        if kind == "gated":  # v3: corrected answer kept only if the verifier prefers it by > delta
+            from mmjee_reasoner.verifier.v3 import gate_choices, gate_outcome, prepare_pool
+
+            pool = self.pool(exp)
+            scores = self.verifier_scores(pool)
+            prim = self.verifiers()["primary"]
+            delta = getattr(self.verifiers()["all"][(prim["model"], prim["feature_set"])],
+                            "delta", None)
+            if delta is None:
+                raise ValueError("gated rows need a v3 verifier with a trained gate delta")
+            prepared = prepare_pool(pool)
+            ch = gate_choices(prepared, scores, delta)
+            ser = ch.groupby("uid")["final_correct"].mean()
+            return ser, {"gate": gate_outcome(prepared, scores, delta)}
         raise ValueError(kind)
 
-    def matched_samples(self, match_exp: str) -> int | None:
-        if not (self.has(match_exp) and self.has("cot")):
+    def matched_samples(self, match_exp: str, sc_exp: str = "cot") -> int | None:
+        """Samples of ``sc_exp`` whose tokens match the verifier pool of ``match_exp``."""
+        if not (self.has(match_exp) and self.has(sc_exp)):
             return None
         full_tok = self.cost(match_exp, "verifier")["tokens"]
-        cot_tok = self.cands("cot")["completion_tokens"].mean()
+        cot_tok = self.cands(sc_exp)["completion_tokens"].mean()
         return int(math.ceil(full_tok / cot_tok))
 
     # ------------------------------------------------------------- analyses
@@ -213,15 +231,17 @@ class Evaluator:
         cfg = self.cfg
         rows, scores = [], {}
         table = cfg["eval"]["table1"]
-        match_specs = [s for s in table if s["kind"] == "sc_matched"]
-        sc_n = self.matched_samples(match_specs[0]["match"]) if match_specs else None
         baseline = None
         for spec in table:
             exp = spec["exp"]
-            if not self.has(exp) or (spec["kind"] == "verifier" and not self._verifier_ready()):
+            # each SC row is matched against its own CoT run (v3 tables have several)
+            sc_n = (self.matched_samples(spec["match"], exp)
+                    if spec["kind"] == "sc_matched" else None)
+            needs_verifier = spec["kind"] in ("verifier", "gated")
+            if not self.has(exp) or (needs_verifier and not self._verifier_ready()):
                 rows.append({"row": spec["row"], "available": False})
                 continue
-            if spec["kind"] == "verifier" and load_experiment(exp).get("kind") == "correct":
+            if needs_verifier and load_experiment(exp).get("kind") == "correct":
                 if not self.has(load_experiment(exp)["source"]):
                     rows.append({"row": spec["row"], "available": False})
                     continue
@@ -234,7 +254,7 @@ class Evaluator:
                 "numerical": float(ser[qnum.to_numpy()].mean() * 100),
                 "ci95": bootstrap_ci(ser, cfg["eval"]["bootstrap"], cfg["seed"], self.clusters),
                 "n_questions": len(ser),
-                "cost": self.cost(exp, "mean" if spec["kind"] == "mean" else "verifier")
+                "cost": self.cost(exp, "mean" if spec["kind"] in ("mean", "gated") else "verifier")
                 if spec["kind"] != "sc_matched" else None,
                 "breakdown": breakdown(ser, self.questions),
                 **extra,
@@ -252,22 +272,32 @@ class Evaluator:
 
         results = {"table1": rows, "n_test_questions": len(self.questions)}
         sc_row = next((r for r in rows if r.get("kind") == "sc_matched"), None)
-        full_row = next((r for r in rows if r["row"] == "Full framework" and r["available"]),
-                        None)
+        ev = cfg["eval"]
+        full_name = ev.get("full_row", "Full framework")   # v3 tables name their own rows
+        full_row = next((r for r in rows if r["row"] == full_name and r["available"]), None)
         if sc_row and full_row:
             results["full_vs_sc_matched"] = paired_bootstrap(
-                scores["Full framework"], scores[sc_row["row"]], cfg["eval"]["bootstrap"],
+                scores[full_name], scores[sc_row["row"]], cfg["eval"]["bootstrap"],
                 cfg["seed"], self.clusters)
             results["full_vs_sc_matched_mcnemar"] = mcnemar(
-                scores["Full framework"], scores[sc_row["row"]])
-        if self.has("cot"):
-            results["sc_curve"] = self.sc_curve("cot")
+                scores[full_name], scores[sc_row["row"]])
+        for a, b in ev.get("compare", []):                 # v3: extra paired comparisons
+            if a in scores and b in scores:
+                results.setdefault("comparisons", {})[f"{a} vs {b}"] = {
+                    "bootstrap": paired_bootstrap(scores[a], scores[b], ev["bootstrap"],
+                                                  cfg["seed"], self.clusters),
+                    "mcnemar": mcnemar(scores[a], scores[b])}
+        sc_exp = sc_row["exp"] if sc_row else "cot"
+        if self.has(sc_exp):
+            results["sc_curve"] = self.sc_curve(sc_exp)
         results["correction"] = {e: self.correction_analysis(e)
-                                 for e in ("pot_corr_same", "pot_corr_cross", "full")
+                                 for e in ev.get("correction_exps",
+                                                 ("pot_corr_same", "pot_corr_cross", "full"))
                                  if self.has(e)}
         if self._verifier_ready():
             results["verifier_test"] = {e: self.verifier_test_quality(e)
-                                        for e in ("pot", "pot_corr_cross", "full")
+                                        for e in ev.get("verifier_test_exps",
+                                                        ("pot", "pot_corr_cross", "full"))
                                         if self.has(e) and self._pool_ready(e)}
         extra_means = {}
         for e in ("pot_rag",):
@@ -305,10 +335,11 @@ class Evaluator:
         per_q = pd.DataFrame(scores)
         per_q.index.name = "uid"
         out_dir = eval_dir(cfg)
-        per_q.to_csv(out_dir / f"per_question{self.suffix}.csv")
-        (out_dir / f"results{self.suffix}.json").write_text(json.dumps(results, indent=2,
-                                                                       default=_json_default))
-        log.info("wrote %s", out_dir / f"results{self.suffix}.json")
+        tag = self.suffix + test_tag(cfg) + cfg["eval"].get("results_tag", "")
+        per_q.to_csv(out_dir / f"per_question{tag}.csv")
+        (out_dir / f"results{tag}.json").write_text(json.dumps(results, indent=2,
+                                                               default=_json_default))
+        log.info("wrote %s", out_dir / f"results{tag}.json")
         return results
 
     def _verifier_ready(self) -> bool:

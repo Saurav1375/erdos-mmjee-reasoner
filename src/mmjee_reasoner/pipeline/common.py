@@ -49,9 +49,32 @@ def subset_cli_args(cfg: dict) -> list[str]:
     return []
 
 
+def test_tag(cfg: dict) -> str:
+    """'' by default; e.g. '.y2026' when a config switches the test year (keeps files apart)."""
+    return cfg["data"].get("test_tag") or ""
+
+
+def experiment_split(exp_name: str) -> str | None:
+    """Split an experiment runs on (a correction experiment inherits its source's split)."""
+    from mmjee_reasoner.config import load_experiment
+
+    try:
+        exp = load_experiment(exp_name)
+    except FileNotFoundError:
+        return None
+    if exp.get("kind") == "correct":
+        return experiment_split(exp["source"])
+    return exp.get("split")
+
+
+def year_tag(cfg: dict, exp_name: str) -> str:
+    """Test tag for test-split experiments only (training-split outputs are shared)."""
+    return test_tag(cfg) if experiment_split(exp_name) == "test" else ""
+
+
 def candidates_path(cfg: dict, exp_name: str, suffix: str | None = None) -> Path:
     suffix = subset_suffix(cfg) if suffix is None else suffix
-    return exp_dir(cfg, exp_name) / f"candidates{suffix}.jsonl"
+    return exp_dir(cfg, exp_name) / f"candidates{suffix}{year_tag(cfg, exp_name)}.jsonl"
 
 
 def write_jsonl(path: Path, records: list[dict]) -> None:
@@ -96,9 +119,14 @@ def pilot_twins(questions: pd.DataFrame, split: str, n_pairs: int, seed: int) ->
 
 
 def select_questions(cfg: dict, split: str, limit: int | None = None,
-                     seed: int | None = None) -> pd.DataFrame:
-    """Questions of a split, restricted to the active subset (pilot / random smoke)."""
-    df = load_questions(cfg, split)
+                     seed: int | None = None, years=None,
+                     df: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Questions of a split, restricted to the active subset (pilot / random smoke).
+    v3: ``years`` filters before the subset is drawn; ``df`` replaces the dataset
+    questions (external text-only sets)."""
+    df = load_questions(cfg, split) if df is None else df
+    if years:
+        df = df[df["year"].isin(years)].reset_index(drop=True)
     sub = cfg.get("subset") or {"kind": "full"}
     if sub["kind"] == "pilot":
         n = cfg["pilot"]["test_pairs" if split == "test" else "train_pairs"]
