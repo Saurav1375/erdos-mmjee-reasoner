@@ -139,6 +139,9 @@ def select(pool: pd.DataFrame, scores: np.ndarray | None, method: str) -> dict:
         weights = np.ones(len(keys))
     elif method == "weighted_vote":
         weights = np.asarray(scores, dtype=float)
+    elif method == "log_odds_vote":  # v3: sum of log-odds per answer (not in SELECTION_METHODS)
+        p = np.clip(np.asarray(scores, dtype=float), 1e-4, 1 - 1e-4)
+        weights = np.log(p / (1 - p))
     elif method == "max_prob":
         i = int(np.argmax(scores))  # first max on ties (sample order)
         return {"pred": pool["pred"].iloc[i], "correct": correct[i]}

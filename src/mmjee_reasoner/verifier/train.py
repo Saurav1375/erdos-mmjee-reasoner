@@ -45,7 +45,8 @@ log = logging.getLogger(__name__)
 def verifier_dir(cfg: dict) -> Path:
     from mmjee_reasoner.pipeline.common import subset_suffix
 
-    return artifacts_dir(cfg, f"verifier{subset_suffix(cfg)}", "x").parent
+    name = cfg["verifier"].get("dir_name", "verifier")
+    return artifacts_dir(cfg, f"{name}{subset_suffix(cfg)}", "x").parent
 
 
 def _subset(fm: FeatureMatrix, rows: np.ndarray) -> FeatureMatrix:
