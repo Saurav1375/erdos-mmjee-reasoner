@@ -58,9 +58,9 @@ Full framework vs. matched self-consistency: **+12.1 points** [+4.2, +20.5], McN
 |---|---|---|---|
 | **1. Proposal and base-paper study** | [`phase-1`](../../tree/phase-1) | SOP, base-paper repo (submodule), code audit | [`docs/phases/PHASE1.md`](docs/phases/PHASE1.md) |
 | **2. Baselines, pilot, full run (v2)** | [`phase-2`](../../tree/phase-2) | Framework implementation; Qwen2.5-VL-7B reproduction and Qwen3-VL-8B baselines; 40-question pilot; v1→v2 fixes; full 2025 run; reports | [`docs/phases/PHASE2.md`](docs/phases/PHASE2.md) |
-| **3. v3 framework and clean 2026 test** | `phase-3` | Clean 2026 test (Hindi twins built from the official papers); frozen v3 (adaptive budget, transcript block, RAG v3, verifier v3 with correction gate); v2 re-run on 2026; Qwen2.5 bridge to the paper; memorisation probes; final report | [`docs/phases/PHASE3.md`](docs/phases/PHASE3.md) |
+| **3. v3 framework and clean 2026 test** | [`phase-3`](../../tree/phase-3) | Clean 2026 test (Hindi twins built from the official papers); frozen v3 (adaptive budget, transcript block, RAG v3, verifier v3 with correction gate); v2 re-run on 2026; Qwen2.5 bridge to the paper; memorisation probes; final report | [`docs/phases/PHASE3.md`](docs/phases/PHASE3.md) |
 
-`main` always points to the latest published phase, which is currently **phase 2**. Each
+`main` always points to the latest published phase, which is currently **phase 3**. Each
 phase document lists its goals, the issues encountered, and the future enhancements.
 
 ## 2. Problem statement
