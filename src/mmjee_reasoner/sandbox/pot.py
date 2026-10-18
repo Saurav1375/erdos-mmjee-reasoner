@@ -19,8 +19,20 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-from mmjee_reasoner.llm import Engine, GenRequest, assistant_message, derive_seed, user_message
-from mmjee_reasoner.prompts.templates import CODE_OUTPUT_TEMPLATE, baseline_prompt
+from mmjee_reasoner.llm import (
+    Engine,
+    GenRequest,
+    GenResult,
+    assistant_message,
+    derive_seed,
+    gen_sampling,
+    user_message,
+)
+from mmjee_reasoner.prompts.templates import (
+    CODE_OUTPUT_TEMPLATE,
+    baseline_prompt,
+    with_question_text,
+)
 from mmjee_reasoner.sandbox.executor import ExecCache, run_many
 
 log = logging.getLogger(__name__)
@@ -57,6 +69,7 @@ class Trajectory:
     used_fallback: bool = False
     fallback_text: str = ""
     forced_answer: bool = False    # final answer forced after the token budget ran out
+    question_text: str | None = None  # v3: text-only questions (JEEBench KB items), no image
 
     @property
     def full_text(self) -> str:
@@ -93,10 +106,14 @@ def pending_python_block(text: str) -> str | None:
 
 
 def run_pot(trajs: list[Trajectory], engine: Engine, cfg: dict,
-            sampling: dict | None = None, exec_cache: ExecCache | None = None) -> None:
-    """Advance all trajectories to completion (in place)."""
+            sampling: dict | None = None, exec_cache: ExecCache | None = None,
+            turn_offset: int = 0) -> None:
+    """Advance all trajectories to completion (in place).
+
+    ``turn_offset`` keeps per-turn seeds distinct when trajectories are resumed (extension).
+    """
     sb = cfg["sandbox"]
-    samp = dict(cfg["sampling"] if sampling is None else sampling)
+    samp = gen_sampling(cfg["sampling"] if sampling is None else sampling)
     budget = int(samp.pop("max_tokens"))
     max_ctx = int(cfg["models"]["solver"]["max_model_len"])
     next_prompt: dict[str, int] = {}  # rid -> estimated prompt tokens of the next turn
@@ -124,7 +141,7 @@ def run_pot(trajs: list[Trajectory], engine: Engine, cfg: dict,
             reqs.append(GenRequest(
                 messages=msgs,
                 sampling={**samp, "max_tokens": remaining, "stop": stop,
-                          "seed": derive_seed(t.seed_base, "turn", turn)},
+                          "seed": derive_seed(t.seed_base, "turn", turn + turn_offset)},
                 continue_final=bool(so_far),
                 meta={"rid": t.rid, "turn": turn},
             ))
@@ -177,6 +194,57 @@ def run_pot(trajs: list[Trajectory], engine: Engine, cfg: dict,
             t.done, t.finish = True, "max_turns"
 
 
+TRUNCATED = ("length", "budget")
+
+
+def continue_truncated_results(reqs: list[GenRequest], results: list[GenResult], engine: Engine,
+                               cfg: dict) -> list[GenResult]:
+    """v3 adaptive budget for single-call generations (CoT, CoT fallback): results cut off
+    at max_tokens without an answer continue for ``extend_on_truncation`` more tokens."""
+    ext = int(cfg["sampling"].get("extend_on_truncation") or 0)
+    idx = [i for i, r in enumerate(results)
+           if r.finish_reason == "length" and "\\boxed" not in r.text]
+    if ext <= 0 or not idx:
+        return results
+    creqs = [GenRequest(
+        messages=[*reqs[i].messages, assistant_message(results[i].text)],
+        sampling={**reqs[i].sampling, "max_tokens": ext,
+                  "seed": derive_seed(reqs[i].sampling.get("seed"), "extend")},
+        continue_final=True, meta={**reqs[i].meta, "extend": True},
+    ) for i in idx]
+    out = list(results)
+    for i, r in zip(idx, engine.generate(creqs)):
+        old = results[i]
+        out[i] = GenResult(text=old.text + r.text, prompt_tokens=old.prompt_tokens + r.prompt_tokens,
+                           completion_tokens=old.completion_tokens + r.completion_tokens,
+                           finish_reason=r.finish_reason, stop_reason=r.stop_reason)
+    log.info("extended %d/%d truncated single-call generations by up to %d tokens", len(idx),
+             len(results), ext)
+    return out
+
+
+def extend_truncated(trajs: list[Trajectory], engine: Engine, cfg: dict,
+                     exec_cache: ExecCache | None = None) -> int:
+    """v3 adaptive budget: trajectories cut off by the token budget continue for
+    ``sampling.extend_on_truncation`` more tokens (0 = off, the v2 behaviour).
+
+    The first pass is unchanged (identical requests -> generation-cache hits), and a cut-off
+    trajectory simply keeps generating from where it stopped, so the result has the same
+    distribution as running with a budget of max_tokens + extension.
+    """
+    ext = int(cfg["sampling"].get("extend_on_truncation") or 0)
+    todo = [t for t in trajs if t.finish in TRUNCATED and "\\boxed" not in t.prefix + t.text]
+    if ext <= 0 or not todo:
+        return 0
+    for t in todo:
+        t.done = False
+    samp = {**cfg["sampling"], "max_tokens": int(cfg["sampling"]["max_tokens"]) + ext}
+    run_pot(todo, engine, cfg, sampling=samp, exec_cache=exec_cache, turn_offset=100)
+    log.info("extended %d/%d truncated trajectories by up to %d tokens", len(todo), len(trajs),
+             ext)
+    return len(todo)
+
+
 def code_failed(t: Trajectory) -> bool:
     return t.n_blocks > 0 and t.n_ok == 0
 
@@ -216,19 +284,26 @@ def needs_fallback(t: Trajectory) -> bool:
     return ("\\boxed" not in text) or code_failed(t)
 
 
+def fallback_prompt(t: Trajectory) -> str:
+    """Base-paper CoT prompt; for a text-only question (no image) the question text is added."""
+    prompt = baseline_prompt(t.language, t.question_type)
+    return with_question_text(prompt, t.question_text) if t.question_text else prompt
+
+
 def apply_cot_fallback(trajs: list[Trajectory], engine: Engine, cfg: dict,
                        sampling: dict | None = None) -> None:
     """Answer trajectories that need it with one plain-CoT sample (base-paper prompt)."""
-    samp = dict(cfg["sampling"] if sampling is None else sampling)
+    samp = gen_sampling(cfg["sampling"] if sampling is None else sampling)
     todo = [t for t in trajs if needs_fallback(t)]
     if not todo:
         return
     reqs = [GenRequest(
-        messages=[user_message(baseline_prompt(t.language, t.question_type), t.image)],
+        messages=[user_message(fallback_prompt(t), t.image)],
         sampling={**samp, "seed": derive_seed(t.seed_base, "fallback")},
         meta={"rid": t.rid, "fallback": True},
     ) for t in todo]
-    for t, r in zip(todo, engine.generate(reqs)):
+    results = continue_truncated_results(reqs, engine.generate(reqs), engine, cfg)
+    for t, r in zip(todo, results):
         t.used_fallback = True
         t.fallback_text = r.text
         t.calls += 1
