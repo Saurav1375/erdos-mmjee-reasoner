@@ -40,6 +40,45 @@ def baseline_prompt(language: str, question_type: str) -> str:
     return f"{PAPER_SYSTEM[language]}\n\n{PAPER_TYPE_INSTRUCTIONS[question_type]}"
 
 
+def with_question_text(prompt: str, question_text: str) -> str:
+    """v3: the same prompt for a question given as text (no image), e.g. JEEBench KB items."""
+    prompt = prompt.replace("analyze the image carefully", "analyze the question carefully")
+    return f"{prompt}\n\nQuestion:\n{question_text.strip()}"
+
+
+TRANSCRIPT_BLOCK = (
+    "A transcription of the question image is given below to help you read it. It was made "
+    "automatically and may contain errors: the image is authoritative.\n"
+    "Transcription:\n{transcript}"
+)
+
+
+def with_transcript(prompt: str, transcript: str) -> str:
+    """v3 extension (transcript-assisted solving): image + the model's own transcription."""
+    return f"{prompt}\n\n{TRANSCRIPT_BLOCK.format(transcript=transcript.strip())}"
+
+
+# ---------------------------------------------------------------------------
+# v3 memorisation probes (not part of the framework)
+# ---------------------------------------------------------------------------
+ANSWER_ONLY_INSTRUCTION = (
+    "Do NOT show any reasoning, steps or calculations. Reply with only the final answer in "
+    "\\boxed{}."
+)
+
+COMPLETION_PROMPT = (
+    "Below is the beginning of a question from the JEE Advanced exam. Continue the text exactly, "
+    "word for word, until the end of the question, including all answer options. Output only "
+    "the continuation.\n\n{prefix}"
+)
+
+
+def answer_only_prompt(language: str, question_type: str) -> str:
+    """Probe: the paper's type instruction, but the answer must come without any reasoning.
+    High accuracy without reasoning on seen years (vs. unseen years) hints at memorisation."""
+    return f"{ANSWER_ONLY_INSTRUCTION}\n\n{PAPER_TYPE_INSTRUCTIONS[question_type]}"
+
+
 # ---------------------------------------------------------------------------
 # Module A: program-of-thoughts solver with a code sandbox
 # ---------------------------------------------------------------------------
@@ -151,6 +190,12 @@ TRANSCRIBE_PROMPT = (
     "Transcribe this exam question exactly as plain text in its original language. Write "
     "mathematical expressions in LaTeX. Include all answer options. If there is a figure, add "
     "one line \"[Figure: <short description>]\". Output only the transcription."
+)
+
+TRANSLATE_PROMPT = (
+    "Translate this JEE Advanced exam question from Hindi to English. Keep every number, unit, "
+    "LaTeX expression, option label and figure note unchanged. Output only the translation."
+    "\n\n{text}"
 )
 
 EXEMPLAR_HEADER = (

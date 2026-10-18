@@ -27,7 +27,13 @@ from mmjee_reasoner.agents.steps import number_steps, parse_critic, split_steps
 from mmjee_reasoner.llm import Engine, GenRequest, assistant_message, derive_seed, user_message
 from mmjee_reasoner.prompts.templates import CRITIC_VERDICT_CUE, corrector_prompt, critic_prompt
 from mmjee_reasoner.sandbox.executor import ExecCache
-from mmjee_reasoner.sandbox.pot import Trajectory, force_answers, needs_fallback, run_pot
+from mmjee_reasoner.sandbox.pot import (
+    Trajectory,
+    extend_truncated,
+    force_answers,
+    needs_fallback,
+    run_pot,
+)
 from mmjee_reasoner.scoring import extract_answer
 
 log = logging.getLogger(__name__)
@@ -152,6 +158,7 @@ def corrector_phase(chains: list[Chain], engine: Engine, cfg: dict, round_idx: i
     run_pot(trajs, engine, cfg, exec_cache=exec_cache)
     if cfg["sandbox"].get("force_answer"):
         force_answers(trajs, engine, cfg)
+    extend_truncated(trajs, engine, cfg, exec_cache)   # v3 adaptive budget (off by default)
     for c, t in zip(todo, trajs):
         failed = needs_fallback(t)
         if failed:  # no usable corrected solution: keep the previous one
