@@ -1,6 +1,6 @@
 # Tests (`tests/`)
 
-73 tests. They run on CPU in about 2 minutes, with a fake VLM: no GPU and no model downloads,
+100 tests. They run on CPU in about 2 minutes, with a fake VLM: no GPU and no model downloads,
 apart from the small embedding model.
 
 ```bash
@@ -18,6 +18,10 @@ pytest tests/test_agents.py -q
 | `test_verifier.py` | Answer keys, pool features, selection rules, the verifier learning a separable signal (AUC > 0.9), GroupKFold OOF indexing |
 | `test_rag.py` | Tag parsing, topic matching, thresholded and subject-filtered retrieval with twin exclusion |
 | `test_pipeline_e2e.py` | Full pipeline on the fake VLM: solve → correct → verifier → evaluate. Checks that SC over 1 sample equals Pass@1, and that cached re-runs make no model calls. |
+| `test_v3_infra.py` | v3 isolation: year split follows the config, the v2 split is unchanged, test-year tags, configurable directories, `--limit` reads the full KB, tag merging, correction subsets, the embedder device |
+| `test_v3_solve_rag.py` | Adaptive budget (CoT and PoT continuation instead of fallback), text-only questions, the transcript block, the v3 KB (JEEBench, hybrid retrieval, LOYO τ), and `--limit` after the filters |
+| `test_v3_verifier.py` | Verifier v3 features, ranker, LOYO selection, correction gate, the `gated` Table I row, SC matched to its own run |
+| `test_v3_metacog.py`, `test_v3_probes.py`, `test_v3_devab.py` | EP/EC metacognition and pass@k, memorisation probes, dev A/B statistics |
 
 Tests marked `dataset` need the real dataset in `artifacts/data` (run `mmjee prepare` first);
 otherwise they are skipped.

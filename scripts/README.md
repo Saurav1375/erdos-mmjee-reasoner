@@ -5,6 +5,12 @@
 | `vendor_upstream.py` | either | Regenerates `src/mmjee_reasoner/scoring/upstream.py` byte for byte from the base-paper notebooks in `third_party/mmJEE-Eval` (located with `ast`). Run it once; `tests/test_scoring.py` re-checks identity. |
 | `phase2_report.py` | CPU | Builds the Phase-2 progress report: `report/phase2/` (figures, generated LaTeX tables, `phase2_report.tex/.pdf`). It covers baselines, the pilot and the v1→v2 fixes only, with no full-run results. |
 | `final_report.py` | CPU | Builds the final-report draft: `report/final/` (figures, tables, `final_report.tex/.pdf`) from the full-run artifacts. |
+| `final_report_v3.py` | CPU | Builds the v3 final report from `artifacts_v3/eval`: `report/final_v3/` (figures, generated LaTeX tables and macros, `metrics.json`) and `report/FINAL_REPORT_v3.md` (from `final_report_v3_template.md`). Then run `tectonic final_report_v3.tex` in `report/final_v3/`. |
+| `build_hindi2026.py` | CPU | Crops the Hindi 2026 twins from the official Hindi papers (PyMuPDF) and matches them to the English rows |
+| `v3_analysis.py` | CPU | Paper-style metacognition (EP/EC), pass@k, critic gating and memorisation probes, written to `artifacts_v3/analysis/analysis.json` |
+| `v3_dev_ab.py` | CPU | 2024 dev A/B tests behind the v3 freeze (paired bootstrap), written to `analysis/dev_ab.json` |
+| `v3_rag_sweep.py` | CPU | RAG v3 LOYO sweep over retrieval variants on the training years |
+| `demo.py` | CPU | Read-only CLI walk-through of one question through every module (no model calls) |
 | `lab/env.sh` | — | Shared settings: `LAB_HOST` (ssh alias, default `ml-lab`), `LAB_ROOT` (default `~/saurav_mmjee`), project paths. Override them with environment variables. |
 | `lab/setup_lab.sh` | local → lab | One-time setup. Syncs the code, creates `$LAB_ROOT/.venv` with vLLM, and installs the project in editable mode. No sudo. |
 | `lab/sync_to_lab.sh` | local → lab | rsyncs the code (not the artifacts) to the lab PC |

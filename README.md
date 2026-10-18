@@ -13,7 +13,18 @@
 | Arpit Kumar | 12340350 | arpitk@iitbhilai.ac.in | [@arpitkumar0007](https://github.com/arpitkumar0007) |
 | Saurav Gupta | 12341940 | sauravg@iitbhilai.ac.in | [@Saurav1375](https://github.com/Saurav1375) |
 
-**Headline (2025 held-out, 190 questions, Qwen3-VL-8B AWQ):**
+**Headline, Phase 3 (clean JEE Advanced 2026 test, 204 questions = 102 EN + 102 HI, Qwen3-VL-8B AWQ):**
+
+| Setup | v2 framework (re-run) | v3 framework |
+|---|---|---|
+| Baseline single-pass CoT | 41.2% | 44.3% |
+| Self-consistency at **matched compute** | 49.0% | 52.5% |
+| **Full framework** | **55.4%** | **58.8%** |
+
+Both frameworks beat matched self-consistency on the clean year: **+6.4 points** (v3: [+1.5, +10.8],
+McNemar p = 0.011). v3 vs v2: +3.4 [−1.5, +8.8], not significant. Details: [§8.3](#83-phase-3-v3-clean-2026-test).
+
+**Headline, Phase 2 (2025 held-out, 190 questions; post-hoc since Phase 3):**
 
 | Setup | Accuracy |
 |---|---|
@@ -34,7 +45,7 @@ Full framework vs. matched self-consistency: **+12.1 points** [+4.2, +20.5], McN
 5. [Setup](#5-setup)
 6. [Running the pipeline](#6-running-the-pipeline)
 7. [Specifications](#7-specifications)
-8. [Results (Phase 2)](#8-results-phase-2)
+8. [Results](#8-results)
 9. [Directory structure](#9-directory-structure)
 10. [Experimental protocol and safeguards](#10-experimental-protocol-and-safeguards)
 11. [References](#11-references)
@@ -47,7 +58,7 @@ Full framework vs. matched self-consistency: **+12.1 points** [+4.2, +20.5], McN
 |---|---|---|---|
 | **1. Proposal and base-paper study** | [`phase-1`](../../tree/phase-1) | SOP, base-paper repo (submodule), code audit | [`docs/phases/PHASE1.md`](docs/phases/PHASE1.md) |
 | **2. Baselines, pilot, full run (v2)** | [`phase-2`](../../tree/phase-2) | Framework implementation; Qwen2.5-VL-7B reproduction and Qwen3-VL-8B baselines; 40-question pilot; v1→v2 fixes; full 2025 run; reports | [`docs/phases/PHASE2.md`](docs/phases/PHASE2.md) |
-| 3. v3 improvements | `phase-3` | In progress (not yet published): clean 2026 test, Qwen2.5 bridge to the paper, memorisation probes, verifier v3 with correction gate, RAG v3 | — |
+| **3. v3 framework and clean 2026 test** | `phase-3` | Clean 2026 test (Hindi twins built from the official papers); frozen v3 (adaptive budget, transcript block, RAG v3, verifier v3 with correction gate); v2 re-run on 2026; Qwen2.5 bridge to the paper; memorisation probes; final report | [`docs/phases/PHASE3.md`](docs/phases/PHASE3.md) |
 
 `main` always points to the latest published phase, which is currently **phase 2**. Each
 phase document lists its goals, the issues encountered, and the future enhancements.
@@ -242,7 +253,7 @@ Full details: [`docs/SPECIFICATIONS.md`](docs/SPECIFICATIONS.md).
 | RAG | top-2, τ = 0.885 (auto), dedup 0.90 |
 | Compute | ~54 GPU-hours for the full run |
 
-## 8. Results (Phase 2)
+## 8. Results
 
 All numbers are on the **2025 held-out set** (190 questions = 95 EN + 95 HI). 95% CIs come from
 a cluster bootstrap over EN/HI twin pairs. Raw outputs are in [`results/phase2/`](results/phase2).
@@ -283,9 +294,27 @@ xychart-beta
 | Contamination | 1 CoT sample: 43.9% (2019–24) vs 42.6% (2025); no memorisation signal |
 | Breakdown | EN–HI gap widens 9.8 → 16.9; diagram gap 18.5 → 26.3; gains come from reasoning and computation, not perception |
 
+### 8.3 Phase 3 (v3): clean 2026 test
+
+The v3 framework was frozen on 2019–2024 before any test run ([`V3_FREEZE.md`](V3_FREEZE.md)).
+2026 postdates Qwen3-VL, so it is a clean test. 2025 is reported as post-hoc, since it was used to pilot v1/v2.
+Raw outputs are in [`results/v3/`](results/v3).
+
+| Comparison (2026 unless marked) | Δ points [95% CI] |
+|---|---|
+| v3 framework vs matched SC | **+6.4 [+1.5, +10.8]**, McNemar p = 0.011 |
+| v2 framework (re-run) vs matched SC | **+6.4 [+1.5, +11.8]**, p = 0.015 |
+| v3 vs v2 framework | +3.4 [−1.5, +8.8], not significant |
+| v3 PoT vs v2 PoT (transcript block + adaptive budget) | +6.8 [+3.6, +10.0] |
+| Verifier v3 pick vs majority vote over the same pool | −0.5 (58.8 vs 59.3). On 2025: +6.3 |
+| Correction gate vs ungated correction | +0.6 [−0.4, +1.5]; right→wrong 33 → 9 |
+| 2025 (post-hoc): v3 vs v2 framework | +6.8 [+1.1, +12.1] (72.1 vs 65.3) |
+| Qwen2.5-VL-7B framework vs matched SC (2025, clean for that model) | −1.1 [−7.4, +5.3] |
+
 Reports:
+- **Final report (v3): [`report/final_v3/final_report_v3.pdf`](report/final_v3/final_report_v3.pdf)** ([Markdown](report/FINAL_REPORT_v3.md));
 - Phase-2 progress report: [`report/phase2/phase2_report.pdf`](report/phase2/phase2_report.pdf) ([Markdown](report/PHASE2_REPORT.md));
-- final-report draft: [`report/final/final_report.pdf`](report/final/final_report.pdf);
+- v2 final-report draft (2025 only): [`report/final/final_report.pdf`](report/final/final_report.pdf);
 - auto-generated summary: [`report/REPORT.md`](report/REPORT.md).
 
 ## 9. Directory structure
@@ -298,6 +327,7 @@ erdos-mmjee-reasoner/
 ├── pyproject.toml  uv.lock  .python-version
 ├── configs/                      # YAML configs                                  → configs/README.md
 │   ├── base.yaml                 #   paths, split, sampling, module settings, Table I
+│   ├── v3*.yaml                  #   v3 overrides: v3_final.yaml = frozen v3, v3_test2026.yaml, eval tables
 │   ├── models.yaml               #   model roles + vLLM settings
 │   └── experiments/*.yaml        #   one file per generation run
 ├── src/mmjee_reasoner/
@@ -312,17 +342,21 @@ erdos-mmjee-reasoner/
 │   ├── verifier/                 # Module C: features, models, training/selection
 │   ├── rag/                      # Module D: tagger, knowledge base, retrieval
 │   ├── pipeline/                 # stages: solve, correct, evaluate
+│   ├── analysis/                 # v3: metacognition (EP/EC), memorisation probes, dev A/Bs
 │   └── report/                   # REPORT.md / LaTeX / figure builder
 ├── scripts/
 │   ├── vendor_upstream.py        # regenerate scoring/upstream.py from the notebooks
-│   ├── phase2_report.py  final_report.py
+│   ├── phase2_report.py  final_report.py  final_report_v3.py
+│   ├── build_hindi2026.py        # Hindi 2026 twins from the official papers
+│   ├── v3_analysis.py  v3_dev_ab.py  v3_rag_sweep.py  demo.py
 │   └── lab/                      # lab GPU setup, launch, supervise, sync
-├── tests/                        # 73 pytest tests (CPU, fake VLM)
-├── results/phase2/               # published result summaries (JSON/CSV)
-├── report/                       # Phase-2 report, final-report draft, generated report
+├── tests/                        # 100 pytest tests (CPU, fake VLM)
+├── results/phase2/  results/v3/  # published result summaries (JSON/CSV)
+├── report/                       # Phase-2 report, v2 draft, v3 final report (final_v3/)
+├── V3_FREEZE.md                  # the pre-registered v3 freeze
 ├── docs/
 │   ├── proposal/SOP_12340350_12341940.pdf
-│   ├── phases/PHASE1.md  PHASE2.md
+│   ├── phases/PHASE1.md  PHASE2.md  PHASE3.md
 │   ├── SPECIFICATIONS.md
 │   └── REFERENCES.md
 ├── third_party/mmJEE-Eval/       # base-paper repo (git submodule @ 815ac89)
