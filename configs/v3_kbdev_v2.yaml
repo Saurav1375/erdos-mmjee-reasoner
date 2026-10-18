@@ -1,0 +1,5 @@
+# Dev KB (v2 recipe) without 2024, for the 2024 RAG A/B. Use after configs/v3.yaml.
+rag:
+  kb_name: kb_dev2024_v2
+  kb_exclude_years: [2024]
+  retrieval: tag

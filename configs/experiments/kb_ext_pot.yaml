@@ -1,0 +1,7 @@
+# v3 KB expansion: PoT solutions for JEEBench 2016-2018 (text-only, official answers). Only
+# solutions scored correct enter the v3 KB (rag.extra_kb in configs/v3_final.yaml).
+kind: solve
+mode: pot
+dataset: jeebench
+split: external
+n_samples: 8

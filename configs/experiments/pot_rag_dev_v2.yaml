@@ -1,0 +1,7 @@
+# v3 dev A/B (2024 only): v2-style RAG with a KB that excludes 2024 (configs/v3_kbdev_v2.yaml).
+kind: solve
+mode: pot
+rag: true
+split: train
+years: [2024]
+n_samples: 8

@@ -1,0 +1,8 @@
+# Dev KB (v3 recipe) without 2024, for the 2024 RAG A/B. Use after configs/v3.yaml.
+rag:
+  kb_name: kb_dev2024_v3
+  kb_exclude_years: [2024]
+  extra_kb: [{exp: kb_ext_pot, dataset: jeebench}]
+  retrieval: hybrid
+  hybrid_weight: 0.9   # chosen by LOYO sweep on 2019-2024 (CHANGELOG_v3, 2026-10-08)
+  threshold_tuning: loyo
