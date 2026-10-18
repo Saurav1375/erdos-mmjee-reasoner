@@ -1,0 +1,8 @@
+# The FROZEN v2 framework re-run on new data (2026 clean test): v2 KB (tag-only retrieval,
+# tau = 0.885 tuned on 2024) and no v3 additions. Use after configs/v3.yaml:
+#   --config configs/v3.yaml --config configs/v3_test2026.yaml --config configs/v3_v2fw.yaml
+# The v2 verifier is selected at evaluation time (verifier.dir_name: verifier).
+rag:
+  kb_name: kb
+verifier:
+  dir_name: verifier

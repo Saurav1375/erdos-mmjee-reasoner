@@ -1,0 +1,7 @@
+# v3 memorisation probe: answer WITHOUT reasoning, every year 2019-2026, Qwen3-VL-8B (solver).
+# Not part of Table I. Seen years (<=2025 possible) vs unseen (2026).
+kind: solve
+mode: answer_only
+split: any
+n_samples: 1
+sampling: {temperature: 0.0, top_p: 1.0, top_k: -1, max_tokens: 64}

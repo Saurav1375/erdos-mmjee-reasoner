@@ -1,0 +1,8 @@
+# v3 framework, solver stage: PoT + RAG v3 exemplars + English transcript block, 8 samples,
+# adaptive budget (run with v3_final.yaml).
+kind: solve
+mode: pot
+rag: true
+transcript: true
+split: test
+n_samples: 8

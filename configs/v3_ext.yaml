@@ -1,0 +1,3 @@
+# v3 adaptive token budget: trajectories cut off at max_tokens (4096) continue for 4096 more.
+sampling:
+  extend_on_truncation: 4096

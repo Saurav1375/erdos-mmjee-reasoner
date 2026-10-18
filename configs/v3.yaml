@@ -1,0 +1,12 @@
+# v3 overrides (see PLAN_v3.md). Use: python -m mmjee_reasoner --config configs/v3.yaml <stage>
+# All v3 outputs go to artifacts_v3/, which was seeded with a copy of the frozen v2 artifacts
+# (data/images is a symlink). v2 outputs in artifacts/ are never written by v3 runs.
+paths:
+  artifacts: artifacts_v3
+
+verifier:
+  dir_name: verifier_v3      # v2 verifier stays in artifacts_v3/verifier (copied)
+
+rag:
+  kb_name: kb_v3             # v2 KB stays in artifacts_v3/rag/kb (copied)
+  dedup_years: [2025, 2026]  # KB entries near-duplicate to ANY held-out year are dropped

@@ -1,0 +1,14 @@
+# The frozen v2 framework's Table I re-run on the 2026 clean test (v2 KB, v2 verifier, no adaptive
+# budget). Use: --config v3.yaml --config v3_test2026.yaml --config v3_v2fw.yaml --config v3_eval_v2fw.yaml
+# -> eval/results.y2026.v2fw.json. The same-critic row was not re-run on 2026.
+eval:
+  results_tag: .v2fw
+  correction_exps: [pot_corr_cross, full]
+  verifier_test_exps: [pot, pot_corr_cross, full]
+  table1:
+    - {row: "Baseline (single-pass CoT)", kind: mean, exp: cot}
+    - {row: "Self-consistency (matched compute)", kind: sc_matched, exp: cot, match: full}
+    - {row: "+ Code sandbox", kind: mean, exp: pot}
+    - {row: "+ Agentic correction (cross-model critic)", kind: mean, exp: pot_corr_cross}
+    - {row: "+ Learned verifier", kind: verifier, exp: pot_corr_cross}
+    - {row: "Full framework", kind: verifier, exp: full}

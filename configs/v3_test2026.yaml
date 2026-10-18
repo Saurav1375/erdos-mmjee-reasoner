@@ -1,0 +1,10 @@
+# Second, clean test set: JEE Advanced 2026 (exam after Qwen3-VL release). English from the
+# dataset, Hindi twins cropped by scripts/build_hindi2026.py from the official Hindi papers.
+# Use after configs/v3.yaml:  --config configs/v3.yaml --config configs/v3_test2026.yaml
+# Test-split outputs get the ".y2026" tag (candidates.y2026.jsonl, results.y2026.json);
+# training-split outputs (pot_train, verifier, KB) are shared with the 2025 runs.
+data:
+  test_years: [2026]
+  exclude_years: [2025]
+  test_tag: .y2026
+  expected_counts: {train: 1270, test: 204}   # 102 EN (dataset) + 102 HI (v3 crops)

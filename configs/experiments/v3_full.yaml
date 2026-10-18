@@ -1,0 +1,6 @@
+# v3 framework, correction stage: cross-model critic (InternVL3.5-8B) on v3_pot; corrector with
+# the adaptive budget (run with v3_final.yaml). Final answer: verifier v3 (xgb_ranker,
+# handcrafted, max_prob) over 8 originals + 8 corrected; correction gate delta = -0.08.
+kind: correct
+source: v3_pot
+critic: critic_cross

@@ -1,0 +1,6 @@
+# v3 bridge: Module B with Qwen2.5-VL-7B as solver, critic and corrector (same-model critic, the
+# self-correction setting of the paper's EP/EC experiment).
+kind: correct
+source: q25_pot
+critic: solver
+model: repro

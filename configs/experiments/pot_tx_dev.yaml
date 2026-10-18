@@ -1,0 +1,8 @@
+# v3 dev A/B (2024 only) for transcript-assisted solving (extension beyond the SOP): PoT with
+# the question's own English transcription added. Compared with pot_train rows of 2024.
+kind: solve
+mode: pot
+split: train
+years: [2024]
+transcript: true
+n_samples: 8

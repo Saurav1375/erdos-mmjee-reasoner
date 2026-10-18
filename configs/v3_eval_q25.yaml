@@ -1,0 +1,16 @@
+# v3 bridge table: the framework with the paper's model Qwen2.5-VL-7B on 2025 (clean for it).
+# Use after configs/v3.yaml. Verifier rows use the v3 verifier trained on Qwen3 solutions
+# (transfer, labelled as such) - Qwen2.5 has no training-set solutions of its own.
+eval:
+  results_tag: .q25
+  full_row: "Qwen2.5: + Learned verifier (transfer)"
+  correction_exps: [q25_corr_same, q25_corr_cross]
+  verifier_test_exps: [q25_pot, q25_corr_cross]
+  table1:
+    - {row: "Qwen2.5: Baseline (single-pass CoT)", kind: mean, exp: q25_cot}
+    - {row: "Qwen2.5: Self-consistency (matched compute)", kind: sc_matched, exp: q25_cot,
+       match: q25_corr_cross}
+    - {row: "Qwen2.5: + Code sandbox", kind: mean, exp: q25_pot}
+    - {row: "Qwen2.5: + Correction (same-model critic)", kind: mean, exp: q25_corr_same}
+    - {row: "Qwen2.5: + Correction (cross-model critic)", kind: mean, exp: q25_corr_cross}
+    - {row: "Qwen2.5: + Learned verifier (transfer)", kind: verifier, exp: q25_corr_cross}

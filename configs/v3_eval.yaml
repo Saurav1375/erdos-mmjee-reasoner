@@ -1,0 +1,17 @@
+# v3 Table I (frozen v3 framework, V3_FREEZE.md). Evaluation only; changes no generation setting.
+# 2026 clean:  --config v3.yaml --config v3_test2026.yaml --config v3_final.yaml --config v3_eval.yaml
+#              -> eval/results.y2026.v3.json
+# 2025 post-hoc: --config v3.yaml --config v3_final.yaml --config v3_eval.yaml -> eval/results.v3.json
+eval:
+  results_tag: .v3
+  full_row: "v3 framework (verifier v3)"
+  correction_exps: [v3_full]
+  verifier_test_exps: [v3_pot, v3_full]
+  table1:
+    - {row: "Baseline (single-pass CoT, adaptive budget)", kind: mean, exp: cot_ext}
+    - {row: "Self-consistency (matched compute)", kind: sc_matched, exp: cot_ext, match: v3_full}
+    - {row: "+ Code sandbox + RAG v3 + transcript (v3 PoT)", kind: mean, exp: v3_pot}
+    - {row: "+ Learned verifier v3 (PoT pool only)", kind: verifier, exp: v3_pot}
+    - {row: "+ Correction (cross-model critic)", kind: mean, exp: v3_full}
+    - {row: "+ Correction (gated)", kind: gated, exp: v3_full}
+    - {row: "v3 framework (verifier v3)", kind: verifier, exp: v3_full}

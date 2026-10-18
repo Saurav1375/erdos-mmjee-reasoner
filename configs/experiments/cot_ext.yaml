@@ -1,0 +1,7 @@
+# v3 baseline: base-paper CoT, 20 samples, with the adaptive budget (run with v3_final.yaml).
+# Same seeds as `cot`, so the first pass is cache-identical; only cut-off answers continue.
+# Self-consistency at matched compute for the v3 framework votes over these samples.
+kind: solve
+mode: cot
+split: test
+n_samples: 20

@@ -1,0 +1,7 @@
+# v3 dev A/B (2024 only) for the adaptive token budget: same seeds as pot_train, run with
+# configs/v3_ext.yaml (extend_on_truncation). Paired with pot_train rows of 2024.
+kind: solve
+mode: pot
+split: train
+years: [2024]
+n_samples: 8

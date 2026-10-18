@@ -1,0 +1,7 @@
+# v3 verifier training data: Module B (InternVL critic, Qwen3 corrector) on the 2019-2024 PoT
+# samples of a fixed stratified subset of 120 EN/HI twin pairs (~240 questions x 8 chains), so
+# the v3 verifier learns from corrected solutions and critic signals like those it must rank.
+kind: correct
+source: pot_train
+critic: critic_cross
+subset_pairs: 120

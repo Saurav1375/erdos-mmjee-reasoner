@@ -1,0 +1,7 @@
+# v3 bridge to the paper: baseline CoT with Qwen2.5-VL-7B (the paper's model; released Jan 2025,
+# so the 2025 test set is clean for it). Samples 0-9 are shared with repro_qwen25 (same seeds).
+kind: solve
+mode: cot
+split: test
+n_samples: 20
+model: repro

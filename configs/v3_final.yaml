@@ -1,0 +1,12 @@
+# FROZEN v3 framework (V3_FREEZE.md, 2026-10-09). Every choice below was made on 2019-2024 only.
+# Use after configs/v3.yaml (and configs/v3_test2026.yaml for the 2026 clean test):
+#   python -m mmjee_reasoner --config configs/v3.yaml --config configs/v3_final.yaml [...]
+# Do not edit after the final runs start; a change needs a new config file and a new freeze.
+rag:
+  kb_name: kb_v3                                   # 2019-2024 mmJEE + JEEBench 2016-2018
+  extra_kb: [{exp: kb_ext_pot, dataset: jeebench}]
+  retrieval: hybrid
+  hybrid_weight: 0.9          # LOYO sweep on 2019-2024 (CHANGELOG_v3, 2026-10-08)
+  threshold_tuning: loyo      # tau tuned leave-one-year-out on 2019-2024
+sampling:
+  extend_on_truncation: 4096  # adaptive budget: 2024 dev A/B +2.33 [+0.98, +3.74] (2026-10-09)

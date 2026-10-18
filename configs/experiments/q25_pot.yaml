@@ -1,0 +1,6 @@
+# v3 bridge: Module A (PoT + code sandbox) with Qwen2.5-VL-7B as the solver.
+kind: solve
+mode: pot
+split: test
+n_samples: 8
+model: repro

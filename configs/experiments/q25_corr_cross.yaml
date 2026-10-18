@@ -1,0 +1,5 @@
+# v3 bridge: Module B with Qwen2.5-VL-7B as solver/corrector and InternVL3.5-8B as critic.
+kind: correct
+source: q25_pot
+critic: critic_cross
+model: repro
