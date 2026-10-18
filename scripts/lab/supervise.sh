@@ -12,9 +12,13 @@
 # usage: supervise.sh <name> "<mmjee args>" ["<mmjee args>" ...]
 #   log of each stage: artifacts/logs/<name>.out ; progress: artifacts/logs/<name>.supervisor.out
 set -uo pipefail
-ROOT=~/saurav_mmjee; PROJ=$ROOT/mmjee-reasoner; LOG=$PROJ/artifacts/logs
+ROOT=~/saurav_mmjee; PROJ=$ROOT/mmjee-reasoner; LOG=$PROJ/${RUN_ARTIFACTS:-artifacts}/logs
 NAME="$1"; shift
 export HF_HOME=$ROOT/hf_cache VLLM_NO_USAGE_STATS=1 VLLM_USE_FLASHINFER_SAMPLER=0
+export MMJEE_EMBED_DEVICE=cpu   # v3: embedder on CPU, vLLM keeps the whole GPU budget
+# v3: the parent touches CUDA (torch import by the CPU embedder) before vLLM starts its engine
+# process; a forked child then fails with "CUDA error: initialization error". Spawn instead.
+export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export PATH=$ROOT/.venv/bin:$PATH
 cd "$PROJ"
 mkdir -p "$LOG"
