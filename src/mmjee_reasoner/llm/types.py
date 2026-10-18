@@ -64,6 +64,16 @@ class GenResult:
         return cls(**json.loads(blob), cached=True)
 
 
+# Config keys under `sampling` that steer the pipeline, not the model (never sent to vLLM, never
+# part of a cache key).
+PIPELINE_SAMPLING_KEYS = ("extend_on_truncation",)
+
+
+def gen_sampling(sampling: dict) -> dict:
+    """Sampling parameters for a model call (pipeline-only keys removed)."""
+    return {k: v for k, v in sampling.items() if k not in PIPELINE_SAMPLING_KEYS}
+
+
 def derive_seed(*parts: Any) -> int:
     """Deterministic 31-bit seed from arbitrary parts (uid, sample index, turn, ...)."""
     h = hashlib.sha256("|".join(map(str, parts)).encode()).hexdigest()

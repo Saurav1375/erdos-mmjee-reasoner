@@ -10,12 +10,14 @@ from mmjee_reasoner.llm.types import (
     GenResult,
     assistant_message,
     derive_seed,
+    gen_sampling,
     user_message,
 )
 
 __all__ = [
     "CachedEngine", "Engine", "GenRequest", "GenResult", "GenerationCache", "MockEngine",
-    "VLLMEngine", "assistant_message", "derive_seed", "make_engine", "user_message",
+    "VLLMEngine", "assistant_message", "derive_seed", "gen_sampling", "make_engine",
+    "user_message",
 ]
 
 _CACHES: dict[str, GenerationCache] = {}

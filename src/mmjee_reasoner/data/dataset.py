@@ -160,6 +160,8 @@ def load_questions(cfg: dict, split: str | None = None, limit: int | None = None
         raise FileNotFoundError(f"{path} missing - run `mmjee prepare` first")
     df = pd.read_parquet(path)
     df["image_path"] = [str(Path(cfg["paths"]["artifacts"]) / p) for p in df["image_path"]]
+    # The split depends only on the year, so it follows the active config (e.g. a 2026 test run).
+    df["split"] = df["year"].map(lambda y: assign_split(int(y), cfg))
     if split is not None:
         df = df[df["split"] == split]
     df = df.sort_values(["year", "paper", "language", "subject", "qnum", "uid"])

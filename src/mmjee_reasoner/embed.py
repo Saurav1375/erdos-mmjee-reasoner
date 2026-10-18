@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import logging
+import os
 
 import numpy as np
 
@@ -14,7 +15,9 @@ log = logging.getLogger(__name__)
 def _model(name: str):
     from sentence_transformers import SentenceTransformer
 
-    model = SentenceTransformer(name)
+    # v3: MMJEE_EMBED_DEVICE=cpu (set by scripts/lab/supervise.sh) keeps the small embedder off
+    # the GPU, so it never takes memory vLLM has already planned for (OOM in pot_rag_dev_v3).
+    model = SentenceTransformer(name, device=os.environ.get("MMJEE_EMBED_DEVICE") or None)
     log.info("loaded embedding model %s on %s", name, model.device)
     return model
 
