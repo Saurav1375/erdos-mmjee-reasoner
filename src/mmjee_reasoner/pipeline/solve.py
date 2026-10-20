@@ -144,8 +144,17 @@ def run_solve_stage(cfg: dict, exp: dict, engine: Engine, limit: int | None = No
     else:
         # split "any": every year in the dataset (probes), whatever the train/test assignment.
         # v3 dev runs may restrict years (e.g. 2024 A/B tests); --limit samples after that.
+        keys = None
+        if exp.get("subset_pairs"):
+            # v4: fixed stratified subset of EN/HI twin pairs, drawn on the whole split before
+            # the year filter, so experiments split by years share one subset.
+            from mmjee_reasoner.data.dataset import load_questions
+            from mmjee_reasoner.pipeline.common import pilot_twins
+
+            keys = pilot_twins(load_questions(cfg), exp["split"], int(exp["subset_pairs"]),
+                               int(exp.get("subset_seed", cfg["seed"])))
         questions = select_questions(cfg, None if exp["split"] == "any" else exp["split"],
-                                     years=exp.get("years"))
+                                     years=exp.get("years"), twin_keys=keys)
     log.info("[%s] %d questions x %d samples (%s)", exp["name"], len(questions),
              exp["n_samples"], exp["mode"])
     if exp["mode"] in ("cot", "answer_only"):

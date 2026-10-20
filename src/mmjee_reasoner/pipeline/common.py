@@ -120,13 +120,16 @@ def pilot_twins(questions: pd.DataFrame, split: str, n_pairs: int, seed: int) ->
 
 def select_questions(cfg: dict, split: str, limit: int | None = None,
                      seed: int | None = None, years=None,
-                     df: pd.DataFrame | None = None) -> pd.DataFrame:
+                     df: pd.DataFrame | None = None, twin_keys=None) -> pd.DataFrame:
     """Questions of a split, restricted to the active subset (pilot / random smoke).
     v3: ``years`` filters before the subset is drawn; ``df`` replaces the dataset
-    questions (external text-only sets)."""
+    questions (external text-only sets). v4: ``twin_keys`` (a fixed experiment subset) also
+    filters before a --limit smoke subset is drawn."""
     df = load_questions(cfg, split) if df is None else df
     if years:
         df = df[df["year"].isin(years)].reset_index(drop=True)
+    if twin_keys is not None:
+        df = df[df["twin_key"].isin(set(twin_keys))].reset_index(drop=True)
     sub = cfg.get("subset") or {"kind": "full"}
     if sub["kind"] == "pilot":
         n = cfg["pilot"]["test_pairs" if split == "test" else "train_pairs"]
