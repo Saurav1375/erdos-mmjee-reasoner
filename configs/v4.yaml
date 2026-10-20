@@ -1,0 +1,25 @@
+# Phase 4 overrides (docs/phases/PHASE4.md, V4_PREREG.md). Use after the frozen v3 configs:
+#   python -m mmjee_reasoner --config configs/v3.yaml --config configs/v3_final.yaml \
+#       --config configs/v4.yaml <stage>
+# All Phase-4 outputs go to artifacts_v4/, seeded with a copy of artifacts_v3 (data/images is a
+# symlink). artifacts_v3/ and artifacts/ are never written by Phase-4 runs. Every Phase-4 number
+# on 2025/2026 is post-hoc (V4_PREREG.md).
+paths:
+  artifacts: artifacts_v4
+
+verifier:
+  dir_name: verifier_v4      # verifier_v3 stays untouched (copied)
+
+verifier_neural:               # W3: fine-tuned cross-encoder (verifier/neural.py)
+  model: answerdotai/ModernBERT-base   # Apache-2.0, 8k context
+  max_len: 1024
+  question_tokens: 256
+  tail_chars: 8000
+  epochs: 2
+  lr: 3.0e-5
+  batch_size: 8
+  grad_accum: 2
+  eval_batch_size: 32
+  extra_pools:                 # W2 v3-style pools (used with --with-extra)
+    - [v4_pot_train_a, v4_train_corr_a]
+    - [v4_pot_train_b, v4_train_corr_b]

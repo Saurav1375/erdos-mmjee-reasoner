@@ -1,0 +1,12 @@
+# Phase 4 (W2): v3-style solver pools on training questions, so the verifier learns from pools
+# like those it ranks at test time. Same recipe as v3_pot (PoT + RAG v3 + transcript, adaptive
+# budget; run with v3_final.yaml + v4.yaml) on a fixed stratified subset of 200 EN/HI twin pairs
+# of 2019-2024 (the subset is drawn before the year filter; part b = years [2022, 2023, 2024]).
+kind: solve
+mode: pot
+rag: true
+transcript: true
+split: train
+years: [2022, 2023, 2024]
+subset_pairs: 200
+n_samples: 4

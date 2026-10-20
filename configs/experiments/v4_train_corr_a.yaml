@@ -1,0 +1,5 @@
+# Phase 4 (W2): correction stage of the v3 framework (cross-model critic, adaptive budget) on
+# v4_pot_train_a, so the verifier also trains on v3-style corrected solutions.
+kind: correct
+source: v4_pot_train_a
+critic: critic_cross
