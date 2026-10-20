@@ -10,6 +10,7 @@ Stages, in pipeline order (see README for the full workflow):
     build-cards      v4: short method cards for the KB entries (rag.exemplar_format: card)
     correct --exp E  Solver/Critic/Corrector loop (pot_corr_same, pot_corr_cross, full)
     train-verifier   train and select the learned verifier on 2019-2024 samples
+    train-neural-verifier  v4: fine-tuned cross-encoder verifier, leave-one-year-out
     evaluate         SOP Table I + analyses on the 2025 held-out set
     report           Markdown + LaTeX report and figures
     status           what has been generated so far
@@ -172,6 +173,19 @@ def cmd_train_verifier_v3(cfg, args):
     train_verifier_v3(cfg)
 
 
+def cmd_train_neural_verifier(cfg, args):
+    from mmjee_reasoner.verifier.neural import train_neural_loyo
+
+    train_neural_loyo(cfg, tag=args.tag, with_extra=args.with_extra, folds=args.folds,
+                      final=args.final)
+
+
+def cmd_train_verifier_v4(cfg, args):
+    from mmjee_reasoner.verifier.v4 import train_verifier_v4
+
+    train_verifier_v4(cfg, neural_tag=args.neural_tag, with_extra=args.with_extra)
+
+
 def cmd_evaluate(cfg, args):
     from mmjee_reasoner.pipeline.evaluate import run_evaluate_stage
 
@@ -203,7 +217,8 @@ COMMANDS = {
     "tag": cmd_tag, "transcribe": cmd_transcribe, "probe-completion": cmd_probe_completion,
     "translate": cmd_translate, "build-kb": cmd_build_kb, "build-cards": cmd_build_cards,
     "train-verifier": cmd_train_verifier, "train-verifier-v3": cmd_train_verifier_v3,
-    "evaluate": cmd_evaluate, "report": cmd_report,
+    "train-neural-verifier": cmd_train_neural_verifier,
+    "train-verifier-v4": cmd_train_verifier_v4, "evaluate": cmd_evaluate, "report": cmd_report,
     "status": cmd_status,
 }
 
@@ -239,7 +254,16 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--dataset", default=None, help="v3: external dataset (jeebench)")
     add("probe-completion", help="v3 memorisation probe").add_argument(
         "--model", default="solver", help="model role (solver | repro)")
+    sp = add("train-neural-verifier", help="v4: fine-tuned cross-encoder verifier (LOYO)")
+    sp.add_argument("--tag", default="base", help="output name (verifier_v4/neural_<tag>)")
+    sp.add_argument("--with-extra", action="store_true",
+                    help="also train on verifier_neural.extra_pools (Phase-4 v3-style pools)")
+    sp.add_argument("--folds", type=int, nargs="+", default=None, help="only these LOYO years")
+    sp.add_argument("--final", action="store_true", help="also fit a model on all years")
     add("build-cards", help="v4: method cards for the entries of the configured KB")
+    sp = add("train-verifier-v4", help="v4: selector variants + LOYO gates (CPU)")
+    sp.add_argument("--neural-tag", default="base", help="neural verifier run to stack")
+    sp.add_argument("--with-extra", action="store_true", help="include the Phase-4 pools")
     for name in ("build-kb", "train-verifier", "train-verifier-v3", "evaluate", "report",
                  "status"):
         add(name)
