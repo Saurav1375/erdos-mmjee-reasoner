@@ -20,6 +20,8 @@ export MMJEE_EMBED_DEVICE=cpu   # v3: embedder on CPU, vLLM keeps the whole GPU 
 # process; a forked child then fails with "CUDA error: initialization error". Spawn instead.
 export VLLM_WORKER_MULTIPROC_METHOD=spawn
 export PATH=$ROOT/.venv/bin:$PATH
+# v4: a PC without Hugging Face access (ml-lab2, campus proxy) uses the local model cache only.
+[ -f "$ROOT/.hf_offline" ] && export HF_HUB_OFFLINE=1
 cd "$PROJ"
 mkdir -p "$LOG"
 for stage in "$@"; do
