@@ -1,0 +1,10 @@
+# Phase 4 (W4c) post-hoc: the v3_pot recipe (PoT + RAG + transcript, adaptive budget, 8 samples,
+# same seeds) with kb_v4 instead of kb_v3. Requests whose exemplars are unchanged are identical to
+# v3_pot's (cache hits), so v4_pot_kb4 vs v3_pot is paired and differs only where retrieval
+# changed. Run with v3.yaml + v3_test2026.yaml + v3_final.yaml + v4.yaml + v4_kb.yaml.
+kind: solve
+mode: pot
+rag: true
+transcript: true
+split: test
+n_samples: 8

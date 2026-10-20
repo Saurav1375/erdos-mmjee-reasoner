@@ -1,0 +1,8 @@
+# Phase 4 (W4c) open-licensed KB expansion: PoT solutions for OlympiadBench (Apache-2.0;
+# English, text-only, numeric answers; data/external.py), 4 samples. Only solutions scored
+# correct enter kb_v4 (configs/v4_kb.yaml).
+kind: solve
+mode: pot
+dataset: olympiadbench
+split: external
+n_samples: 4

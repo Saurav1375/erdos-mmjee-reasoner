@@ -1,0 +1,6 @@
+# Phase 4 (W4c): kb_v4 = kb_v3 sources (2019-2024 mmJEE + JEEBench 2016-2018) + OlympiadBench.
+# Same v3 recipe (hybrid w = 0.9, LOYO tau, dedup against 2025 and 2026). Use after v3.yaml,
+# v3_final.yaml and v4.yaml. Post-hoc only (V4_PREREG.md).
+rag:
+  kb_name: kb_v4
+  extra_kb: [{exp: kb_ext_pot, dataset: jeebench}, {exp: kb_open_pot, dataset: olympiadbench}]

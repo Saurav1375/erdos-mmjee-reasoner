@@ -90,7 +90,8 @@ def build_entries(cfg: dict, questions: pd.DataFrame, candidates: pd.DataFrame,
             "solution": shorten(sol["text"], cfg["rag"]["max_solution_chars"]),
             "solution_uid": sol["uid"], "solution_sample": int(sol["sample"]),
             "topic": tag["topic"], "method": tag["method"], "query": tag["query"],
-            "source": "jeebench" if rep["split"] == "external" else "mmjee",
+            "source": (rep.get("source_dataset") or "jeebench") if rep["split"] == "external"
+            else "mmjee",
         })
     return entries, {"twins": int(train["twin_key"].nunique()), "no_solution": no_solution}
 
