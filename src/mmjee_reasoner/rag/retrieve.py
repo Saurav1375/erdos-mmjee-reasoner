@@ -208,6 +208,15 @@ def exemplars_for_questions(cfg: dict, questions: pd.DataFrame, engine=None) -> 
     rag = cfg["rag"]
     q_vecs = embed_texts([tags[u]["query"] for u in questions["uid"]], rag["embedding_model"])
     q_text = _query_text_vecs(cfg, list(questions["uid"]))
+    cards = None
+    if rag.get("exemplar_format", "solution") == "card":
+        from mmjee_reasoner.rag.cards import card_key, load_cards
+
+        cards = load_cards(cfg)
+        missing = [e["kb_id"] for e in entries if card_key(e) not in cards]
+        if missing:
+            raise RuntimeError(f"{len(missing)} KB entries have no method card - run "
+                               "`build-cards` first")
     out, log_rows = {}, []
     for qv, qx, (_, q) in zip(q_vecs, q_text, questions.iterrows()):
         sims = query_sims(cfg, qv, qx, kb_vecs, kb_problem) if kb_problem is not None else None
@@ -215,7 +224,14 @@ def exemplars_for_questions(cfg: dict, questions: pd.DataFrame, engine=None) -> 
                       q["twin_key"], rag["top_k"], meta["threshold"]["value"], sims=sims)
         examples = [{"problem": entries[i]["problem"], "solution": entries[i]["solution"]}
                     for i, _ in hits]
-        out[q["uid"]] = {"text": format_exemplars(examples),
+        if cards is not None:   # v4: method cards instead of full worked solutions
+            from mmjee_reasoner.prompts.templates import format_card_exemplars
+
+            text = format_card_exemplars([{"problem": entries[i]["problem"],
+                                           "card": cards[card_key(entries[i])]} for i, _ in hits])
+        else:
+            text = format_exemplars(examples)
+        out[q["uid"]] = {"text": text,
                          "kb_ids": [entries[i]["kb_id"] for i, _ in hits],
                          "sims": [s for _, s in hits]}
         log_rows.append({"uid": q["uid"], "kb_ids": out[q["uid"]]["kb_ids"],
@@ -226,6 +242,8 @@ def exemplars_for_questions(cfg: dict, questions: pd.DataFrame, engine=None) -> 
     kb_name = cfg["rag"].get("kb_name", "kb")
     name = f"retrieval_{split}.jsonl" if kb_name == "kb" and not test_tag(cfg) else \
         f"retrieval_{split}{test_tag(cfg)}_{kb_name}.jsonl"   # v3: never overwrite v2 logs
+    if cards is not None:
+        name = name.replace(".jsonl", "_cards.jsonl")
     path = artifacts_dir(cfg, "rag", name)
     with open(path, "w", encoding="utf-8") as f:
         f.writelines(json.dumps(r, ensure_ascii=False) + "\n" for r in log_rows)

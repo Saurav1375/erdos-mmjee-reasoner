@@ -1,0 +1,10 @@
+# Phase 4 (W4a/W4b) 2024 dev A/B: PoT + RAG (dev KB without 2024, v3 recipe) with matched seeds,
+# exemplars as full worked solutions (v3 format). Paired against pot_train (2024 rows): questions without
+# exemplars are cache-identical. Run with v3.yaml + v3_kbdev_v3.yaml + v4.yaml +
+# v4_rag_matched.yaml.
+kind: solve
+mode: pot
+rag: true
+split: train
+years: [2024]
+n_samples: 8

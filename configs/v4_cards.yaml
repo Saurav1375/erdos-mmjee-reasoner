@@ -1,0 +1,4 @@
+# Phase 4 (W4b): exemplars are method cards (rag/cards.py) instead of full worked solutions.
+# Needs `build-cards` for the configured KB first.
+rag:
+  exemplar_format: card

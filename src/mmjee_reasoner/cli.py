@@ -7,6 +7,7 @@ Stages, in pipeline order (see README for the full workflow):
     tag / transcribe concept tags / transcriptions of question images (RAG)
     probe-completion v3 memorisation probe (continue the first half of a transcription)
     build-kb         knowledge base + FAISS index from 2019-2024 solved problems
+    build-cards      v4: short method cards for the KB entries (rag.exemplar_format: card)
     correct --exp E  Solver/Critic/Corrector loop (pot_corr_same, pot_corr_cross, full)
     train-verifier   train and select the learned verifier on 2019-2024 samples
     evaluate         SOP Table I + analyses on the 2025 held-out set
@@ -153,6 +154,12 @@ def cmd_build_kb(cfg, args):
     build_kb(cfg)
 
 
+def cmd_build_cards(cfg, args):
+    from mmjee_reasoner.rag.cards import run_cards_stage
+
+    run_cards_stage(cfg, _engine(cfg, "solver", args.mock))
+
+
 def cmd_train_verifier(cfg, args):
     from mmjee_reasoner.verifier.train import train_verifier
 
@@ -194,8 +201,9 @@ def cmd_status(cfg, args):
 COMMANDS = {
     "prepare": cmd_prepare, "solve": cmd_solve, "correct": cmd_correct, "phase": cmd_phase,
     "tag": cmd_tag, "transcribe": cmd_transcribe, "probe-completion": cmd_probe_completion,
-    "translate": cmd_translate, "build-kb": cmd_build_kb,
-    "train-verifier": cmd_train_verifier, "train-verifier-v3": cmd_train_verifier_v3, "evaluate": cmd_evaluate, "report": cmd_report,
+    "translate": cmd_translate, "build-kb": cmd_build_kb, "build-cards": cmd_build_cards,
+    "train-verifier": cmd_train_verifier, "train-verifier-v3": cmd_train_verifier_v3,
+    "evaluate": cmd_evaluate, "report": cmd_report,
     "status": cmd_status,
 }
 
@@ -231,6 +239,7 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--dataset", default=None, help="v3: external dataset (jeebench)")
     add("probe-completion", help="v3 memorisation probe").add_argument(
         "--model", default="solver", help="model role (solver | repro)")
+    add("build-cards", help="v4: method cards for the entries of the configured KB")
     for name in ("build-kb", "train-verifier", "train-verifier-v3", "evaluate", "report",
                  "status"):
         add(name)

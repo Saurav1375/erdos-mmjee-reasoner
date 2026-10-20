@@ -1,0 +1,4 @@
+# Phase 4 (W4a): RAG runs draw the same seeds as the no-RAG run of the same questions, so a
+# question without exemplars gets an identical request (cache hit) and RAG vs no-RAG is paired.
+rag:
+  matched_seeds: true

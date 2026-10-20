@@ -207,6 +207,24 @@ EXEMPLAR_HEADER = (
 EXEMPLAR_TEMPLATE = "### Example {i}\nProblem:\n{problem}\n\nWorked solution:\n{solution}"
 
 
+CARD_EXEMPLAR_HEADER = (
+    "Below are method cards from earlier JEE Advanced problems that use a similar method. "
+    "Use them only as guidance on the method. They are DIFFERENT problems."
+)
+
+CARD_EXEMPLAR_TEMPLATE = "### Example {i}\nProblem:\n{problem}\n\nMethod card:\n{card}"
+
+
+def format_card_exemplars(examples: list[dict]) -> str | None:
+    """v4 (rag.exemplar_format: card): ``examples`` with ``problem`` and ``card`` text."""
+    if not examples:
+        return None
+    blocks = [CARD_EXEMPLAR_TEMPLATE.format(i=i + 1, problem=e["problem"].strip(),
+                                            card=e["card"].strip())
+              for i, e in enumerate(examples)]
+    return CARD_EXEMPLAR_HEADER + "\n\n" + "\n\n".join(blocks)
+
+
 def format_exemplars(examples: list[dict]) -> str | None:
     """``examples``: dicts with ``problem`` and ``solution`` text."""
     if not examples:

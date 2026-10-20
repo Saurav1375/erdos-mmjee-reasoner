@@ -96,6 +96,9 @@ def solve_pot(cfg: dict, exp: dict, engine: Engine, questions,
     mode = "pot_rag" if exemplars is not None else "pot"
     if transcripts is not None:
         mode += "_tx"
+    # v4 (rag.matched_seeds): RAG runs draw the same seeds as the no-RAG run, so a question
+    # without exemplars gets an identical request (cache hit) and the RAG effect is paired.
+    seed_mode = mode.replace("pot_rag", "pot") if cfg["rag"].get("matched_seeds") else mode
     trajs, owners = [], []
     for _, q in questions.iterrows():
         ex = (exemplars or {}).get(q["uid"]) or {}
@@ -111,7 +114,7 @@ def solve_pot(cfg: dict, exp: dict, engine: Engine, questions,
                 rid=f"{exp['name']}|{q['uid']}|s{s}", prompt=prompt,
                 image=image, language=q["language"],
                 question_type=q["question_type"],
-                seed_base=seed_base(cfg["seed"], q["uid"], s, mode),
+                seed_base=seed_base(cfg["seed"], q["uid"], s, seed_mode),
                 question_text=qtext,
             ))
             owners.append((q, s, ex))
