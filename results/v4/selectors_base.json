@@ -1,0 +1,52 @@
+{
+  "tag": "base",
+  "rows": 12096,
+  "pools": {
+    "v3": 12096
+  },
+  "baselines": {
+    "v3_16pool": {
+      "majority": 53.71900826446281,
+      "random_expected": 45.99690082644628,
+      "oracle": 78.51239669421489
+    }
+  },
+  "variants": {
+    "v3_ref": {
+      "v3_16pool": {
+        "max_prob": 61.98347107438017,
+        "weighted_vote": 58.67768595041323,
+        "log_odds_vote": 59.50413223140496
+      },
+      "best_method": "max_prob",
+      "gate_pass": false
+    },
+    "no_length": {
+      "v3_16pool": {
+        "max_prob": 58.67768595041323,
+        "weighted_vote": 57.438016528925615,
+        "log_odds_vote": 59.09090909090909
+      },
+      "best_method": "log_odds_vote",
+      "gate_pass": false
+    },
+    "neural": {
+      "v3_16pool": {
+        "max_prob": 54.54545454545454,
+        "weighted_vote": 57.02479338842975,
+        "log_odds_vote": 50.413223140495866
+      },
+      "best_method": "weighted_vote",
+      "gate_pass": false
+    },
+    "stacked": {
+      "v3_16pool": {
+        "max_prob": 60.33057851239669,
+        "weighted_vote": 57.438016528925615,
+        "log_odds_vote": 57.438016528925615
+      },
+      "best_method": "max_prob",
+      "gate_pass": false
+    }
+  }
+}

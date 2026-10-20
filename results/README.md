@@ -29,3 +29,12 @@ models), so they are not in git. They can be regenerated from the cache-backed p
 | `dev_ab.json` | 2024 dev A/B tests behind the freeze (transcript block, adaptive budget, RAG v2 vs v3) |
 | `rag_sweep_loyo.json` | RAG v3 LOYO sweep (coverage at fixed proxy precision) |
 
+## `v4/`: Phase 4 (final phase, post-hoc)
+
+| File | Contents |
+|---|---|
+| `w1_diagnostics.json` | Verifier shift (feature SMDs, verifier vs majority with CIs, by truncation), 2026 error breakdown, where RAG fires, mixed RAG/no-RAG pools |
+| `selectors_base.json`, `selectors_extra.json` | LOYO selection accuracy of `v3_ref` / `no_length` / `neural` / `stacked` on the v3 training pools, and with the Phase-4 pools added; gate decisions |
+| `v4_results.json` | One-shot evaluation (`scripts/v4_eval.py`): gates, S0/majority on 2025/2026, the 2024 dev RAG A/B (matched seeds, method cards), kb_v4 on 2026 |
+| `rag_sweep_kb4.json` | LOYO retrieval coverage of kb_v4 vs kb_v3 at proxy precision 0.70 |
+| `kb_v4_meta.json` | kb_v4 build: entries by source, de-duplication, tuned τ |

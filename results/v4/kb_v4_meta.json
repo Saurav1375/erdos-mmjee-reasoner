@@ -1,0 +1,48 @@
+{
+  "twins": 1115,
+  "no_solution": 296,
+  "entries": 813,
+  "dedup_dropped": [
+    {
+      "kb_id": "2020_P1_Mathematics_MCQ-Multiple_q1",
+      "max_sim": 0.9224342107772827
+    },
+    {
+      "kb_id": "2022_P1_Mathematics_MCQ-Multiple_q5",
+      "max_sim": 0.9022756814956665
+    },
+    {
+      "kb_id": "2022_P2_Mathematics_MCQ-Single_q3",
+      "max_sim": 0.9306213855743408
+    },
+    {
+      "kb_id": "2023_P1_Mathematics_Matching_q2",
+      "max_sim": 0.9346218109130859
+    },
+    {
+      "kb_id": "jb2018_P1_Mathematics_MCQ-Multiple_i39",
+      "max_sim": 0.911637544631958
+    },
+    {
+      "kb_id": "jb2018_P1_Mathematics_Numerical_i46",
+      "max_sim": 0.9011095762252808
+    }
+  ],
+  "test_transcripts": 394,
+  "source_exp": "pot_train",
+  "embedding_model": "BAAI/bge-small-en-v1.5",
+  "entries_by_source": {
+    "mmjee": 451,
+    "olympiadbench": 207,
+    "jeebench": 155
+  },
+  "retrieval": "hybrid",
+  "threshold": {
+    "value": 0.887359082698822,
+    "method": "loyo-proxy",
+    "dev_queries": 1270,
+    "coverage": 0.13543307086614173,
+    "proxy_precision": 0.7034883720930233,
+    "base_precision": 0.3251968503937008
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "tag": "extra",
+  "rows": 15280,
+  "pools": {
+    "v3": 12096,
+    "v4": 3184
+  },
+  "baselines": {
+    "v3_16pool": {
+      "majority": 53.71900826446281,
+      "random_expected": 45.99690082644628,
+      "oracle": 78.51239669421489
+    },
+    "v4_pool": {
+      "majority": 55.778894472361806,
+      "random_expected": 49.528894472361806,
+      "oracle": 71.60804020100502
+    }
+  },
+  "variants": {
+    "v3_ref": {
+      "v3_16pool": {
+        "max_prob": 60.74380165289256,
+        "weighted_vote": 59.09090909090909,
+        "log_odds_vote": 61.15702479338842
+      },
+      "v4_pool": {
+        "max_prob": 60.050251256281406,
+        "weighted_vote": 58.040201005025125,
+        "log_odds_vote": 59.54773869346733
+      },
+      "best_method": "log_odds_vote",
+      "gate_pass": false
+    },
+    "no_length": {
+      "v3_16pool": {
+        "max_prob": 61.57024793388429,
+        "weighted_vote": 58.67768595041323,
+        "log_odds_vote": 59.50413223140496
+      },
+      "v4_pool": {
+        "max_prob": 60.050251256281406,
+        "weighted_vote": 58.291457286432156,
+        "log_odds_vote": 59.04522613065326
+      },
+      "best_method": "max_prob",
+      "gate_pass": false
+    },
+    "neural": {
+      "v3_16pool": {
+        "max_prob": 56.19834710743802,
+        "weighted_vote": 58.67768595041323,
+        "log_odds_vote": 50.413223140495866
+      },
+      "v4_pool": {
+        "max_prob": 55.527638190954775,
+        "weighted_vote": 56.78391959798995,
+        "log_odds_vote": 54.773869346733676
+      },
+      "best_method": "weighted_vote",
+      "gate_pass": false
+    },
+    "stacked": {
+      "v3_16pool": {
+        "max_prob": 61.15702479338842,
+        "weighted_vote": 57.85123966942148,
+        "log_odds_vote": 58.67768595041323
+      },
+      "v4_pool": {
+        "max_prob": 58.79396984924623,
+        "weighted_vote": 58.5427135678392,
+        "log_odds_vote": 60.30150753768844
+      },
+      "best_method": "max_prob",
+      "gate_pass": false
+    }
+  }
+}

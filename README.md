@@ -24,6 +24,8 @@
 Both frameworks beat matched self-consistency on the clean year: **+6.4 points** (v3: [+1.5, +10.8],
 McNemar p = 0.011). v3 vs v2: +3.4 [−1.5, +8.8], not significant. Details: [§8.3](#83-phase-3-v3-clean-2026-test).
 
+**Phase 4 (final phase, post-hoc):** we tested a fine-tuned neural verifier (ModernBERT), length-free and stacked rankers, training pools matched to the v3 solutions, method-card exemplars and an open-licensed KB (OlympiadBench), each against a rule fixed in advance ([`V4_PREREG.md`](V4_PREREG.md)). None passed its gate, so the v3 result stands. Details: [§8.4](#84-phase-4-final-phase-post-hoc).
+
 **Headline, Phase 2 (2025 held-out, 190 questions; post-hoc since Phase 3):**
 
 | Setup | Accuracy |
@@ -59,6 +61,7 @@ Full framework vs. matched self-consistency: **+12.1 points** [+4.2, +20.5], McN
 | **1. Proposal and base-paper study** | [`phase-1`](../../tree/phase-1) | SOP, base-paper repo (submodule), code audit | [`docs/phases/PHASE1.md`](docs/phases/PHASE1.md) |
 | **2. Baselines, pilot, full run (v2)** | [`phase-2`](../../tree/phase-2) | Framework implementation; Qwen2.5-VL-7B reproduction and Qwen3-VL-8B baselines; 40-question pilot; v1→v2 fixes; full 2025 run; reports | [`docs/phases/PHASE2.md`](docs/phases/PHASE2.md) |
 | **3. v3 framework and clean 2026 test** | [`phase-3`](../../tree/phase-3) | Clean 2026 test (Hindi twins built from the official papers); frozen v3 (adaptive budget, transcript block, RAG v3, verifier v3 with correction gate); v2 re-run on 2026; Qwen2.5 bridge to the paper; memorisation probes; final report | [`docs/phases/PHASE3.md`](docs/phases/PHASE3.md) |
+| **4. Final phase (post-hoc)** | [`phase-4`](../../tree/phase-4) | Selector diagnosis; neural ModernBERT verifier, length-free and stacked rankers, v3-style training pools (two GPUs); matched RAG seeds, method cards, open-licensed KB; one-shot post-hoc evaluation; final report v4 | [`docs/phases/PHASE4.md`](docs/phases/PHASE4.md) |
 
 `main` always points to the latest published phase, which is currently **phase 3**. Each
 phase document lists its goals, the issues encountered, and the future enhancements.
@@ -311,8 +314,23 @@ Raw outputs are in [`results/v3/`](results/v3).
 | 2025 (post-hoc): v3 vs v2 framework | +6.8 [+1.1, +12.1] (72.1 vs 65.3) |
 | Qwen2.5-VL-7B framework vs matched SC (2025, clean for that model) | −1.1 [−7.4, +5.3] |
 
+### 8.4 Phase 4 (final phase, post-hoc)
+
+Every choice used 2019–2024 only, under gates fixed in [`V4_PREREG.md`](V4_PREREG.md) before any Phase-4 scoring. Numbers on 2025/2026 are post-hoc. Raw outputs are in [`results/v4/`](results/v4).
+
+| Experiment | Result |
+|---|---|
+| Diagnosis | Length shift is small in both years (SMD 0.15 / 0.28). On 2026 the selector misses 42 questions where the right answer is in the pool but only 17% of candidates are right; diagram questions dominate |
+| Neural verifier (ModernBERT-base, LOYO) | Candidate AUC 0.787, but LOYO pick accuracy 57.0 vs 62.0 for the v3 ranker (majority 53.7): **gate failed** |
+| Ranker without length features / stacked with the neural score | 59.1 / 60.3 vs 62.0: **gate failed** |
+| Retrained with 3,184 v3-style training candidates (398 questions) | best 61.6 vs 62.0; the v3 ranker itself 61.2: **gate failed** |
+| Matched RAG seeds (2024 dev) | Non-fired questions identical; RAG effect measured on the 31 fired questions |
+| Method cards vs solution exemplars (2024 dev, fired) | +3.6 [−0.8, +8.5]: **not adopted** (lower bound ≤ 0) |
+| Open-licensed KB (+207 OlympiadBench) | LOYO coverage 13.5% vs 15.0%; 2026 PoT 49.8 vs 49.8 |
+
 Reports:
-- **Final report (v3): [`report/final_v3/final_report_v3.pdf`](report/final_v3/final_report_v3.pdf)** ([Markdown](report/FINAL_REPORT_v3.md));
+- **Final report (v4 = v3 + Phase 4): [`report/final_v4/final_report_v4.pdf`](report/final_v4/final_report_v4.pdf)**;
+- Final report (v3): [`report/final_v3/final_report_v3.pdf`](report/final_v3/final_report_v3.pdf) ([Markdown](report/FINAL_REPORT_v3.md));
 - Phase-2 progress report: [`report/phase2/phase2_report.pdf`](report/phase2/phase2_report.pdf) ([Markdown](report/PHASE2_REPORT.md));
 - v2 final-report draft (2025 only): [`report/final/final_report.pdf`](report/final/final_report.pdf);
 - auto-generated summary: [`report/REPORT.md`](report/REPORT.md).
@@ -328,6 +346,7 @@ erdos-mmjee-reasoner/
 ├── configs/                      # YAML configs                                  → configs/README.md
 │   ├── base.yaml                 #   paths, split, sampling, module settings, Table I
 │   ├── v3*.yaml                  #   v3 overrides: v3_final.yaml = frozen v3, v3_test2026.yaml, eval tables
+│   ├── v4*.yaml                  #   Phase 4: artifacts_v4, neural verifier, matched seeds, cards, kb_v4
 │   ├── models.yaml               #   model roles + vLLM settings
 │   └── experiments/*.yaml        #   one file per generation run
 ├── src/mmjee_reasoner/
@@ -349,14 +368,16 @@ erdos-mmjee-reasoner/
 │   ├── phase2_report.py  final_report.py  final_report_v3.py
 │   ├── build_hindi2026.py        # Hindi 2026 twins from the official papers
 │   ├── v3_analysis.py  v3_dev_ab.py  v3_rag_sweep.py  demo.py
+│   ├── v4_analysis.py  v4_rag_sweep.py  v4_eval.py  final_report_v4.py   # Phase 4
 │   └── lab/                      # lab GPU setup, launch, supervise, sync
-├── tests/                        # 100 pytest tests (CPU, fake VLM)
-├── results/phase2/  results/v3/  # published result summaries (JSON/CSV)
-├── report/                       # Phase-2 report, v2 draft, v3 final report (final_v3/)
+├── tests/                        # 110 pytest tests (CPU, fake VLM)
+├── results/phase2/  results/v3/  results/v4/   # published result summaries (JSON/CSV)
+├── report/                       # Phase-2 report, v2 draft, v3 final report (final_v3/), v4 (final_v4/)
 ├── V3_FREEZE.md                  # the pre-registered v3 freeze
+├── V4_PREREG.md                  # the Phase-4 pre-registration (gates)
 ├── docs/
 │   ├── proposal/SOP_12340350_12341940.pdf
-│   ├── phases/PHASE1.md  PHASE2.md  PHASE3.md
+│   ├── phases/PHASE1.md  PHASE2.md  PHASE3.md  PHASE4.md
 │   ├── SPECIFICATIONS.md
 │   └── REFERENCES.md
 ├── third_party/mmJEE-Eval/       # base-paper repo (git submodule @ 815ac89)

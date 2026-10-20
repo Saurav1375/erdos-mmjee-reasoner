@@ -1,0 +1,29 @@
+{
+ "kb_v3": {
+  "value": 0.882,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.15,
+  "proxy_precision": 0.702,
+  "base_precision": 0.322,
+  "entries": 606,
+  "hits_by_source": {
+   "jeebench": 44,
+   "mmjee": 147
+  }
+ },
+ "kb_v4": {
+  "value": 0.887,
+  "method": "loyo-proxy",
+  "dev_queries": 1270,
+  "coverage": 0.135,
+  "proxy_precision": 0.703,
+  "base_precision": 0.325,
+  "entries": 813,
+  "hits_by_source": {
+   "jeebench": 41,
+   "mmjee": 120,
+   "olympiadbench": 11
+  }
+ }
+}
