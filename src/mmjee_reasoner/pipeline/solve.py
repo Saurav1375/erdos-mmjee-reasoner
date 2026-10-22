@@ -90,8 +90,11 @@ def solve_pot(cfg: dict, exp: dict, engine: Engine, questions,
 
     v3 options: ``transcripts`` (uid -> English transcription) adds the transcript block
     (transcript-assisted solving); text-only questions carry their text in the prompt.
+    v4b option: ``sample_offset`` k numbers the samples k..k+n-1, so they reuse the seeds of
+    those samples of another run with the same mode.
     """
     n = int(exp["n_samples"])
+    offset = int(exp.get("sample_offset", 0))
     max_blocks = cfg["sandbox"]["max_code_blocks"]
     mode = "pot_rag" if exemplars is not None else "pot"
     if transcripts is not None:
@@ -109,7 +112,7 @@ def solve_pot(cfg: dict, exp: dict, engine: Engine, questions,
         if transcripts is not None and transcripts.get(q["uid"]):
             prompt = with_transcript(prompt, transcripts[q["uid"]])
         image = None if qtext else relative_image(cfg, q["image_path"])
-        for s in range(n):
+        for s in range(offset, offset + n):
             trajs.append(Trajectory(
                 rid=f"{exp['name']}|{q['uid']}|s{s}", prompt=prompt,
                 image=image, language=q["language"],
@@ -170,13 +173,16 @@ def run_solve_stage(cfg: dict, exp: dict, engine: Engine, limit: int | None = No
             exemplars = exemplars_for_questions(cfg, questions, tag_engine or engine)
         transcripts = None
         if exp.get("transcript"):  # v3 extension: transcript-assisted solving
-            from mmjee_reasoner.rag.tagger import load_english_transcripts
+            from mmjee_reasoner.rag.tagger import load_diagram_transcripts, load_english_transcripts
 
-            transcripts = load_english_transcripts(cfg)
+            view = exp.get("transcript_view", "plain")   # v4b: diagram = diagram-first reading
+            transcripts = (load_diagram_transcripts(cfg) if view == "diagram"
+                           else load_english_transcripts(cfg))
             missing = [u for u in questions["uid"] if u not in transcripts]
             if missing:
                 raise RuntimeError(f"{len(missing)} questions lack an English transcription - "
-                                   "run `transcribe` / `translate` first")
+                                   + ("run `transcribe --view diagram` first" if view == "diagram"
+                                      else "run `transcribe` / `translate` first"))
         records = solve_pot(cfg, exp, engine, questions, exemplars, transcripts)
     else:
         raise ValueError(f"unknown solve mode {exp['mode']}")

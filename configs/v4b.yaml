@@ -1,0 +1,8 @@
+# Phase 4b overrides (V4B_PREREG.md). Use after the Phase-4 configs, e.g.
+#   python -m mmjee_reasoner --config configs/v3.yaml --config configs/v4.yaml \
+#       --config configs/v4b.yaml <stage>
+# All Phase-4b outputs go to artifacts_v4b/, seeded with a copy of artifacts_v4 (data/images is a
+# symlink). artifacts_v4/ (Phase 4, closed) is never written. Every Phase-4b number on 2025/2026
+# is post-hoc.
+paths:
+  artifacts: artifacts_v4b

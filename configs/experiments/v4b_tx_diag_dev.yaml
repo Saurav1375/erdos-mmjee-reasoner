@@ -1,0 +1,11 @@
+# Phase 4b (V4B_PREREG.md, track B) 2024 dev: PoT with the diagram-first transcript, samples s4-s7
+# with the seeds of pot_tx_dev s4-s7 (same mode, same sample index), so a paired sample differs
+# only in the transcript. Run with v3.yaml + v4.yaml + v4b.yaml (the settings of pot_tx_dev).
+kind: solve
+mode: pot
+split: train
+years: [2024]
+transcript: true
+transcript_view: diagram
+n_samples: 4
+sample_offset: 4

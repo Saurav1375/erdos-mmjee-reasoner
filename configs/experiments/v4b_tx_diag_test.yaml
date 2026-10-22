@@ -1,0 +1,11 @@
+# Phase 4b (V4B_PREREG.md, track B) 2026, run only if the dev gate passed: the v3_pot recipe with
+# the diagram-first transcript, samples s4-s7 with v3_pot's seeds (run with v3_final.yaml +
+# v4.yaml + v4b.yaml).
+kind: solve
+mode: pot
+rag: true
+transcript: true
+transcript_view: diagram
+split: test
+n_samples: 4
+sample_offset: 4
