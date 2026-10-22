@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
 from mmjee_reasoner.data.dataset import load_questions
@@ -79,3 +80,44 @@ def test_transcript_view_selects_the_diagram_reading(cfg, dataset):
     assert first and all("Transcription:\nDIAGRAM ITEMS" in t and "PLAIN" not in t
                          for t in first)
 
+
+def _toy_frame() -> "pd.DataFrame":
+    import pandas as pd
+
+    rows = []
+    for q, (year, preds, gold) in enumerate([(2019, ["A", "A", "B", "C"], "B"),
+                                             (2020, ["1.50", "1.5", "2", "2"], "2"),
+                                             (2021, ["AB", "BA", "A", "AB"], "AB")]):
+        qtype = {2019: "MCQ-Single", 2020: "Numerical", 2021: "MCQ-Multiple"}[year]
+        for s, p in enumerate(preds):
+            rows.append({"uid": f"q{q}", "year": year, "pool": "v3", "pred": p,
+                         "question_type": qtype, "correct": p.replace("BA", "AB") == gold
+                         or (qtype == "Numerical" and float(p) == float(gold)),
+                         "is_corrected": s >= 2, "has_chain": True,
+                         "corr_critic_flagged_first": float(s % 2), "corr_n_flags": 0.0,
+                         "corr_rounds": 1.0, "corr_answer_changed": float(s == 3),
+                         "correction_failed_last": 0.0, "text": "step\\boxed{x}" * (s + 1),
+                         "completion_tokens": 100 * (s + 1), "n_steps": s + 1,
+                         "n_code_blocks": 1, "n_code_ok": 1, "n_code_err": 0,
+                         "used_fallback": False, "finish": "stop", "subject": "Physics",
+                         "language": "English", "requires_image": q == 0, "source": "x"})
+    return pd.DataFrame(rows)
+
+
+def test_answer_rows_one_per_distinct_answer():
+    from mmjee_reasoner.verifier.v4b import answer_rows, feature_cols, picks
+
+    df = _toy_frame()
+    a = answer_rows(df)
+    assert a.groupby("uid").size().to_dict() == {"q0": 3, "q1": 2, "q2": 2}  # 1.50 == 1.5, AB == BA
+    q1 = a[a["uid"] == "q1"].set_index("key")
+    assert q1["F_vote_share"].tolist() == [0.5, 0.5] and q1["label"].tolist() == [0.0, 1.0]
+    q0 = a[a["uid"] == "q0"].set_index("key")
+    assert q0.loc["A", "F_vote_rank"] == 0.0 and q0.loc["A", "F_orig_share"] == 1.0
+    assert q0.loc["B", "F_gap_top"] == 0.25 and q0.loc["B", "F_corr_share"] == 0.5
+    assert answer_rows(df).equals(a)                              # deterministic
+    assert not a[feature_cols(a)].isna().any().any()
+    pk = picks(a, a["label"].to_numpy(float))                     # perfect scores -> oracle
+    assert pk["label"].tolist() == [1.0, 1.0, 1.0]
+    tie = picks(a, np.zeros(len(a)))                              # ties -> earliest answer
+    assert tie.loc["q0", "label"] == 0.0 and tie.loc["q1", "label"] == 0.0

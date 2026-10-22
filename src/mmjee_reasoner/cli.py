@@ -11,6 +11,7 @@ Stages, in pipeline order (see README for the full workflow):
     correct --exp E  Solver/Critic/Corrector loop (pot_corr_same, pot_corr_cross, full)
     train-verifier   train and select the learned verifier on 2019-2024 samples
     train-neural-verifier  v4: fine-tuned cross-encoder verifier, leave-one-year-out
+    train-verifier-v4b     v4b: answer-level verifier, chosen by its worst LOYO year
     evaluate         SOP Table I + analyses on the 2025 held-out set
     report           Markdown + LaTeX report and figures
     status           what has been generated so far
@@ -187,6 +188,12 @@ def cmd_train_verifier_v4(cfg, args):
     train_verifier_v4(cfg, neural_tag=args.neural_tag, with_extra=args.with_extra)
 
 
+def cmd_train_verifier_v4b(cfg, args):
+    from mmjee_reasoner.verifier.v4b import train_verifier_v4b
+
+    train_verifier_v4b(cfg)
+
+
 def cmd_evaluate(cfg, args):
     from mmjee_reasoner.pipeline.evaluate import run_evaluate_stage
 
@@ -219,7 +226,8 @@ COMMANDS = {
     "translate": cmd_translate, "build-kb": cmd_build_kb, "build-cards": cmd_build_cards,
     "train-verifier": cmd_train_verifier, "train-verifier-v3": cmd_train_verifier_v3,
     "train-neural-verifier": cmd_train_neural_verifier,
-    "train-verifier-v4": cmd_train_verifier_v4, "evaluate": cmd_evaluate, "report": cmd_report,
+    "train-verifier-v4": cmd_train_verifier_v4, "train-verifier-v4b": cmd_train_verifier_v4b,
+    "evaluate": cmd_evaluate, "report": cmd_report,
     "status": cmd_status,
 }
 
@@ -268,6 +276,7 @@ def build_parser() -> argparse.ArgumentParser:
     sp = add("train-verifier-v4", help="v4: selector variants + LOYO gates (CPU)")
     sp.add_argument("--neural-tag", default="base", help="neural verifier run to stack")
     sp.add_argument("--with-extra", action="store_true", help="include the Phase-4 pools")
+    add("train-verifier-v4b", help="v4b: answer-level verifier, worst-year LOYO gate (CPU)")
     for name in ("build-kb", "train-verifier", "train-verifier-v3", "evaluate", "report",
                  "status"):
         add(name)
