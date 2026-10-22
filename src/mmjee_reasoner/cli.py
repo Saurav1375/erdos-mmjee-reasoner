@@ -128,7 +128,8 @@ def cmd_tag(cfg, args):
 def cmd_transcribe(cfg, args):
     from mmjee_reasoner.rag.tagger import run_transcribe_stage
 
-    run_transcribe_stage(cfg, _questions_for(cfg, args), _engine(cfg, "solver", args.mock))
+    run_transcribe_stage(cfg, _questions_for(cfg, args), _engine(cfg, "solver", args.mock),
+                         view=args.view)
 
 
 def cmd_translate(cfg, args):
@@ -252,6 +253,9 @@ def build_parser() -> argparse.ArgumentParser:
         sp.add_argument("--split", default="all", choices=["all", "train", "test"])
         sp.add_argument("--years", type=int, nargs="+", default=None, help="v3: these years")
         sp.add_argument("--dataset", default=None, help="v3: external dataset (jeebench)")
+        if name == "transcribe":
+            sp.add_argument("--view", default="plain", choices=["plain", "diagram"],
+                            help="v4b: diagram = the diagram-first English reading")
     add("probe-completion", help="v3 memorisation probe").add_argument(
         "--model", default="solver", help="model role (solver | repro)")
     sp = add("train-neural-verifier", help="v4: fine-tuned cross-encoder verifier (LOYO)")

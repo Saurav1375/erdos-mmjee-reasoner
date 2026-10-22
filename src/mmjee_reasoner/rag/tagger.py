@@ -20,6 +20,7 @@ from mmjee_reasoner.llm import Engine, GenRequest, user_message
 from mmjee_reasoner.pipeline.common import read_jsonl, relative_image, write_jsonl
 from mmjee_reasoner.prompts.templates import (
     TAGGER_PROMPT,
+    TRANSCRIBE_DIAGRAM_PROMPT,
     TRANSCRIBE_PROMPT,
     TRANSLATE_PROMPT,
     with_question_text,
@@ -87,11 +88,21 @@ def run_tag_stage(cfg: dict, questions: pd.DataFrame, engine: Engine) -> list[di
     return recs
 
 
-def run_transcribe_stage(cfg: dict, questions: pd.DataFrame, engine: Engine) -> list[dict]:
-    recs = _run(cfg, questions, engine, TRANSCRIBE_PROMPT, cfg["rag"]["transcribe_sampling"],
-                "transcribe")
-    _merge_write(transcripts_path(cfg), recs)
-    log.info("transcribed %d questions", len(recs))
+def transcripts_diagram_path(cfg: dict) -> Path:
+    return artifacts_dir(cfg, "rag", "transcripts_diagram.jsonl")
+
+
+def run_transcribe_stage(cfg: dict, questions: pd.DataFrame, engine: Engine,
+                         view: str = "plain") -> list[dict]:
+    """``view: diagram`` (v4b) writes the diagram-first English reading to its own file."""
+    if view == "diagram":
+        prompt, kind, path = TRANSCRIBE_DIAGRAM_PROMPT, "transcribe_diagram", \
+            transcripts_diagram_path(cfg)
+    else:
+        prompt, kind, path = TRANSCRIBE_PROMPT, "transcribe", transcripts_path(cfg)
+    recs = _run(cfg, questions, engine, prompt, cfg["rag"]["transcribe_sampling"], kind)
+    _merge_write(path, recs)
+    log.info("transcribed %d questions (%s)", len(recs), view)
     return recs
 
 
@@ -124,6 +135,12 @@ def load_english_transcripts(cfg: dict) -> dict[str, str]:
     lang = load_questions(cfg).set_index("uid")["language"]
     return {u: (translated.get(u) if lang.get(u) == "Hindi" else t) for u, t in out.items()
             if lang.get(u) != "Hindi" or u in translated}
+
+
+def load_diagram_transcripts(cfg: dict) -> dict[str, str]:
+    """v4b: uid -> diagram-first English reading (already English for both languages)."""
+    p = transcripts_diagram_path(cfg)
+    return {r["uid"]: r["text"] for r in read_jsonl(p)} if p.exists() else {}
 
 
 def load_tags(cfg: dict) -> dict[str, dict]:

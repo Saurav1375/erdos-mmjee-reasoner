@@ -192,6 +192,19 @@ TRANSCRIBE_PROMPT = (
     "one line \"[Figure: <short description>]\". Output only the transcription."
 )
 
+# v4b (V4B_PREREG.md, track B): a second, structured reading of the question in English, with an
+# itemised figure description instead of TRANSCRIBE_PROMPT's one-line figure note.
+TRANSCRIBE_DIAGRAM_PROMPT = (
+    "Read this JEE Advanced exam question (it may be written in English or Hindi) and write it "
+    "out in English. Do not solve it. Use exactly two parts:\n"
+    "QUESTION: the full question text and all answer options, with mathematics in LaTeX.\n"
+    "FIGURE: if there is a figure, describe it as a list with one item per line: every label and "
+    "symbol, every given value with its unit, every arrow and its direction, how the parts are "
+    "connected or placed relative to each other, and any axes, coordinates, curves or angles. "
+    "Write \"FIGURE: none\" if there is no figure.\n"
+    "Output only these two parts."
+)
+
 TRANSLATE_PROMPT = (
     "Translate this JEE Advanced exam question from Hindi to English. Keep every number, unit, "
     "LaTeX expression, option label and figure note unchanged. Output only the translation."
