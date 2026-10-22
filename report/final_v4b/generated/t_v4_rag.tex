@@ -1,0 +1,18 @@
+\begin{table}[!t]
+\centering
+\scriptsize
+\caption{RAG in Phase~4, paired differences (points, 95\% cluster-bootstrap CI). Top: 2024 dev year with matched seeds, 204 questions, RAG fires on 31. Bottom: post-hoc 2026 PoT with the extended KB ($^\dagger$right column: questions whose retrieval changed). LOYO coverage at proxy precision 0.70: kb\_v4 13.5\% vs.\ kb\_v3 15.0\%.}
+\label{tab:v4rag}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lrr}
+\toprule
+Comparison & All & RAG fires \\
+\midrule
+Solutions $-$ no RAG & $-$0.2 [$-$1.0, +0.4] & $-$1.6 [$-$6.2, +2.5] \\
+Cards $-$ no RAG & +0.3 [$-$0.2, +0.9] & +2.0 [$-$1.6, +6.2] \\
+\textbf{Cards $-$ solutions} & +0.6 [$-$0.1, +1.3] & +3.6 [$-$0.8, +8.5] \\
+\midrule
+kb\_v4 $-$ kb\_v3, 2026$^\dagger$ & +0.0 [$-$0.4, +0.4] & +0.0 [$-$6.2, +7.3] \\
+\bottomrule
+\end{tabular}
+\end{table}

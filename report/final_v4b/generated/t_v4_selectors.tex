@@ -1,0 +1,20 @@
+\begin{table}[!t]
+\centering
+\scriptsize
+\caption{Phase~4 selectors, LOYO selection accuracy (\%) on 2019--2024 (no test data). \emph{v3 pools}: the 16-answer training pools of verifier v3; \emph{+W2}: retrained with the new v3-style pools (S5), evaluated on the v3 pools and on the new pools. Each run uses its best of max-prob / weighted / log-odds vote on the v3 pools (Method: base run). Gate (fixed in advance): beat the v3 ranker on every pool kind.}
+\label{tab:v4sel}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lrrrlr}
+\toprule
+Selector & v3 pools & +W2: v3 & +W2: new & Method & Gate \\
+\midrule
+v3 ranker (refit) & 62.0 & 61.2 & 59.5 & max-prob & ref. \\
+S2 no length & 59.1 & 61.6 & 60.1 & log-odds & fail \\
+S3 neural & 57.0 & 58.7 & 56.8 & weighted & fail \\
+S4 stacked & 60.3 & 61.2 & 58.8 & max-prob & fail \\
+\midrule
+Majority vote & 53.7 & 53.7 & 55.8 &  &  \\
+Oracle & 78.5 & 78.5 & 71.6 &  &  \\
+\bottomrule
+\end{tabular}
+\end{table}

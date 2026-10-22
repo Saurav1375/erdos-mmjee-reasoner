@@ -1,0 +1,20 @@
+\begin{table}[!t]
+\centering
+\scriptsize
+\caption{Paired comparisons (cluster bootstrap; McNemar counts questions only $a$ / only $b$ gets right; it is meaningful for single-answer rows only, as Pass@1 rows are rounded per question). $^\dagger$post-hoc.}
+\label{tab:cmp}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lrrrr}
+\toprule
+Comparison ($a$ vs.\ $b$) & $\Delta$ [95\% CI] & P($\Delta{\le}0$) & $a$/$b$ & $p$ \\
+\midrule
+2026 v3 fw vs.\ v2 fw & +3.4 [$-$1.5, +8.8] & 0.113 & 16/9 & 0.230 \\
+2026 v3 PoT vs.\ v2 PoT & +6.8 [+3.6, +10.0] & 0.000 & 27/3 & $<$0.001 \\
+2026 CoT adaptive budget vs.\ CoT & +3.0 [+1.7, +4.5] & 0.000 & 6/3 & 0.508 \\
+2026 gated vs.\ ungated correction (v3) & +0.6 [$-$0.4, +1.5] & 0.122 & 4/1 & 0.375 \\
+2026 verifier v3 pick vs.\ v3 PoT mean & +9.0 [+5.8, +12.4] & 0.000 & 17/0 & $<$0.001 \\
+2025$^\dagger$ v3 fw vs.\ v2 fw & +6.8 [+1.1, +12.1] & 0.012 & 21/8 & 0.024 \\
+2025$^\dagger$ v3 PoT vs.\ v2 PoT & +8.1 [+4.8, +11.6] & 0.000 & 30/7 & $<$0.001 \\
+\bottomrule
+\end{tabular}
+\end{table}

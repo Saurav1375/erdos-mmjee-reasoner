@@ -1,0 +1,22 @@
+\begin{table}[!t]
+\centering
+\scriptsize
+\caption{Diagram-first transcript on the 2024 dev year (\%; differences in points, 95\% cluster-bootstrap CI). Existing: PoT with the v3 transcript, samples 0--7; mixed: samples 0--3 of it plus samples 4--7 solved from the diagram-first transcript with the same seeds; top cells: existing / mixed. Bottom: samples 4--7 only, cells: current / diagram-first reading. Gate (fixed in advance): majority@8 difference $>0$ with lower bound $>0$.}
+\label{tab:v4bdiag}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lrrr}
+\toprule
+ & All (204) & Diagram (59) & Text (145) \\
+\midrule
+Majority@8 & 65.7 / 63.7 & 42.4 / 39.0 & 75.2 / 73.8 \\
+\textbf{Diff.\ (gate)} & $-$2.0 [$-$5.4, +1.0] & $-$3.4 [$-$8.5, +0.0] & $-$1.4 [$-$6.1, +2.8] \\
+Oracle@8 & 79.9 / 78.4 & 61.0 / 59.3 & 87.6 / 86.2 \\
+Distinct answers & 3.05 / 3.18 & 4.05 / 4.24 & 2.64 / 2.75 \\
+\midrule
+Per sample & 55.0 / 51.6 & 29.7 / 24.6 & 65.3 / 62.6 \\
+Diff. & $-$3.4 [$-$6.9, $-$0.1] & $-$5.1 [$-$10.4, $-$0.4] & $-$2.8 [$-$7.0, +1.4] \\
+Truncated & 37.3 / 42.6 & 61.0 / 67.8 & 27.6 / 32.4 \\
+Tokens (k) & 3.5 / 3.9 & 5.3 / 5.7 & 2.8 / 3.1 \\
+\bottomrule
+\end{tabular}
+\end{table}

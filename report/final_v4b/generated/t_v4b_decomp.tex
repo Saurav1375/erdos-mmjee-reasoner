@@ -1,0 +1,23 @@
+\begin{table}[!t]
+\centering
+\scriptsize
+\caption{Where the v3 gain over matched self-consistency comes from (\%; differences in points, 95\% cluster-bootstrap CI). Pool gain: majority vote on the v3 pool $-$ matched SC; selection gain: v3 pick $-$ majority on the same pool. Frozen v3 verifier and existing pools only. Mixed pools hold both right and wrong answers (number of pools in brackets).}
+\label{tab:v4bdecomp}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lrr}
+\toprule
+ & 2025 & 2026 \\
+\midrule
+Matched self-consistency & 58.4 & 52.5 \\
+Majority vote on the v3 pool & 65.8 & 59.3 \\
+v3 pick (verifier v3) & 72.1 & 58.8 \\
+\midrule
+Pool gain & +7.4 [+0.0, +15.3] & +6.9 [+2.0, +11.8] \\
+\textbf{Selection gain} & +6.3 [+1.6, +11.1] & $-$0.5 [$-$2.9, +2.5] \\
+Total gain & +13.7 [+5.8, +21.6] & +6.4 [+1.5, +11.3] \\
+\midrule
+Candidate AUC, all & 0.872 & 0.902 \\
+Candidate AUC, mixed pools & 0.796 (129) & 0.748 (121) \\
+\bottomrule
+\end{tabular}
+\end{table}

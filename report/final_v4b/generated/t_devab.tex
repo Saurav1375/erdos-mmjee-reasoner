@@ -1,0 +1,18 @@
+\begin{table}[!t]
+\centering
+\footnotesize
+\caption{Dev A/B tests on 2024 (204 questions) that decided the freeze. Rule fixed in advance: include iff $\Delta>0$ and the CI lower bound $>0$.}
+\label{tab:devab}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrr}
+\toprule
+Arm & Base & Arm & $\Delta$ [95\% CI] \\
+\midrule
+Transcript block (PoT) & 50.2 & 55.1 & +4.9 [+1.8, +8.2] \\
+Adaptive budget (PoT) & 50.2 & 52.6 & +2.3 [+1.0, +3.7] \\
+Adaptive budget (CoT) & 48.5 & 54.9 & +6.4 [+2.5, +10.8] \\
+RAG, v2 recipe & 50.2 & 50.4 & +0.2 [$-$2.3, +2.9] \\
+RAG v3 (hybrid + JEEBench) & 50.2 & 50.6 & +0.3 [$-$2.1, +3.0] \\
+\bottomrule
+\end{tabular}
+\end{table}
