@@ -26,6 +26,8 @@ McNemar p = 0.011). v3 vs v2: +3.4 [−1.5, +8.8], not significant. Details: [§
 
 **Phase 4 (final phase, post-hoc):** we tested a fine-tuned neural verifier (ModernBERT), length-free and stacked rankers, training pools matched to the v3 solutions, method-card exemplars and an open-licensed KB (OlympiadBench), each against a rule fixed in advance ([`V4_PREREG.md`](V4_PREREG.md)). None passed its gate, so the v3 result stands. Details: [§8.4](#84-phase-4-final-phase-post-hoc).
 
+**Phase 4b (final diagnostics, post-hoc):** three checks pre-registered in [`V4B_PREREG.md`](V4B_PREREG.md). The gain over matched SC comes from the candidate pool and is stable across years (+7.4 on 2025, +6.9 on 2026), while the verifier's selection gain does not transfer (+6.3 → −0.5). An answer-level verifier and a diagram-first transcript both failed their gates. Details: [§8.5](#85-phase-4b-final-diagnostics-post-hoc).
+
 **Headline, Phase 2 (2025 held-out, 190 questions; post-hoc since Phase 3):**
 
 | Setup | Accuracy |
@@ -62,6 +64,7 @@ Full framework vs. matched self-consistency: **+12.1 points** [+4.2, +20.5], McN
 | **2. Baselines, pilot, full run (v2)** | [`phase-2`](../../tree/phase-2) | Framework implementation; Qwen2.5-VL-7B reproduction and Qwen3-VL-8B baselines; 40-question pilot; v1→v2 fixes; full 2025 run; reports | [`docs/phases/PHASE2.md`](docs/phases/PHASE2.md) |
 | **3. v3 framework and clean 2026 test** | [`phase-3`](../../tree/phase-3) | Clean 2026 test (Hindi twins built from the official papers); frozen v3 (adaptive budget, transcript block, RAG v3, verifier v3 with correction gate); v2 re-run on 2026; Qwen2.5 bridge to the paper; memorisation probes; final report | [`docs/phases/PHASE3.md`](docs/phases/PHASE3.md) |
 | **4. Final phase (post-hoc)** | [`phase-4`](../../tree/phase-4) | Selector diagnosis; neural ModernBERT verifier, length-free and stacked rankers, v3-style training pools (two GPUs); matched RAG seeds, method cards, open-licensed KB; one-shot post-hoc evaluation; final report v4 | [`docs/phases/PHASE4.md`](docs/phases/PHASE4.md) |
+| **4b. Final diagnostics (post-hoc)** | [`phase-4b`](../../tree/phase-4b) | Gain decomposition (pool vs selection), within-pool AUC; answer-level verifier; diagram-first transcript (2024 dev); final report v4b | [`docs/phases/PHASE4B.md`](docs/phases/PHASE4B.md) |
 
 `main` always points to the latest published phase, which is currently **phase 3**. Each
 phase document lists its goals, the issues encountered, and the future enhancements.
@@ -328,8 +331,20 @@ Every choice used 2019–2024 only, under gates fixed in [`V4_PREREG.md`](V4_PRE
 | Method cards vs solution exemplars (2024 dev, fired) | +3.6 [−0.8, +8.5]: **not adopted** (lower bound ≤ 0) |
 | Open-licensed KB (+207 OlympiadBench) | LOYO coverage 13.5% vs 15.0%; 2026 PoT 49.8 vs 49.8 |
 
+### 8.5 Phase 4b (final diagnostics, post-hoc)
+
+Gates fixed in [`V4B_PREREG.md`](V4B_PREREG.md) before any Phase-4b run, on 2019–2024 only; every track is reported whatever its outcome. Outputs are separate from Phase 4 (`artifacts_v4b/`, `configs/v4b.yaml`). Raw outputs are in [`results/v4b/`](results/v4b).
+
+| Experiment | Result |
+|---|---|
+| Gain decomposition (frozen v3 verifier, existing pools) | Pool gain (majority on the v3 pool − matched SC) +7.4 / +6.9 on 2025 / 2026; selection gain (v3 pick − majority) +6.3 [+1.6, +11.1] / −0.5 [−2.9, +2.5] |
+| Candidate AUC, all vs inside mixed pools | 0.87 → 0.90 overall, but 0.80 → 0.75 inside pools with right and wrong answers |
+| Answer-level verifier (one row per distinct answer, chosen by worst LOYO year) | 57.9 vs 62.0 for the v3 ranker (majority 53.7): **gate failed** |
+| Diagram-first transcript (2024 dev, half of each pool, same seeds) | Majority@8 −2.0 [−5.4, +1.0]; per sample −3.4, diagram questions 29.7 → 24.6; truncation 37% → 43%: **gate failed**, 2026 not run |
+
 Reports:
-- **Final report (v4 = v3 + Phase 4): [`report/final_v4/final_report_v4.pdf`](report/final_v4/final_report_v4.pdf)**;
+- **Final report (v4b = v4 + Phase 4b): [`report/final_v4b/final_report_v4b.pdf`](report/final_v4b/final_report_v4b.pdf)**;
+- Final report (v4 = v3 + Phase 4): [`report/final_v4/final_report_v4.pdf`](report/final_v4/final_report_v4.pdf);
 - Final report (v3): [`report/final_v3/final_report_v3.pdf`](report/final_v3/final_report_v3.pdf) ([Markdown](report/FINAL_REPORT_v3.md));
 - Phase-2 progress report: [`report/phase2/phase2_report.pdf`](report/phase2/phase2_report.pdf) ([Markdown](report/PHASE2_REPORT.md));
 - v2 final-report draft (2025 only): [`report/final/final_report.pdf`](report/final/final_report.pdf);
@@ -347,6 +362,7 @@ erdos-mmjee-reasoner/
 │   ├── base.yaml                 #   paths, split, sampling, module settings, Table I
 │   ├── v3*.yaml                  #   v3 overrides: v3_final.yaml = frozen v3, v3_test2026.yaml, eval tables
 │   ├── v4*.yaml                  #   Phase 4: artifacts_v4, neural verifier, matched seeds, cards, kb_v4
+│   ├── v4b.yaml                  #   Phase 4b: artifacts_v4b
 │   ├── models.yaml               #   model roles + vLLM settings
 │   └── experiments/*.yaml        #   one file per generation run
 ├── src/mmjee_reasoner/
@@ -369,15 +385,17 @@ erdos-mmjee-reasoner/
 │   ├── build_hindi2026.py        # Hindi 2026 twins from the official papers
 │   ├── v3_analysis.py  v3_dev_ab.py  v3_rag_sweep.py  demo.py
 │   ├── v4_analysis.py  v4_rag_sweep.py  v4_eval.py  final_report_v4.py   # Phase 4
+│   ├── v4b_analysis.py  final_report_v4b.py                              # Phase 4b
 │   └── lab/                      # lab GPU setup, launch, supervise, sync
-├── tests/                        # 110 pytest tests (CPU, fake VLM)
-├── results/phase2/  results/v3/  results/v4/   # published result summaries (JSON/CSV)
-├── report/                       # Phase-2 report, v2 draft, v3 final report (final_v3/), v4 (final_v4/)
+├── tests/                        # 115 pytest tests (CPU, fake VLM)
+├── results/phase2/  results/v3/  results/v4/  results/v4b/   # published result summaries (JSON/CSV)
+├── report/                       # Phase-2 report, v2 draft, v3 final report (final_v3/), v4 (final_v4/), v4b (final_v4b/)
 ├── V3_FREEZE.md                  # the pre-registered v3 freeze
 ├── V4_PREREG.md                  # the Phase-4 pre-registration (gates)
+├── V4B_PREREG.md                 # the Phase-4b pre-registration (gates)
 ├── docs/
 │   ├── proposal/SOP_12340350_12341940.pdf
-│   ├── phases/PHASE1.md  PHASE2.md  PHASE3.md  PHASE4.md
+│   ├── phases/PHASE1.md  PHASE2.md  PHASE3.md  PHASE4.md  PHASE4B.md
 │   ├── SPECIFICATIONS.md
 │   └── REFERENCES.md
 ├── third_party/mmJEE-Eval/       # base-paper repo (git submodule @ 815ac89)

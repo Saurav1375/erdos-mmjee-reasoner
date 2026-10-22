@@ -38,3 +38,10 @@ models), so they are not in git. They can be regenerated from the cache-backed p
 | `v4_results.json` | One-shot evaluation (`scripts/v4_eval.py`): gates, S0/majority on 2025/2026, the 2024 dev RAG A/B (matched seeds, method cards), kb_v4 on 2026 |
 | `rag_sweep_kb4.json` | LOYO retrieval coverage of kb_v4 vs kb_v3 at proxy precision 0.70 |
 | `kb_v4_meta.json` | kb_v4 build: entries by source, de-duplication, tuned τ |
+
+## `v4b/`: Phase 4b (final diagnostics, post-hoc)
+
+| File | Contents |
+|---|---|
+| `v4b_analysis.json` | `scripts/v4b_analysis.py`: gain decomposition (pool vs selection gain, 2025/2026, paired cluster bootstrap), candidate AUC overall and inside mixed pools, 2026 error budget, and the 2024 dev diagram-first transcript test (gate, oracle@8, per-sample accuracy, tokens, truncation, by diagram/text) |
+| `answer_level_verifier.json` | `train-verifier-v4b`: LOYO pick accuracy of the 5 answer-level models on both pool kinds, by year; the refit v3 ranker; majority; chosen model and gate decision |
