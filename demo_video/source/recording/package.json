@@ -1,0 +1,6 @@
+{
+  "name": "mmjee-demo-recording",
+  "private": true,
+  "type": "module",
+  "dependencies": { "playwright": "^1.49.0" }
+}

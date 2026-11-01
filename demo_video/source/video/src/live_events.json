@@ -1,0 +1,450 @@
+[
+ {
+  "t": 9.159,
+  "type": "stage",
+  "i": 0,
+  "status": "start"
+ },
+ {
+  "t": 9.161,
+  "type": "calls",
+  "role": "solver",
+  "n": 1,
+  "kinds": [
+   "transcribe"
+  ]
+ },
+ {
+  "t": 15.577,
+  "type": "result",
+  "role": "solver",
+  "rid": null
+ },
+ {
+  "t": 15.578,
+  "type": "stage",
+  "i": 0,
+  "status": "done"
+ },
+ {
+  "t": 15.578,
+  "type": "stage",
+  "i": 1,
+  "status": "start"
+ },
+ {
+  "t": 15.578,
+  "type": "calls",
+  "role": "solver",
+  "n": 1,
+  "kinds": [
+   "tag"
+  ]
+ },
+ {
+  "t": 16.212,
+  "type": "result",
+  "role": "solver",
+  "rid": null
+ },
+ {
+  "t": 16.432,
+  "type": "stage",
+  "i": 1,
+  "status": "done",
+  "retrieval": [
+   [
+    "2022_P1_Physics_Matching_q3",
+    0.9113
+   ],
+   [
+    "2021_P2_Physics_MCQ-Single_q4",
+    0.8903
+   ]
+  ]
+ },
+ {
+  "t": 16.449,
+  "type": "stage",
+  "i": 2,
+  "status": "start",
+  "n": 8
+ },
+ {
+  "t": 16.45,
+  "type": "calls",
+  "role": "solver",
+  "n": 8,
+  "kinds": [
+   "solve"
+  ]
+ },
+ {
+  "t": 16.45,
+  "type": "stream_start",
+  "role": "solver",
+  "rid": "v3_pot|2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s0"
+ },
+ {
+  "t": 60.047,
+  "type": "result",
+  "role": "solver",
+  "rid": "v3_pot|2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s0"
+ },
+ {
+  "t": 60.242,
+  "type": "result",
+  "role": "solver",
+  "rid": "v3_pot|2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s1"
+ },
+ {
+  "t": 60.243,
+  "type": "result",
+  "role": "solver",
+  "rid": "v3_pot|2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s2"
+ },
+ {
+  "t": 60.243,
+  "type": "result",
+  "role": "solver",
+  "rid": "v3_pot|2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s3"
+ },
+ {
+  "t": 60.243,
+  "type": "result",
+  "role": "solver",
+  "rid": "v3_pot|2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s4"
+ },
+ {
+  "t": 60.244,
+  "type": "result",
+  "role": "solver",
+  "rid": "v3_pot|2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s5"
+ },
+ {
+  "t": 60.244,
+  "type": "result",
+  "role": "solver",
+  "rid": "v3_pot|2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s6"
+ },
+ {
+  "t": 60.244,
+  "type": "result",
+  "role": "solver",
+  "rid": "v3_pot|2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s7"
+ },
+ {
+  "t": 60.244,
+  "type": "stage",
+  "i": 2,
+  "status": "done"
+ },
+ {
+  "t": 60.245,
+  "type": "stage",
+  "i": 3,
+  "status": "start"
+ },
+ {
+  "t": 60.245,
+  "type": "calls",
+  "role": "critic",
+  "n": 8,
+  "kinds": [
+   "critic"
+  ]
+ },
+ {
+  "t": 60.245,
+  "type": "stream_start",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s0"
+ },
+ {
+  "t": 102.071,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s0"
+ },
+ {
+  "t": 102.076,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s1"
+ },
+ {
+  "t": 102.076,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s2"
+ },
+ {
+  "t": 102.076,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s3"
+ },
+ {
+  "t": 102.076,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s4"
+ },
+ {
+  "t": 102.076,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s5"
+ },
+ {
+  "t": 102.076,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s6"
+ },
+ {
+  "t": 102.077,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s7"
+ },
+ {
+  "t": 102.077,
+  "type": "calls",
+  "role": "critic",
+  "n": 3,
+  "kinds": [
+   "solve"
+  ]
+ },
+ {
+  "t": 102.077,
+  "type": "stream_start",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s0"
+ },
+ {
+  "t": 103.53,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s0"
+ },
+ {
+  "t": 103.535,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s4"
+ },
+ {
+  "t": 103.535,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s5"
+ },
+ {
+  "t": 103.535,
+  "type": "critic",
+  "round": 0,
+  "chains": [
+   {
+    "s": 0,
+    "error": false,
+    "step": null
+   },
+   {
+    "s": 1,
+    "error": false,
+    "step": null
+   },
+   {
+    "s": 2,
+    "error": true,
+    "step": 3
+   },
+   {
+    "s": 3,
+    "error": false,
+    "step": null
+   },
+   {
+    "s": 4,
+    "error": false,
+    "step": null
+   },
+   {
+    "s": 5,
+    "error": false,
+    "step": null
+   },
+   {
+    "s": 6,
+    "error": false,
+    "step": null
+   },
+   {
+    "s": 7,
+    "error": false,
+    "step": null
+   }
+  ]
+ },
+ {
+  "t": 103.535,
+  "type": "calls",
+  "role": "solver",
+  "n": 1,
+  "kinds": [
+   "solve"
+  ]
+ },
+ {
+  "t": 116.184,
+  "type": "result",
+  "role": "solver",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s2|corr0"
+ },
+ {
+  "t": 116.184,
+  "type": "corrector",
+  "round": 0,
+  "chains": [
+   {
+    "s": 2,
+    "answer": "AC"
+   }
+  ]
+ },
+ {
+  "t": 116.185,
+  "type": "calls",
+  "role": "critic",
+  "n": 1,
+  "kinds": [
+   "critic"
+  ]
+ },
+ {
+  "t": 129.924,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s2"
+ },
+ {
+  "t": 129.924,
+  "type": "critic",
+  "round": 1,
+  "chains": [
+   {
+    "s": 2,
+    "error": true,
+    "step": 4
+   }
+  ]
+ },
+ {
+  "t": 129.933,
+  "type": "calls",
+  "role": "solver",
+  "n": 1,
+  "kinds": [
+   "solve"
+  ]
+ },
+ {
+  "t": 136.091,
+  "type": "result",
+  "role": "solver",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s2|corr1"
+ },
+ {
+  "t": 136.091,
+  "type": "corrector",
+  "round": 1,
+  "chains": [
+   {
+    "s": 2,
+    "answer": "ABC"
+   }
+  ]
+ },
+ {
+  "t": 136.092,
+  "type": "calls",
+  "role": "critic",
+  "n": 1,
+  "kinds": [
+   "critic"
+  ]
+ },
+ {
+  "t": 165.391,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s2"
+ },
+ {
+  "t": 165.391,
+  "type": "calls",
+  "role": "critic",
+  "n": 1,
+  "kinds": [
+   "solve"
+  ]
+ },
+ {
+  "t": 166.713,
+  "type": "result",
+  "role": "critic",
+  "rid": "2026_P1_English_Physics_MCQ-Multiple_q3_MCQ-Multiple_page16|s2"
+ },
+ {
+  "t": 166.713,
+  "type": "critic",
+  "round": 2,
+  "chains": [
+   {
+    "s": 2,
+    "error": false,
+    "step": null
+   }
+  ]
+ },
+ {
+  "t": 166.713,
+  "type": "corrector",
+  "round": 2,
+  "chains": []
+ },
+ {
+  "t": 166.713,
+  "type": "stage",
+  "i": 3,
+  "status": "done"
+ },
+ {
+  "t": 166.713,
+  "type": "stage",
+  "i": 4,
+  "status": "start"
+ },
+ {
+  "t": 170.137,
+  "type": "stage",
+  "i": 4,
+  "status": "done"
+ },
+ {
+  "t": 170.137,
+  "type": "stage",
+  "i": 5,
+  "status": "done"
+ },
+ {
+  "t": 170.139,
+  "type": "done",
+  "final": {
+   "pred": "ABC",
+   "ok": true
+  }
+ }
+]
