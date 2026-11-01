@@ -13,6 +13,11 @@
 | Arpit Kumar | 12340350 | arpitk@iitbhilai.ac.in | [@arpitkumar0007](https://github.com/arpitkumar0007) |
 | Saurav Gupta | 12341940 | sauravg@iitbhilai.ac.in | [@Saurav1375](https://github.com/Saurav1375) |
 
+**Final submission:** paper [`report/final_paper/final_paper.pdf`](report/final_paper/final_paper.pdf) ·
+slides [`report/final_presentation/`](report/final_presentation) · demo website
+[`demo_website/`](demo_website) (replay, plus a live mode on the lab GPUs) · demo videos
+[`demo_video/`](demo_video). See [§8.6](#86-final-submission).
+
 **Headline, Phase 3 (clean JEE Advanced 2026 test, 204 questions = 102 EN + 102 HI, Qwen3-VL-8B AWQ):**
 
 | Setup | v2 framework (re-run) | v3 framework |
@@ -65,8 +70,9 @@ Full framework vs. matched self-consistency: **+12.1 points** [+4.2, +20.5], McN
 | **3. v3 framework and clean 2026 test** | [`phase-3`](../../tree/phase-3) | Clean 2026 test (Hindi twins built from the official papers); frozen v3 (adaptive budget, transcript block, RAG v3, verifier v3 with correction gate); v2 re-run on 2026; Qwen2.5 bridge to the paper; memorisation probes; final report | [`docs/phases/PHASE3.md`](docs/phases/PHASE3.md) |
 | **4. Final phase (post-hoc)** | [`phase-4`](../../tree/phase-4) | Selector diagnosis; neural ModernBERT verifier, length-free and stacked rankers, v3-style training pools (two GPUs); matched RAG seeds, method cards, open-licensed KB; one-shot post-hoc evaluation; final report v4 | [`docs/phases/PHASE4.md`](docs/phases/PHASE4.md) |
 | **4b. Final diagnostics (post-hoc)** | [`phase-4b`](../../tree/phase-4b) | Gain decomposition (pool vs selection), within-pool AUC; answer-level verifier; diagram-first transcript (2024 dev); final report v4b | [`docs/phases/PHASE4B.md`](docs/phases/PHASE4B.md) |
+| **Final submission** | [`final`](../../tree/final) | Final paper (IEEE, 12 pages) and slides; demo website with replay of all 204 test questions and a live mode; demo videos | [§8.6](#86-final-submission) |
 
-`main` always points to the latest published phase, which is currently **phase 3**. Each
+`main` always points to the latest published phase, which is currently the **final submission** (`final`). Each
 phase document lists its goals, the issues encountered, and the future enhancements.
 
 ## 2. Problem statement
@@ -350,6 +356,15 @@ Reports:
 - v2 final-report draft (2025 only): [`report/final/final_report.pdf`](report/final/final_report.pdf);
 - auto-generated summary: [`report/REPORT.md`](report/REPORT.md).
 
+### 8.6 Final submission
+
+No new experiments; every number comes from the frozen runs above.
+
+- **Paper:** [`report/final_paper/final_paper.pdf`](report/final_paper/final_paper.pdf) (IEEE format, with the prompts in an appendix). Build: `python scripts/final_paper_figures.py && python scripts/final_paper.py && cd report/final_paper && tectonic final_paper.tex`.
+- **Slides:** [`report/final_presentation/Erdos_Final_Submission_Presentation.pptx`](report/final_presentation/Erdos_Final_Submission_Presentation.pptx) ([PDF](report/final_presentation/Erdos_Final_Submission_Presentation.pdf)), built by `scripts/final_deck.py` on the Phase-2 deck in `report/phase2/`.
+- **Demo website:** [`demo_website/`](demo_website). Open `index.html` to replay the saved run of any of the 204 questions in 2026 (transcript, retrieval, code runs, critic rounds, verifier scores, result). With the lab GPUs, `bash demo_website/live/start.sh` runs the frozen framework live on any exam question or an uploaded one, with a stop button and reattach after a page reload. See [`demo_website/live/README.md`](demo_website/live/README.md).
+- **Demo videos:** [`demo_video/mmjee-demo.mp4`](demo_video/mmjee-demo.mp4) (replay walkthrough, 1:52) and [`demo_video/mmjee-live-demo.mp4`](demo_video/mmjee-live-demo.mp4) (a real live run, with the waits fast-forwarded, 2:06). Recording and edit sources are in [`demo_video/source/`](demo_video/source).
+
 ## 9. Directory structure
 
 ```
@@ -386,10 +401,15 @@ erdos-mmjee-reasoner/
 │   ├── v3_analysis.py  v3_dev_ab.py  v3_rag_sweep.py  demo.py
 │   ├── v4_analysis.py  v4_rag_sweep.py  v4_eval.py  final_report_v4.py   # Phase 4
 │   ├── v4b_analysis.py  final_report_v4b.py                              # Phase 4b
+│   ├── final_paper.py  final_paper_figures.py  final_deck.py             # final paper and slides
 │   └── lab/                      # lab GPU setup, launch, supervise, sync
 ├── tests/                        # 115 pytest tests (CPU, fake VLM)
 ├── results/phase2/  results/v3/  results/v4/  results/v4b/   # published result summaries (JSON/CSV)
 ├── report/                       # Phase-2 report, v2 draft, v3 final report (final_v3/), v4 (final_v4/), v4b (final_v4b/)
+│   ├── final_paper/              #   final paper (LaTeX, generated tables, figures, PDF)
+│   └── final_presentation/       #   final slides (PPTX + PDF)
+├── demo_website/                 # interactive replay of the 2026 runs; live/ = live mode on the lab GPUs
+├── demo_video/                   # demo videos (replay and live run) + their recording/edit source
 ├── V3_FREEZE.md                  # the pre-registered v3 freeze
 ├── V4_PREREG.md                  # the Phase-4 pre-registration (gates)
 ├── V4B_PREREG.md                 # the Phase-4b pre-registration (gates)
