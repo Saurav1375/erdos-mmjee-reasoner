@@ -1,0 +1,20 @@
+\begin{table}[!t]
+\centering
+\footnotesize
+\caption{Pilot study before the fixes (40 test questions, 20 EN/HI pairs; verifier and knowledge base from 150 training questions). Accuracy in \%.}
+\label{tab:pilot}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrc}
+\toprule
+Configuration & Acc. & 95\% CI \\
+\midrule
+Baseline (single-pass CoT) & 29.5 & 17.8--41.6 \\
+Self-consistency (matched) & 35.0 & 20.0--52.5 \\
++ Code sandbox (PoT) & 41.2 & 28.1--54.4 \\
++ Correction, same-model critic & 46.6 & 32.8--60.3 \\
++ Correction, cross-model critic & 43.1 & 29.7--56.2 \\
++ Learned verifier & 50.0 & 32.5--67.5 \\
+Full framework & 57.5 & 40.0--72.5 \\
+\bottomrule
+\end{tabular}
+\end{table}

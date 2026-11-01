@@ -1,0 +1,20 @@
+\begin{table}[!t]
+\centering
+\scriptsize
+\caption{Paired comparisons (cluster bootstrap; McNemar counts questions only $a$ / only $b$ gets right; it is meaningful for single-answer rows only, as Pass@1 rows are rounded per question). $^\dagger$post-hoc.}
+\label{tab:cmp}
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lrrrr}
+\toprule
+Comparison ($a$ vs.\ $b$) & $\Delta$ [95\% CI] & P($\Delta{\le}0$) & $a$/$b$ & $p$ \\
+\midrule
+2026 final vs.\ Phase-2 framework & +3.4 [$-$1.5, +8.8] & 0.113 & 16/9 & 0.230 \\
+2026 final vs.\ Phase-2 PoT & +6.8 [+3.6, +10.0] & 0.000 & 27/3 & $<$0.001 \\
+2026 CoT with continuation vs.\ CoT & +3.0 [+1.7, +4.5] & 0.000 & 6/3 & 0.508 \\
+2026 gated vs.\ ungated correction & +0.6 [$-$0.4, +1.5] & 0.122 & 4/1 & 0.375 \\
+2026 verifier pick vs.\ mean PoT answer & +9.0 [+5.8, +12.4] & 0.000 & 17/0 & $<$0.001 \\
+2025$^\dagger$ final vs.\ Phase-2 framework & +6.8 [+1.1, +12.1] & 0.012 & 21/8 & 0.024 \\
+2025$^\dagger$ final vs.\ Phase-2 PoT & +8.1 [+4.8, +11.6] & 0.000 & 30/7 & $<$0.001 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,20 @@
+\begin{table}[!t]
+\centering
+\footnotesize
+\caption{Phase-2 framework on JEE Advanced 2025 (190 questions; the Phase-2 test year). Rows add one module at a time from the code sandbox. Accuracy in \%, 95\% cluster-bootstrap CI; tokens are generated tokens per question.}
+\label{tab:p2}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrcr}
+\toprule
+Configuration & Acc. & Num. & 95\% CI & Tok./q \\
+\midrule
+Baseline (single-pass CoT) & 43.2 & 40.2 & 37.0--49.6 & 2.7k \\
+Self-consistency (matched, $n{=}20$) & 53.2 & 51.2 & 44.2--62.6 & 54.2k \\
++ Code sandbox (PoT) & 48.2 & 50.4 & 41.4--54.9 & 3.5k \\
++ Correction, same-model critic & 51.2 & 55.1 & 44.6--58.0 & 6.1k \\
++ Correction, cross-model critic & 51.3 & 53.0 & 44.5--58.1 & 6.4k \\
++ Learned verifier & 63.2 & 66.7 & 55.3--71.6 & 51.5k \\
+\textbf{+ Retrieval = full framework} & \textbf{65.3} & 69.0 & 57.4--73.7 & 54.1k \\
+\bottomrule
+\end{tabular}
+\end{table}

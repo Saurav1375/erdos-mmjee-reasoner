@@ -1,0 +1,16 @@
+\begin{table}[!t]
+\centering
+\footnotesize
+\caption{Correction gate: per-chain accuracy (\%) and flips, ungated $\to$ gated.}
+\label{tab:gate}
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{lrrrrrr}
+\toprule
+Set & Chains & Orig. & Corr. & Gated & W$\to$R & R$\to$W \\
+\midrule
+Train (LOYO, picks $\delta$) & 1936 & 44.4 & 47.6 & \textbf{48.2} & 95$\to$88 & 32$\to$14 \\
+2026 (clean) & 1632 & 49.8 & 52.0 & \textbf{52.6} & 68$\to$54 & 33$\to$9 \\
+2025 (post-hoc) & 1520 & 56.2 & 57.9 & \textbf{58.5} & 46$\to$41 & 21$\to$7 \\
+\bottomrule
+\end{tabular}
+\end{table}
