@@ -1,0 +1,7 @@
+live/cache.sqlite*
+live/exec_cache.sqlite*
+live/emb_cache/
+live/.run/
+live/uploads/
+live/runs/test/
+live/runs/upload_*

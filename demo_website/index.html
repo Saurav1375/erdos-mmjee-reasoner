@@ -1,0 +1,1614 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mmJEE Reasoner</title>
+<meta name="description" content="Replay of real runs of a frozen 8B vision-language model with a code sandbox, a cross-model critic, a learned verifier and retrieval, on JEE Advanced 2026.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<style>
+/* An examiner's marking desk. Warm answer-sheet paper, black ink, and one brand colour: the
+   marker's highlighter yellow. Yellow fills mark what the system chose; the same hue deepened to
+   amber carries text and lines. Green and red appear only as right and wrong.
+   Type: Archivo condensed for headlines and figures, Source Serif 4 for reading, Archivo at
+   normal width for labels and controls, IBM Plex Mono for code and answers. */
+:root {
+  --paper: #f4f1e6;
+  --sheet: #fffdf5;
+  --ink: #17150f;
+  --ink-2: #4a463a;
+  --ink-3: #7a7464;
+  --rule: #d8d1bd;
+  --rule-2: #ebe5d3;
+  --hi: #ffd20a;
+  --on-hi: #17150f;
+  --hi-edge: #17150f;
+  --mark: #ffe04a;
+  --on-mark: #17150f;
+  --mark-top: 52%;
+  --accent: #835800;
+  --accent-soft: #ffeb85;
+  --on-soft: #17150f;
+  --right: #17764a;
+  --right-soft: #dff0e3;
+  --wrong: #b3261e;
+  --wrong-soft: #f8e1dc;
+  --code-bg: #17150f;
+  --code-fg: #ece7d8;
+  --code-dim: #938c79;
+  --code-kw: #ffd20a;
+  --code-str: #b5dc9a;
+  --code-num: #f5b48a;
+  --code-out: #0d0c08;
+  --shadow: none;
+  --f-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-ui: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 56px; --s-8: 88px;
+  --r: 2px;
+  --wrap: 1240px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #12110c; --sheet: #1b1913; --ink: #f3efe2; --ink-2: #c2bba8; --ink-3: #8c8674;
+    --rule: #37332a; --rule-2: #25221b; --hi-edge: #ffd20a; --mark: #ffd20a; --mark-top: 6%;
+    --accent: #ffd20a; --accent-soft: #3a3210; --on-soft: #ffe46b;
+    --right: #63c890; --right-soft: #14281c; --wrong: #f28b7d; --wrong-soft: #351a18;
+    --code-bg: #0c0b07; --code-out: #070604;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #12110c; --sheet: #1b1913; --ink: #f3efe2; --ink-2: #c2bba8; --ink-3: #8c8674;
+  --rule: #37332a; --rule-2: #25221b; --hi-edge: #ffd20a; --mark: #ffd20a; --mark-top: 6%;
+  --accent: #ffd20a; --accent-soft: #3a3210; --on-soft: #ffe46b;
+  --right: #63c890; --right-soft: #14281c; --wrong: #f28b7d; --wrong-soft: #351a18;
+  --code-bg: #0c0b07; --code-out: #07060a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body {
+  background: var(--paper); color: var(--ink);
+  font: 16.5px/1.6 var(--f-body);
+  -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--sheet); }
+a { color: var(--accent); }
+input { accent-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 800; font-stretch: 72%; text-wrap: balance; margin: 0; letter-spacing: -.005em; }
+p { margin: 0; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.eyebrow { font: 600 11.5px/1.4 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--f-mono); }
+
+/* ------------------------------------------------------------- top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--sheet); border-bottom: 1.5px solid var(--ink); }
+.top .wrap { display: flex; align-items: center; gap: var(--s-5); height: 56px; }
+.brand { font: 800 21px/1 var(--f-display); font-stretch: 72%; color: var(--ink); text-decoration: none; white-space: nowrap; letter-spacing: .01em; }
+.brand span { color: var(--ink-3); font: 500 13px/1 var(--f-ui); margin-left: 6px; }
+.nav { display: flex; gap: var(--s-1); margin-left: auto; overflow-x: auto; scrollbar-width: none; }
+.nav a { color: var(--ink-2); text-decoration: none; font: 500 14px/1 var(--f-ui); padding: 8px 10px; white-space: nowrap; border-bottom: 2px solid transparent; }
+.nav a:hover { color: var(--ink); border-bottom-color: var(--hi); }
+@media (max-width: 720px) { .nav a:not(.keep) { display: none; } }
+@media (max-width: 520px) { .brand span, .nav { display: none; } .live-badge { margin-left: auto; } }
+
+/* ------------------------------------------------------------- hero */
+.hero { padding-block: var(--s-7) var(--s-6); }
+.hero-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--s-7); align-items: start; }
+.hero h1 { font-size: clamp(42px, 6.6vw, 92px); line-height: .94; margin-top: var(--s-4); letter-spacing: -.01em; }
+.hero h1 em { font-style: normal; color: var(--on-mark); background: linear-gradient(transparent var(--mark-top), var(--mark) var(--mark-top), var(--mark) 92%, transparent 92%); padding-inline: .04em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.hero .lede { margin-top: var(--s-5); color: var(--ink-2); font-size: 18.5px; line-height: 1.55; max-width: 56ch; }
+.hero .cta { margin-top: var(--s-5); display: flex; gap: var(--s-3); flex-wrap: wrap; }
+.btn { font: 600 14px/1 var(--f-ui); border: 1.5px solid var(--ink); background: var(--sheet); color: var(--ink); padding: 11px 15px; border-radius: var(--r); cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.btn:hover { background: var(--rule-2); }
+.btn.primary { background: var(--hi); color: var(--on-hi); border-color: var(--hi-edge); }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn[disabled] { opacity: .4; cursor: default; }
+/* the featured question, laid out like a marked answer slip */
+.specimen { margin: var(--s-3) 0 0; background: var(--sheet); border: 1.5px solid var(--ink); box-shadow: 10px 10px 0 var(--hi); min-width: 0; }
+.sp-head { display: flex; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap; padding: 10px var(--s-4); border-bottom: 3px double var(--ink); font: 500 11.5px/1.3 var(--f-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-2); }
+.sp-img { background: #fff; padding: var(--s-3); border-bottom: 1px solid var(--rule); }
+.sp-img img { display: block; width: 100%; height: auto; }
+.slip { width: 100%; border-collapse: collapse; font-size: 14px; }
+.slip th { text-align: left; font: 500 13.5px/1.3 var(--f-ui); color: var(--ink-2); padding: 9px var(--s-4); border-bottom: 1px solid var(--rule-2); }
+.slip td { font: 600 15px/1.3 var(--f-mono); padding: 9px var(--s-4) 9px 0; border-bottom: 1px solid var(--rule-2); white-space: nowrap; text-align: right; }
+.slip td small { font: 400 12px var(--f-ui); color: var(--ink-3); }
+.slip tr.ours th, .slip tr.ours td { background: var(--accent-soft); color: var(--on-soft); }
+.slip tr.ours th { font-weight: 700; }
+.slip tr.key th, .slip tr.key td { border-bottom: 0; color: var(--ink-3); }
+.sp-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); flex-wrap: wrap; padding: var(--s-3) var(--s-4); border-top: 1.5px solid var(--ink); }
+.sp-foot p { font-size: 14px; color: var(--ink-2); max-width: 40ch; }
+.scores { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-5); margin-top: var(--s-7); border-top: 1.5px solid var(--ink); }
+.score { padding-top: var(--s-4); display: grid; gap: var(--s-2); align-content: start; }
+.score b { font: 800 56px/1 var(--f-display); font-stretch: 68%; letter-spacing: -.01em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.score:first-child b { font-size: clamp(56px, 7vw, 96px); }
+.score b small { font-size: .5em; color: var(--ink-3); }
+.score b .arrow { color: var(--ink-3); font-weight: 400; margin: 0 .12em; }
+.score b .to { color: var(--on-mark); background: linear-gradient(transparent var(--mark-top), var(--mark) var(--mark-top), var(--mark) 95%, transparent 95%); }
+.score p { color: var(--ink-2); font-size: 15px; line-height: 1.45; max-width: 40ch; }
+@media (max-width: 960px) { .hero-grid { grid-template-columns: 1fr; gap: var(--s-6); } .specimen { margin-right: 10px; } }
+@media (max-width: 760px) { .scores { grid-template-columns: 1fr; gap: 0; } .score { padding-block: var(--s-4); border-bottom: 1px solid var(--rule); } }
+
+/* ------------------------------------------------------------- sections */
+section.block { padding-block: var(--s-7); border-top: 1.5px solid var(--ink); }
+.sec-head { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: var(--s-6); align-items: end; margin-bottom: var(--s-6); }
+.sec-head h2 { font-size: clamp(34px, 4.2vw, 58px); line-height: .98; margin-top: var(--s-3); }
+.sec-head .eyebrow { color: var(--ink); font-family: var(--f-mono); font-weight: 500; letter-spacing: .06em; display: flex; align-items: center; gap: 10px; }
+.sec-head .eyebrow::before { content: ""; width: 12px; height: 12px; background: var(--hi); outline: 1.5px solid var(--hi-edge); outline-offset: -1.5px; }
+.sec-head p { color: var(--ink-2); max-width: 58ch; font-size: 17px; }
+@media (max-width: 860px) { .sec-head { grid-template-columns: 1fr; gap: var(--s-3); } }
+
+/* ------------------------------------------------------------- replay */
+.replay { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+@media (max-width: 980px) { .replay { grid-template-columns: 1fr; } }
+.cases { display: flex; flex-direction: column; gap: 2px; position: sticky; top: 72px; }
+@media (max-width: 980px) { .cases { position: static; } }
+.cases .label { margin-bottom: var(--s-2); }
+.case { text-align: left; background: transparent; border: 0; border-left: 2px solid var(--rule); padding: 9px 12px; cursor: pointer; color: var(--ink); font: inherit; display: grid; gap: 2px; }
+.case:hover { background: var(--rule-2); }
+.case[aria-current="true"] { border-left: 4px solid var(--hi); padding-left: 10px; background: var(--sheet); }
+.case .t { font: 700 18px/1.15 var(--f-display); font-stretch: 78%; }
+.case .m { font-size: 12px; color: var(--ink-3); }
+.case.fail .t::before { content: "Failure · "; color: var(--wrong); font-family: var(--f-ui); font-size: 12px; font-weight: 500; letter-spacing: .02em; }
+@media (max-width: 980px) { .case-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 4px; } }
+.any { margin-top: var(--s-4); display: grid; gap: 6px; }
+.any select { width: 100%; font: 14px var(--f-ui); padding: 8px; border-radius: var(--r); border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); }
+
+.stage-wrap { background: var(--sheet); border: 1.5px solid var(--ink); border-radius: var(--r); min-width: 0; }
+.qbar { display: flex; flex-wrap: wrap; gap: var(--s-3) var(--s-4); align-items: baseline; justify-content: space-between; padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--rule); }
+.qbar h3 { font-size: 26px; font-stretch: 78%; font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 11.5px/1 var(--f-mono); padding: 5px 7px; border-radius: var(--r); border: 1px solid var(--rule); color: var(--ink-2); white-space: nowrap; }
+.chip.acc { background: var(--accent-soft); border-color: transparent; color: var(--on-soft); }
+
+.rail-scroll { overflow-x: auto; border-bottom: 1px solid var(--rule); }
+.rail { display: grid; grid-template-columns: repeat(6, minmax(112px, 1fr)); min-width: 680px; position: relative; padding: var(--s-4) var(--s-3) var(--s-3); }
+.rail::before { content: ""; position: absolute; left: calc(100% / 12); right: calc(100% / 12); top: calc(var(--s-4) + 13px); height: 2px; background: var(--rule); }
+.rail .fill { position: absolute; left: calc(100% / 12); top: calc(var(--s-4) + 13px); height: 2px; background: var(--accent); transition: width .5s ease; }
+.step { position: relative; background: none; border: 0; cursor: pointer; display: grid; justify-items: center; gap: 6px; padding: 0 4px; color: var(--ink-3); font: inherit; text-align: center; }
+.step .dot { width: 28px; height: 28px; border-radius: var(--r); display: grid; place-items: center; background: var(--sheet); border: 2px solid var(--rule); font: 600 12px/1 var(--f-mono); transition: all .3s; position: relative; z-index: 1; }
+.step .n { font: 500 13px/1.25 var(--f-ui); color: var(--ink-2); }
+.step .who { font: 400 11px/1.2 var(--f-mono); color: var(--ink-3); }
+.step.done .dot { border-color: var(--accent); color: var(--accent); }
+.step.on .dot { background: var(--hi); border-color: var(--hi-edge); color: var(--on-hi); }
+.step.on .n { color: var(--ink); font-weight: 600; }
+
+.stage { padding: var(--s-5); min-height: 440px; }
+.stage h4 { font: 800 28px/1.05 var(--f-display); font-stretch: 74%; margin: 0 0 var(--s-3); }
+.stage .say { color: var(--ink-2); max-width: 70ch; margin-bottom: var(--s-4); }
+.stage .say b { color: var(--ink); font-weight: 600; }
+.fade-in { animation: fade .18s ease-out both; }
+@keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+.controls { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-5); border-top: 1px solid var(--rule); flex-wrap: wrap; }
+.controls .pos { margin-left: auto; color: var(--ink-3); font-size: 13px; }
+.kbd { font: 500 11px/1 var(--f-mono); border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: var(--r); padding: 2px 5px; color: var(--ink-3); }
+
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+.qimg { border: 1px solid var(--rule); border-radius: var(--r); background: #fff; padding: 8px; max-height: 520px; overflow: auto; }
+.qimg img { display: block; width: 100%; height: auto; }
+.cap { font-size: 12px; color: var(--ink-3); margin-top: 6px; }
+.doc { font-size: 15.5px; line-height: 1.6; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; min-width: 0; }
+.doc .katex-display { margin: .5em 0; overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+.doc .katex { font-size: 1.04em; }
+.boxed { background: var(--mark); border-radius: 0; padding: 0 5px; font-weight: 600; color: var(--on-mark); }
+.tx { border-left: 2px solid var(--rule); padding-left: var(--s-4); max-height: 470px; overflow: auto; }
+.gold { display: inline-flex; align-items: center; gap: 8px; margin-top: var(--s-4); }
+.gold button { font: 600 14px/1 var(--f-mono); padding: 7px 10px; border-radius: var(--r); border: 1px dashed var(--ink-3); background: var(--paper); color: var(--ink); cursor: pointer; }
+.gold button.hid { color: transparent; text-shadow: 0 0 8px var(--ink-3); }
+
+.tag { display: grid; grid-template-columns: auto minmax(0, 1fr); border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
+.tag div { padding: 9px 12px; border-bottom: 1px solid var(--rule); }
+.tag div:nth-last-child(-n+2) { border-bottom: 0; }
+.tag .k { font: 500 11px/1.9 var(--f-mono); letter-spacing: .06em; color: var(--ink-3); background: var(--rule-2); }
+.meter { margin-top: var(--s-5); }
+.meter svg { width: 100%; height: auto; display: block; overflow: visible; }
+.kbcard { border-top: 1px solid var(--rule); padding-top: var(--s-3); margin-top: var(--s-3); }
+.kbcard .h { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; font-size: 13px; color: var(--ink-3); margin-bottom: 4px; }
+.kbcard .h b { color: var(--ink); font-family: var(--f-mono); font-weight: 500; }
+.empty { border: 1px dashed var(--rule); border-radius: var(--r); padding: var(--s-4); color: var(--ink-2); }
+
+.statrow { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-5); font-size: 13px; color: var(--ink-3); margin-bottom: var(--s-4); }
+.statrow b { color: var(--ink); font-weight: 600; }
+.sol { max-height: 560px; overflow: auto; padding-right: var(--s-2); }
+.cell { margin: 10px 0; border-radius: var(--r); overflow: hidden; background: var(--code-bg); color: var(--code-fg); white-space: normal; font-size: 13px; }
+.cell .hd { display: flex; justify-content: space-between; gap: 8px; font: 500 11px/1 var(--f-mono); color: var(--code-dim); padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,.06); letter-spacing: .04em; }
+.cell pre { margin: 0; padding: 10px 12px; font: 12.5px/1.55 var(--f-mono); overflow-x: auto; white-space: pre; }
+.cell .out { background: var(--code-out); border-top: 1px solid rgba(255,255,255,.06); }
+.cell .out pre { color: #d8f5c8; }
+.cell .run { padding: 10px 12px; font: 12px var(--f-mono); color: var(--code-dim); display: flex; gap: 8px; align-items: center; }
+.spin { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--code-dim); border-top-color: transparent; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.k-kw { color: var(--code-kw); } .k-str { color: var(--code-str); } .k-num { color: var(--code-num); } .k-com { color: var(--code-dim); font-style: italic; }
+.answer-line { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); margin-top: var(--s-4); padding-top: var(--s-3); border-top: 1px solid var(--rule); }
+.ans { font: 600 15px/1 var(--f-mono); }
+.mark { font: 700 12px/1 var(--f-ui); padding: 4px 7px; border-radius: var(--r); white-space: nowrap; }
+.mark.ok { background: var(--right-soft); color: var(--right); }
+.mark.no { background: var(--wrong-soft); color: var(--wrong); }
+
+.rounds { display: grid; gap: var(--s-4); }
+.round { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: var(--s-3); }
+.round .rn { font: 600 12px/1 var(--f-mono); color: var(--ink-3); padding-top: 4px; }
+.speaker { font: 500 12px/1 var(--f-mono); color: var(--ink-3); margin-bottom: 6px; letter-spacing: .02em; }
+.verdict { display: inline-flex; gap: 8px; align-items: baseline; font: 700 20px/1.2 var(--f-display); font-stretch: 78%; }
+.verdict.err { color: var(--wrong); }
+.verdict.okv { color: var(--right); }
+.why { color: var(--ink-2); font-size: 14px; margin-top: 4px; max-width: 75ch; white-space: pre-wrap; }
+.fix { margin-top: var(--s-3); padding: var(--s-3) var(--s-4); background: var(--paper); border-left: 3px solid var(--rule); }
+.fix details { margin-top: 6px; }
+.fix summary { cursor: pointer; font: 600 13px var(--f-ui); color: var(--ink); text-decoration: underline; text-decoration-color: var(--hi); text-decoration-thickness: 3px; text-underline-offset: 3px; }
+.fix .doc { max-height: 360px; overflow: auto; margin-top: 8px; font-size: 13.5px; }
+.note { font-size: 12.5px; color: var(--ink-3); }
+.gate { margin-top: var(--s-5); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-3); align-items: center; border-top: 2px solid var(--ink); padding-top: var(--s-3); }
+.gate .res { font: 600 14px/1 var(--f-ui); padding: 8px 12px; border-radius: var(--r); }
+
+.pool { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--s-6); }
+@media (max-width: 860px) { .pool { grid-template-columns: 1fr; } }
+.prow { display: grid; grid-template-columns: 112px 74px minmax(60px, 1fr) 52px 22px; align-items: center; gap: 10px; padding: 5px 6px; border-radius: 0; font-size: 13px; transition: background .3s; }
+.prow .src { color: var(--ink-3); font-size: 12px; white-space: nowrap; }
+.prow .src.c { color: var(--accent); }
+.prow .pa { font: 500 13px var(--f-mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prow .bar { height: 8px; background: var(--rule-2); overflow: hidden; }
+.prow .bar i { display: block; height: 100%; background: var(--ink-3); transform-origin: left; animation: grow .5s cubic-bezier(.2,.7,.2,1) both; }
+.prow .sc { font: 12px var(--f-mono); text-align: right; color: var(--ink-2); }
+.prow .mk { font-weight: 700; text-align: center; }
+.prow .mk.ok { color: var(--right); } .prow .mk.no { color: var(--wrong); }
+.prow.pick { background: var(--accent-soft); }
+.prow.pick .bar i { background: var(--ink); }
+.prow.pick .pa, .prow.pick .sc { color: var(--on-soft); font-weight: 600; }
+.phead { display: grid; grid-template-columns: 112px 74px minmax(60px, 1fr) 52px 22px; gap: 10px; padding: 0 6px 6px; font: 500 11px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--rule); margin-bottom: 4px; }
+@media (max-width: 520px) { .prow, .phead { grid-template-columns: 76px 60px minmax(40px, 1fr) 44px 18px; gap: 6px; } }
+.votes { display: grid; gap: 8px; }
+.vote { display: grid; grid-template-columns: 74px minmax(0, 1fr) 28px; gap: 10px; align-items: center; font-size: 13px; }
+.vote .vb { display: flex; gap: 3px; }
+.vote .vb i { width: 12px; height: 16px; border-radius: 2px; background: var(--ink-3); }
+.vote .vb i.c { background: transparent; border: 1.5px solid var(--ink-3); }
+.callout { margin-top: var(--s-4); padding-top: var(--s-3); border-top: 1px solid var(--rule); font-size: 14px; color: var(--ink-2); }
+.callout b { color: var(--ink); }
+
+.cmp { width: 100%; border-collapse: collapse; font-size: 14px; }
+.cmp td, .cmp th { padding: 11px 8px; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: middle; }
+.cmp th { font: 500 11px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.cmp td.a { font: 600 14px var(--f-mono); white-space: nowrap; }
+.cmp tr.ours td { background: var(--accent-soft); color: var(--on-soft); }
+.cmp tr.ours td:first-child { font-weight: 600; }
+.cmp tr.goldr td { border-bottom: 0; color: var(--ink-3); }
+.verdict-box { margin-top: var(--s-5); display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-4); align-items: start; }
+.verdict-box .big { font: 800 64px/.9 var(--f-display); font-stretch: 68%; }
+.verdict-box .big.ok { color: var(--right); } .verdict-box .big.no { color: var(--wrong); }
+.verdict-box h5 { font: 700 22px/1.15 var(--f-display); font-stretch: 78%; margin: 0 0 6px; }
+.verdict-box p { color: var(--ink-2); max-width: 70ch; }
+
+/* ------------------------------------------------------------- results */
+.tabs { display: inline-flex; flex-wrap: wrap; border: 1.5px solid var(--ink); border-radius: var(--r); background: var(--sheet); }
+.tabs button { font: 600 13px var(--f-ui); border: 0; background: none; color: var(--ink-2); padding: 8px 12px; border-radius: 0; cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.t1 { margin-top: var(--s-4); }
+.t1row { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr) 64px 84px; gap: var(--s-4); align-items: center; padding-block: 10px; border-bottom: 1px solid var(--rule); }
+.t1row.head { font: 500 11px var(--f-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); padding-block: 6px; }
+.t1row .lab { font-size: 14px; }
+.t1row .lab small { display: block; color: var(--ink-3); font-size: 12px; }
+.t1row .val { font: 800 24px var(--f-display); font-stretch: 72%; text-align: right; font-variant-numeric: tabular-nums; }
+.t1row .tok { font: 12px var(--f-mono); text-align: right; color: var(--ink-3); }
+.track { position: relative; height: 22px; }
+.track .grid { position: absolute; top: -4px; bottom: -4px; width: 1px; background: var(--rule-2); }
+.track .b { position: absolute; left: 0; top: 4px; height: 14px; background: var(--ink-3); transform-origin: left; animation: grow .5s cubic-bezier(.2,.7,.2,1) both; }
+.track .ci { position: absolute; top: 10px; height: 2px; background: var(--ink); opacity: .55; }
+.track .ci::before, .track .ci::after { content: ""; position: absolute; top: -4px; width: 2px; height: 10px; background: inherit; }
+.track .ci::before { left: 0; } .track .ci::after { right: 0; }
+.t1row.sc .b { background: var(--ink-2); }
+.t1row.final .b { background: var(--hi); box-shadow: inset 0 0 0 1.5px var(--hi-edge); }
+.t1row.final .val { color: var(--on-mark); background: var(--mark); padding-inline: 4px; justify-self: end; }
+.axis { position: relative; height: 18px; font: 11px var(--f-mono); color: var(--ink-3); }
+.axis span { position: absolute; transform: translateX(-50%); }
+@media (max-width: 760px) { .t1row { grid-template-columns: minmax(0, 1fr) 56px; } .t1row .track, .t1row .tok, .t1row.head .hb, .t1row.head .ht { display: none; } .t1-axis { display: none; } }
+.chart-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-6); margin-top: var(--s-7); }
+@media (max-width: 860px) { .chart-grid { grid-template-columns: 1fr; } }
+.fig h3 { font-size: 28px; line-height: 1.05; margin-bottom: 8px; }
+.fig p.sub { color: var(--ink-2); font-size: 14px; margin-bottom: var(--s-3); max-width: 60ch; }
+.fig svg { width: 100%; height: auto; display: block; }
+.fig svg text { fill: var(--ink-3); font: 11px var(--f-mono); }
+.fig svg .lbl { fill: var(--ink-2); font: 12px var(--f-ui); }
+.fig svg .acc { fill: var(--accent); }
+.figs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-4); margin-top: var(--s-6); border-top: 2px solid var(--ink); }
+.figs > div { padding-top: var(--s-3); }
+.figs b { font: 800 40px/1 var(--f-display); font-stretch: 70%; display: block; font-variant-numeric: tabular-nums; }
+.figs span { font-size: 13px; color: var(--ink-2); display: block; margin-top: 6px; }
+@media (max-width: 760px) { .figs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ------------------------------------------------------------- questions grid */
+.qfilters { display: flex; gap: var(--s-3); flex-wrap: wrap; align-items: center; margin-bottom: var(--s-4); }
+.legend { display: flex; gap: var(--s-4); flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-left: auto; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+.tile { width: 22px; height: 22px; border-radius: var(--r); border: 1.5px solid var(--ink); background: var(--ink); cursor: pointer; padding: 0; }
+.legend .tile { width: 14px; height: 14px; cursor: default; }
+.tile.selector_miss { background: linear-gradient(135deg, var(--ink) 0 50%, transparent 50%); }
+.tile.never_in_pool { background: transparent; border-color: var(--ink-3); }
+.tile:hover { transform: scale(1.25); }
+.tile.dim { opacity: .12; }
+.qgroups { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s-6); }
+@media (max-width: 860px) { .qgroups { grid-template-columns: 1fr; } }
+.qgroup h3 { font-size: 26px; }
+.qgroup .stat { font-size: 13px; color: var(--ink-2); margin: 4px 0 var(--s-3); }
+.tiles { display: flex; flex-wrap: wrap; gap: 5px; }
+.split { display: flex; height: 10px; border-radius: 0; overflow: hidden; margin-bottom: var(--s-3); background: var(--rule-2); }
+.split i { display: block; height: 100%; }
+
+/* ------------------------------------------------------------- method */
+.mods { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+.mod { display: grid; grid-template-columns: 88px minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--s-3) var(--s-6); padding-block: var(--s-5); border-bottom: 1px solid var(--rule); align-items: start; }
+.mod .mnum { font: 800 64px/.85 var(--f-display); font-stretch: 62%; color: var(--ink); }
+.mod h3 { font-size: 30px; line-height: 1; margin: 0 0 var(--s-2); }
+.mod p { color: var(--ink-2); font-size: 16px; max-width: 52ch; }
+.mod dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 14px; font-size: 13px; }
+.mod dt { color: var(--ink-3); font-family: var(--f-ui); }
+.mod dd { margin: 0; font-family: var(--f-mono); font-size: 12.5px; }
+@media (max-width: 860px) { .mod { grid-template-columns: 56px minmax(0, 1fr); } .mod .mnum { font-size: 48px; } .mod dl { grid-column: 2; } }
+.clean { margin-top: var(--s-8); display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--s-6); }
+.clean h3 { font-size: 40px; line-height: 1; margin-top: var(--s-3); }
+.clean ol { margin: 0; padding: 0; list-style: none; counter-reset: c; columns: 2 300px; column-gap: var(--s-6); }
+.clean li { counter-increment: c; break-inside: avoid; font-size: 15.5px; color: var(--ink-2); padding: 10px 0 10px 40px; position: relative; border-top: 1px solid var(--rule); }
+.clean li::before { content: counter(c, decimal-leading-zero); position: absolute; left: 0; top: 12px; font: 500 12px var(--f-mono); color: var(--ink-3); }
+.clean li b { color: var(--ink); font-weight: 600; }
+@media (max-width: 860px) { .clean { grid-template-columns: 1fr; } }
+
+footer { border-top: 1.5px solid var(--ink); padding-block: var(--s-6) var(--s-7); color: var(--ink-3); font-size: 13px; }
+footer .wrap { display: flex; gap: var(--s-4); flex-wrap: wrap; justify-content: space-between; }
+footer b { color: var(--ink); font-weight: 500; }
+
+
+/* ------------------------------------------------------------- live (only with the demo server) */
+.live-badge { display: inline-flex; align-items: center; gap: 6px; font: 600 12px/1 var(--f-ui); color: var(--ink-2); border: 1.5px solid var(--ink); border-radius: var(--r); padding: 6px 10px; white-space: nowrap; text-decoration: none; }
+.live-badge i { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+.live-badge.up i { background: var(--right); box-shadow: 0 0 0 3px var(--right-soft); }
+.live-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: var(--s-5); align-items: start; }
+@media (max-width: 980px) { .live-grid { grid-template-columns: 1fr; } }
+.live-form { display: grid; gap: var(--s-4); }
+.live-form select, .live-form input[type="text"] { width: 100%; font: 14px var(--f-ui); padding: 8px; border-radius: var(--r); border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); }
+.live-form label.eyebrow { display: block; margin-bottom: 6px; }
+.drop { display: grid; place-items: center; gap: 8px; min-height: 120px; border: 1.5px dashed var(--ink-3); border-radius: var(--r); padding: var(--s-3); text-align: center; color: var(--ink-2); font-size: 13px; cursor: pointer; background: var(--sheet); }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.drop img { max-height: 160px; border-radius: 6px; background: #fff; }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+.modes { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+.modes label { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; font-size: 13px; color: var(--ink-2); align-items: start; cursor: pointer; }
+.modes b { color: var(--ink); font-weight: 600; }
+.live-actions { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+.live-out { min-height: 420px; }
+.lv-head { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: baseline; justify-content: space-between; padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--rule); }
+.lv-head h3 { font-size: 26px; font-weight: 700; font-stretch: 78%; }
+.lv-status { font: 13px var(--f-mono); color: var(--ink-3); }
+.lv-tools { display: inline-flex; align-items: center; gap: var(--s-3); flex-wrap: wrap; }
+#lvStop { padding: 7px 11px; font-size: 13px; }
+#lvStop:hover { border-color: var(--wrong); color: var(--wrong); background: var(--wrong-soft); }
+.lv-body { padding: var(--s-5); display: grid; gap: var(--s-5); }
+.lv-empty { padding: var(--s-6) var(--s-5); color: var(--ink-2); max-width: 60ch; }
+.lv-panel h4 { font: 700 21px/1.15 var(--f-display); font-stretch: 78%; margin: 0 0 8px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.lv-panel h4 .note { font-family: var(--f-ui); }
+.lv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.lv-chip { font: 500 12px/1 var(--f-mono); padding: 7px 9px; border-radius: var(--r); background: var(--rule-2); color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
+.lv-chip.run::before { content: ""; width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--ink-3); border-top-color: transparent; animation: spin .8s linear infinite; }
+.lv-chip.ok { background: var(--right-soft); color: var(--right); }
+.lv-chip.no { background: var(--wrong-soft); color: var(--wrong); }
+.lv-chip.acc { background: var(--accent-soft); color: var(--on-soft); }
+.lv-stream { max-height: 380px; overflow: auto; border: 1px solid var(--rule); border-radius: var(--r); padding: var(--s-3) var(--s-4); background: var(--paper); }
+.lv-stream .doc { font-size: 13.5px; }
+.caret::after { content: "▍"; color: var(--accent); animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.lv-rounds { display: grid; gap: 8px; }
+.lv-round { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 8px; align-items: center; font-size: 13px; }
+.lv-final { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s-4); align-items: center; border-top: 2px solid var(--ink); padding-top: var(--s-4); }
+.lv-final .big { font: 800 56px/.9 var(--f-display); font-stretch: 68%; }
+.lv-err { border: 1px solid var(--wrong); background: var(--wrong-soft); color: var(--ink); border-radius: var(--r); padding: var(--s-3) var(--s-4); }
+.mini-rail { display: flex; gap: 4px; padding: var(--s-3) var(--s-5) 0; }
+.mini-rail span { flex: 1; height: 4px; border-radius: 0; background: var(--rule); transition: background .3s; }
+.mini-rail span.on { background: var(--hi); animation: pulseBar 1.2s ease-in-out infinite; }
+.mini-rail span.done { background: var(--accent); }
+@keyframes pulseBar { 50% { opacity: .45; } }
+/* interactive add-ons inside the replay */
+.cell .edit-btn { background: none; border: 1px solid rgba(255,255,255,.18); color: var(--code-fg); font: 500 11px/1 var(--f-mono); padding: 4px 7px; border-radius: 4px; cursor: pointer; }
+.cell textarea { display: block; width: 100%; min-height: 160px; resize: vertical; border: 0; padding: 10px 12px; font: 12.5px/1.55 var(--f-mono); background: var(--code-bg); color: var(--code-fg); outline: none; }
+.sbx-bar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 12px; border-top: 1px solid rgba(255,255,255,.08); }
+.sbx-bar button { font: 500 11px/1 var(--f-mono); padding: 6px 8px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,.18); background: transparent; color: var(--code-fg); }
+.sbx-bar button.run { background: var(--hi); color: var(--on-hi); border-color: var(--hi); }
+.sbx-bar span { font: 11px var(--f-mono); color: var(--code-dim); }
+.sbx-out pre.blocked { color: #ffb4ab; }
+.whatif { margin-top: var(--s-3); padding: var(--s-3) var(--s-4); background: var(--paper); border-left: 3px solid var(--hi); font-size: 13px; color: var(--ink-2); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.prow input.pa-in { font: 500 13px var(--f-mono); width: 100%; min-width: 0; border: 1px dashed var(--ink-3); border-radius: 4px; padding: 2px 4px; background: var(--sheet); color: var(--ink); }
+.prow { cursor: pointer; }
+.prow.sel { outline: 1.5px solid var(--ink-3); }
+.why { margin-top: var(--s-3); }
+.whyrow { display: grid; grid-template-columns: minmax(0, 1fr) 120px 52px; gap: 8px; align-items: center; font-size: 12.5px; padding: 3px 0; }
+.whyrow .wb { position: relative; height: 8px; background: var(--rule-2); border-radius: 4px; }
+.whyrow .wb i { position: absolute; top: 0; height: 100%; border-radius: 4px; }
+.kbsearch { margin-top: var(--s-5); border-top: 1px solid var(--rule); padding-top: var(--s-4); }
+.kbsearch form { display: flex; gap: 8px; }
+.kbsearch input { flex: 1; min-width: 0; font: 14px var(--f-ui); padding: 8px; border-radius: var(--r); border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); }
+.kbhit { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rule-2); font-size: 13px; }
+.kbhit b { font: 600 13px var(--f-mono); }
+.kbhit b.above { color: var(--accent); }
+
+.case .t, .qbar h3, .stage h4, .verdict, .verdict-box .big, .verdict-box h5, .t1row .val, .figs b, .lv-final .big, .lv-panel h4, .lv-head h3, .mod .mnum, .score b, .brand { font-stretch: 72%; }
+.mod .mnum, .score b, .verdict-box .big, .lv-final .big { font-stretch: 64%; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top">mmJEE Reasoner <span>· Team Erdős</span></a>
+    <nav class="nav" aria-label="Sections">
+      <a class="keep" href="#replay">Replay</a>
+      <a href="#results">Results</a>
+      <a href="#gain">Where the gain comes from</a>
+      <a href="#questions">All 204 questions</a>
+      <a href="#method">Method</a>
+    </nav>
+    <a class="live-badge" id="liveBadge" href="#live" hidden><i></i><span>Live</span></a>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">ML course project · Team Erdős · IIT Bhilai</div>
+        <h1>An 8B model that <em>checks its own work</em> on JEE Advanced 2026</h1>
+        <p class="lede">Qwen3-VL-8B is never fine-tuned. Around it we put a Python sandbox for the arithmetic, a second model that names the first wrong step, a trained verifier that picks the final answer, and a library of solved past problems. The 2026 papers came out after the model, and we froze the system before running it on them.</p>
+        <div class="cta">
+          <a class="btn primary" href="#replay">Replay a real question ↓</a>
+          <a class="btn" href="#questions">See all 204 questions</a>
+        </div>
+      </div>
+      <figure class="specimen" id="specimen"></figure>
+    </div>
+    <div class="scores" id="heroScores"></div>
+  </div>
+
+
+  <!-- ============================================================ LIVE (needs the demo server) -->
+  <section class="block" id="live" hidden>
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">Live run</div>
+          <h2>Run it now on the lab GPUs</h2>
+        </div>
+        <p>The frozen system solves the question from scratch. Qwen3-VL-8B runs on one lab PC and InternVL3.5-8B on another; the code sandbox, retrieval and the verifier run on this laptop. A live run draws new samples, so its answer can differ from the saved run.</p>
+      </div>
+      <div class="live-grid">
+        <form class="live-form" id="liveForm">
+          <div class="tabs" role="group" aria-label="Question source" id="liveSrc">
+            <button type="button" data-v="exam" aria-pressed="true">Exam question</button>
+            <button type="button" data-v="new" aria-pressed="false">New question</button>
+          </div>
+          <div id="srcExam"><label class="eyebrow" for="liveQ">2026 question</label><select id="liveQ"></select></div>
+          <div id="srcNew" hidden>
+            <label class="drop" id="drop" for="liveFile"><input type="file" id="liveFile" accept="image/*"><span id="dropText">Drop, paste or choose an image of a question</span><img id="dropPrev" alt="Uploaded question" hidden></label>
+            <div class="row3">
+              <select id="newSubj" aria-label="Subject"><option>Physics</option><option>Chemistry</option><option value="Mathematics">Maths</option></select>
+              <select id="newType" aria-label="Question type"><option value="MCQ-Single">Single-choice</option><option value="MCQ-Multiple">Multiple-choice</option><option value="Numerical">Numerical</option><option value="Matching">Matching</option></select>
+              <select id="newLang" aria-label="Language"><option>English</option><option>Hindi</option></select>
+            </div>
+            <label class="check"><input type="checkbox" id="newDiag"> The question needs its diagram</label>
+          </div>
+          <fieldset class="modes"><legend class="eyebrow" style="margin-bottom:6px">Settings</legend>
+            <label><input type="radio" name="lmode" value="full" checked><span><b>Full</b> · 8 attempts, up to 3 correction rounds: the frozen settings</span></label>
+            <label><input type="radio" name="lmode" value="quick"><span><b>Quick</b> · 4 attempts, 1 round: faster, but a smaller pool than the verifier was trained on</span></label>
+          </fieldset>
+          <div class="live-actions">
+            <button class="btn primary" id="liveGo" type="submit">▶ Run live</button>
+            <button class="btn" id="liveAgain" type="button" disabled>New samples</button>
+          </div>
+          <p class="note" id="liveNote"></p>
+        </form>
+        <div class="stage-wrap live-out" id="liveOut">
+          <div class="lv-empty">Pick a question and press <b>Run live</b>. Each stage appears here as it happens: the transcript, the retrieved examples, the first attempt being written with its code running in the sandbox, the critic's verdicts, and the verifier's pick.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ REPLAY -->
+  <section class="block" id="replay">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">01 · Replay</div>
+          <h2>Follow one question through the system</h2>
+        </div>
+        <p>Pick a case and step through it. The text, the code, the critic's verdicts and the verifier's scores are the real outputs of the final, frozen system on 2026. Nothing on this page calls a model.</p>
+      </div>
+
+      <div class="replay">
+        <aside class="cases" aria-label="Cases">
+          <div class="eyebrow label">Chosen cases</div>
+          <div class="case-list" id="caseList"></div>
+          <div class="any">
+            <label class="eyebrow" for="qpick">Or any 2026 question</label>
+            <select id="qpick"></select>
+          </div>
+        </aside>
+
+        <div class="stage-wrap">
+          <div class="qbar">
+            <h3 id="qtitle">Question</h3>
+            <div class="chips" id="qchips"></div>
+          </div>
+          <div class="rail-scroll">
+            <div class="rail" id="rail" role="tablist" aria-label="Pipeline stages"><div class="fill" id="railFill"></div></div>
+          </div>
+          <div class="stage" id="stage" aria-live="polite"></div>
+          <div class="controls">
+            <button class="btn" id="prev" type="button">← Back</button>
+            <button class="btn primary" id="play" type="button">▶ Play</button>
+            <button class="btn" id="next" type="button">Next →</button>
+            <span class="pos"><span class="kbd">←</span> <span class="kbd">→</span> to step · <span id="pos" class="num">1 / 6</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ RESULTS -->
+  <section class="block" id="results">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">02 · Results</div>
+          <h2>Adding one module at a time</h2>
+        </div>
+        <p>Accuracy on all questions of the exam, in the base paper's scoring. The thin line on each bar is the 95% interval from a bootstrap that resamples English/Hindi twin pairs together. Tokens are the generated tokens per question.</p>
+      </div>
+      <div class="tabs" role="group" aria-label="Exam year">
+        <button type="button" id="y2026" aria-pressed="true">2026 exam · clean test</button>
+        <button type="button" id="y2025" aria-pressed="false">2025 exam · seen during design</button>
+      </div>
+      <div class="t1" id="t1"></div>
+      <p class="note" id="t1note" style="margin-top:12px"></p>
+
+      <div class="chart-grid">
+        <div class="fig">
+          <h3>More votes do not catch up</h3>
+          <p class="sub">Majority vote over more and more plain chain-of-thought answers on 2026. At 18 answers it spends as many tokens as our full system, and it is still 6.4 points behind.</p>
+          <div id="scCurve"></div>
+        </div>
+        <div class="fig">
+          <h3>What the critic and corrector do</h3>
+          <p class="sub">InternVL3.5-8B checks each of the 1,632 solutions on 2026 (204 questions × 8) and names the first wrong step. Qwen3-VL-8B then redoes the solution from that step.</p>
+          <div id="corrFig"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ GAIN -->
+  <section class="block" id="gain">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">03 · Where the gain comes from</div>
+          <h2>The gain comes from a better pool of answers</h2>
+        </div>
+        <p>We split the total gain over same-compute voting into two parts. The pool part is a plain majority vote over our 16 answers. The selection part is what the verifier adds on top of that vote.</p>
+      </div>
+      <div class="chart-grid" style="margin-top:0">
+        <div class="fig"><div id="decomp"></div></div>
+        <div class="fig" id="decompText"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ QUESTIONS -->
+  <section class="block" id="questions">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">04 · All 204 questions</div>
+          <h2>Where the remaining errors are</h2>
+        </div>
+        <p>One square per 2026 question. Click any square to replay it. Questions that need the diagram are the weak spot: there, the right answer is often missing from all 16 attempts.</p>
+      </div>
+      <div class="qfilters">
+        <div class="tabs" role="group" aria-label="Language" id="flang">
+          <button type="button" data-v="" aria-pressed="true">Both languages</button>
+          <button type="button" data-v="English" aria-pressed="false">English</button>
+          <button type="button" data-v="Hindi" aria-pressed="false">Hindi</button>
+        </div>
+        <div class="tabs" role="group" aria-label="Subject" id="fsubj">
+          <button type="button" data-v="" aria-pressed="true">All subjects</button>
+          <button type="button" data-v="Physics" aria-pressed="false">Physics</button>
+          <button type="button" data-v="Chemistry" aria-pressed="false">Chemistry</button>
+          <button type="button" data-v="Mathematics" aria-pressed="false">Maths</button>
+        </div>
+        <div class="legend">
+          <span><i class="tile correct"></i>Right</span>
+          <span><i class="tile selector_miss"></i>Right answer in the pool, not picked</span>
+          <span><i class="tile never_in_pool"></i>No right answer among the 16</span>
+        </div>
+      </div>
+      <div class="qgroups" id="qgroups"></div>
+    </div>
+  </section>
+
+  <!-- ============================================================ METHOD -->
+  <section class="block" id="method">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <div class="eyebrow">05 · Method</div>
+          <h2>Four modules around one frozen model, on one 12 GB GPU</h2>
+        </div>
+        <p>The solver is Qwen3-VL-8B in 4-bit AWQ, served with vLLM. Only the verifier is trained, and it trains on a CPU.</p>
+      </div>
+      <ol class="mods">
+        <li class="mod">
+          <span class="mnum">A</span>
+          <div><h3>Code sandbox</h3><p>The model writes Python for the calculations. We run each block, paste its output back into the solution, and the model carries on from there.</p></div>
+          <dl><dt>Checks</dt><dd>AST whitelist, no exec/eval/open</dd><dt>Process</dt><dd>python -I, empty temp dir</dd><dt>Limits</dt><dd>10 s · 1 GB · 1 MB output</dd><dt>Fallback</dt><dd>plain CoT if no answer</dd></dl>
+        </li>
+        <li class="mod">
+          <span class="mnum">B</span>
+          <div><h3>Critic and corrector</h3><p>A different model, InternVL3.5-8B, names the first wrong step. The solver keeps everything before that step and redoes the rest.</p></div>
+          <dl><dt>Critic</dt><dd>InternVL3.5-8B</dd><dt>Rounds</dt><dd>up to 3</dd><dt>Cut-off verdict</dt><dd>forced, unparsed 76 → 1 of 501</dd><dt>Gate</dt><dd>δ = −0.08</dd></dl>
+        </li>
+        <li class="mod">
+          <span class="mnum">C</span>
+          <div><h3>Learned verifier</h3><p>Scores each of the 16 answers and picks the best one. The training labels cost nothing: the paper's scorer already marks every past answer right or wrong.</p></div>
+          <dl><dt>Model</dt><dd>XGBoost pairwise ranker</dd><dt>Features</dt><dd>agreement, code ran, cut-off, critic flags…</dd><dt>Data</dt><dd>12,096 answers, 2019–2024</dd><dt>Chosen by</dt><dd>leave-one-year-out</dd></dl>
+        </li>
+        <li class="mod">
+          <span class="mnum">D</span>
+          <div><h3>Retrieval</h3><p>The model tags the question as "subject | topic | method". Solved problems with a close enough tag go into the prompt as worked examples.</p></div>
+          <dl><dt>Embedder</dt><dd>bge-small + FAISS</dd><dt>Knowledge base</dt><dd id="kbSize">606 solved problems</dd><dt>Similarity</dt><dd>0.9 tag + 0.1 text</dd><dt>Threshold</dt><dd id="kbTau">τ = 0.882</dd></dl>
+        </li>
+      </ol>
+      <div class="clean">
+        <div>
+          <div class="eyebrow">Keeping the test clean</div>
+          <h3>How we know 58.8% is honest</h3>
+        </div>
+        <ol>
+          <li><b>Frozen first.</b> The final system was fixed and written down before any 2026 run.</li>
+          <li><b>Year split.</b> Training, tuning and the knowledge base use 2019–2024 only.</li>
+          <li><b>Twins kept apart.</b> A question's English/Hindi twin never appears in its training or retrieval.</li>
+          <li><b>De-duplicated knowledge base.</b> Entries with cosine ≥ 0.90 to any test question were removed.</li>
+          <li><b>Fair baseline.</b> Majority voting gets the same token budget as our system.</li>
+          <li><b>Hindi 2026 built by us.</b> 102 Hindi crops from the official papers, each matched to its English twin.</li>
+          <li><b>Pre-registered steps.</b> Later ideas had their pass rule committed before running, and every outcome is reported.</li>
+          <li><b>Paper's own scorer.</b> Answers are marked with the base paper's extraction and scoring code.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span><b>Team Erdős</b> · Arpit Kumar (12340350) · Saurav Gupta (12341940) · IIT Bhilai</span>
+    <span>Code: <a href="https://github.com/Saurav1375/erdos-mmjee-reasoner">github.com/Saurav1375/erdos-mmjee-reasoner</a></span>
+  </div>
+</footer>
+
+<script src="vendor/katex/katex.min.js"></script>
+<script src="vendor/katex/auto-render.min.js"></script>
+<script src="data.js"></script>
+<script>
+(() => {
+"use strict";
+const D = window.DEMO;
+const Q = D.questions;
+const byId = Object.fromEntries(Q.map(q => [q.id, q]));
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const fmt = (x, d = 1) => Number(x).toFixed(d);
+const T26 = D.table.y2026, T25 = D.table.y2025;
+const row = (t, k) => t.find(r => r.row.includes(k));
+const FINAL = "framework (verifier", SC = "Self-consistency", BASE = "Baseline";
+
+const LANG = { English: "English", Hindi: "Hindi" };
+const TYPE = { "MCQ-Single": "Single-choice", "MCQ-Multiple": "Multiple-choice", Numerical: "Numerical", Matching: "Matching" };
+const SUBJ = { Physics: "Physics", Chemistry: "Chemistry", Mathematics: "Maths" };
+const qname = q => { const n = /-q(\d+)$/.exec(q.id); return `${q.paper === "new" ? "New question" : "Paper " + q.paper.slice(1)} · ${SUBJ[q.subj]} · ${TYPE[q.type]}${n ? " Q" + n[1] : ""} · ${q.lang}`; };
+
+// ------------------------------------------------------------------ chosen cases
+const CASES = [
+  { id: "P1-EN-Phys-Num-q2", t: "Python does the arithmetic",
+    n: "A numerical physics question with a figure. The picked solution computes the value in a Python block. Majority voting over 18 plain answers settles on 1; the framework answers 0.33, inside the accepted range 0.32 to 0.34." },
+  { id: "P1-EN-Chem-Num-q1", t: "The critic finds the wrong step",
+    n: "The first solution is wrong. InternVL flags step 1, the corrector redoes the solution from there and gets 9.8, which is right. The verifier then picks a corrected answer." },
+  { id: "P2-EN-Chem-MCQM-q2", t: "The verifier overrules the vote",
+    n: "In the pool, CD and ACD get 4 votes each and majority voting takes CD, which comes first. The verifier ranks an ACD answer highest, and ACD is right. Majority voting over 18 plain answers also says CD." },
+  { id: "P2-HI-Phys-MCQ-q1", t: "A Hindi question, read in English",
+    n: "The question image is in Hindi. The model first writes the question out in English, and the solver sees both. Majority voting over 18 plain answers picks A; the framework picks C, which is right." },
+  { id: "P2-HI-Chem-Num-q7", t: "Retrieval finds solved examples",
+    n: "Two solved past problems pass the similarity threshold and are shown to the solver. The framework answers correctly; the single-answer baseline (its first sample) does not." },
+  { id: "P2-HI-Chem-MCQ-q4", t: "The gate blocks a bad correction",
+    n: "The original answer A is right. The critic wrongly reports an error and the corrector changes the answer to D. The verifier's score drops from 0.80 to 0.42, so the correction gate keeps A." },
+  { id: "P1-HI-Chem-MCQ-q4", t: "The verifier overrules a right vote", fail: true,
+    n: "A majority vote over the 16 answers would give C, which is right. The verifier prefers D. This kind of selection miss is what grew on 2026." },
+  { id: "P1-HI-Phys-Num-q1", t: "The figure is misread every time", fail: true,
+    n: "None of the 16 answers is right: half of them say 2, while the accepted range is 1.70 to 1.75. No way of picking can fix this; it needs a better reading of the diagram." },
+];
+const caseOf = Object.fromEntries(CASES.map(c => [c.id, c]));
+
+// ------------------------------------------------------------------ hero
+(() => {
+  const b = row(T26, BASE).acc, f = row(T26, FINAL).acc;
+  $("#heroScores").innerHTML = `
+    <div class="score"><b>${fmt(b)}<span class="arrow">→</span><span class="to">${fmt(f)}</span><small>%</small></b><p>Accuracy on all 204 questions of 2026: one chain-of-thought answer, then the full system.</p></div>
+    <div class="score"><b>+${fmt(D.vs_sc.y2026.diff)}</b><p>points over majority voting given the same token budget (p = ${fmt(D.vs_sc.mcnemar.p, 3)}, McNemar).</p></div>
+    <div class="score"><b>102 + 102</b><p>English questions, and their Hindi twins, which we cropped from the official papers.</p></div>`;
+  // The featured question: a figure-based numerical where 17 of 18 plain answers agree on the wrong value.
+  const sq = byId["P1-EN-Phys-Num-q2"], m = sq.methods;
+  const tick = ok => `<span class="mark ${ok ? "ok" : "no"}">${ok ? "✓" : "✗"}</span>`;
+  $("#specimen").innerHTML = `
+    <div class="sp-head"><span>JEE Advanced 2026 · Paper 1</span><span>Physics · Numerical</span></div>
+    <div class="sp-img"><img src="img/${sq.id}.webp" width="971" height="540" alt="JEE Advanced 2026 Paper 1, Physics: five Carnot engines between six heat reservoirs; find the efficiency η"></div>
+    <table class="slip">
+      <tr><th>One chain-of-thought answer</th><td>${esc(m.cot0.pred)} ${tick(m.cot0.ok)}</td></tr>
+      <tr><th>Majority of 18 such answers</th><td><small>${m.sc.votes[0][1]} of 18 say</small> ${esc(m.sc.pred)} ${tick(m.sc.ok)}</td></tr>
+      <tr class="ours"><th>Our system</th><td>${esc(m.final.pred)} ${tick(m.final.ok)}</td></tr>
+      <tr class="key"><th>Answer key</th><td>${esc(sq.gold.replace(" TO ", " to "))}</td></tr>
+    </table>
+    <div class="sp-foot"><p>The system's answer comes from Python it wrote and ran itself.</p><button class="btn" type="button" id="spGo">Replay this question →</button></div>`;
+  $("#spGo").addEventListener("click", () => { stopPlay(); load(sq.id); $("#replay").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }); });
+})();
+
+// ------------------------------------------------------------------ text rendering
+const KW = /\b(import|from|as|def|return|for|in|if|elif|else|while|and|or|not|print|lambda|with|True|False|None|range|try|except|class|is)\b/;
+function highlight(code) {
+  const re = /(#[^\n]*)|("""[\s\S]*?"""|'''[\s\S]*?'''|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*')|(\b\d+(?:\.\d+)?(?:e[-+]?\d+)?\b)|(\b[A-Za-z_]\w*\b)/g;
+  let out = "", last = 0, m;
+  while ((m = re.exec(code))) {
+    out += esc(code.slice(last, m.index));
+    if (m[1]) out += `<span class="k-com">${esc(m[1])}</span>`;
+    else if (m[2]) out += `<span class="k-str">${esc(m[2])}</span>`;
+    else if (m[3]) out += `<span class="k-num">${esc(m[3])}</span>`;
+    else out += KW.test(m[4]) && m[4].match(KW)[0] === m[4] ? `<span class="k-kw">${m[4]}</span>` : esc(m[4]);
+    last = re.lastIndex;
+  }
+  return out + esc(code.slice(last));
+}
+function prose(t) {
+  t = t.replace(/\n{3,}/g, "\n\n").replace(/^\s+|\s+$/g, "");
+  if (!t) return "";
+  let h = esc(t).replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>").replace(/^(#{1,4}) (.+)$/gm, "<b>$2</b>")
+               .replace(/^(Step \d+:)/gm, "<b>$1</b>");
+  return `<div class="doc">${h}</div>`;
+}
+// Splits a solution into prose and code cells; output fences attach to the cell before them.
+function solutionHTML(text, animate) {
+  const re = /```(\w*)[^\n]*\n([\s\S]*?)```/g;
+  let out = "", last = 0, m, n = 0;
+  const parts = [];
+  while ((m = re.exec(text))) {
+    parts.push({ kind: "text", v: text.slice(last, m.index) });
+    parts.push({ kind: (m[1] || "").toLowerCase() === "output" ? "out" : "code", v: m[2].replace(/\s+$/, "") });
+    last = re.lastIndex;
+  }
+  parts.push({ kind: "text", v: text.slice(last) });
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (p.kind === "text") { out += prose(p.v); continue; }
+    if (p.kind === "code") {
+      n++;
+      let o = null;
+      let j = i + 1;
+      while (j < parts.length && parts[j].kind === "text" && !parts[j].v.trim()) j++;
+      if (j < parts.length && parts[j].kind === "out") { o = parts[j].v; i = j; }
+      const outHTML = o === null ? "" :
+        `<div class="out" data-delay="${n}"><div class="hd"><span>OUTPUT · run in the sandbox</span></div><pre>${esc(o) || "(no output)"}</pre></div>`;
+      const running = o === null || !animate ? "" :
+        `<div class="run" data-run="${n}"><span class="spin"></span>running in the sandbox (python -I, 10 s, 1 GB)…</div>`;
+      out += `<div class="cell"><div class="hd"><span>PYTHON · block ${n}</span><span>written by the model</span></div><pre>${highlight(p.v)}</pre>${running}${outHTML}</div>`;
+    } else {
+      out += `<div class="cell"><div class="out"><div class="hd"><span>OUTPUT</span></div><pre>${esc(p.v)}</pre></div></div>`;
+    }
+  }
+  return out;
+}
+function typeset(el) {
+  if (window.renderMathInElement) {
+    try {
+      renderMathInElement(el, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true }, { left: "\\[", right: "\\]", display: true },
+          { left: "\\(", right: "\\)", display: false }, { left: "$", right: "$", display: false }],
+        ignoredClasses: ["cell"], throwOnError: false, strict: "ignore",
+      });
+    } catch (e) { /* leave raw text */ }
+  }
+  // a bare \boxed{X} outside maths
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const hits = [];
+  while (walker.nextNode()) if (walker.currentNode.nodeValue.includes("\\boxed{") && !walker.currentNode.parentElement.closest(".katex,.cell")) hits.push(walker.currentNode);
+  for (const node of hits) {
+    const span = document.createElement("span");
+    span.innerHTML = esc(node.nodeValue).replace(/\\boxed\{([^{}]*)\}/g, '<span class="boxed">$1</span>');
+    node.replaceWith(...span.childNodes);
+  }
+}
+const mark = ok => cur && cur.key === false ? "" : ok ? `<span class="mark ok">✓ right</span>` : `<span class="mark no">✗ wrong</span>`;
+const ansText = a => a === null || a === undefined || a === "" ? "(no answer)" : a;
+
+// ------------------------------------------------------------------ stages
+const STAGES = [
+  { n: "Read the question", who: "Qwen3-VL-8B" },
+  { n: "Look up solved problems", who: "bge-small · FAISS" },
+  { n: "Solve with Python", who: "Qwen3-VL + sandbox" },
+  { n: "Critique and correct", who: "InternVL3.5-8B" },
+  { n: "Verify and pick", who: "XGBoost ranker" },
+  { n: "Result", who: "paper's scorer" },
+];
+let cur = null, stageIx = 0, timers = [], playing = false, playTimer = null, revealed = false;
+const clearTimers = () => { timers.forEach(clearTimeout); timers = []; };
+
+$("#rail").insertAdjacentHTML("beforeend", STAGES.map((s, i) =>
+  `<button class="step" type="button" role="tab" data-i="${i}" aria-label="Stage ${i + 1}: ${s.n}"><span class="dot">${i + 1}</span><span class="n">${s.n}</span><span class="who">${s.who}</span></button>`).join(""));
+$("#rail").addEventListener("click", e => { const b = e.target.closest(".step"); if (b) { stopPlay(); go(+b.dataset.i); } });
+
+function stageRead(q) {
+  const lang = q.lang === "Hindi"
+    ? "The image is in <b>Hindi</b>. The model first writes the question out in English; the solver gets the image and this transcript."
+    : "The model first writes the question out as text, including what the figure shows. Every solver attempt gets the image and this transcript.";
+  return `<div class="two">
+      <div><div class="qimg"><img src="${q.image}" alt="Question image: ${esc(qname(q))}"></div>
+        <div class="cap">The question image exactly as the model receives it${q.diagram ? " · this question needs the diagram" : ""}.</div>
+        ${q.key === false ? `<div class="gold"><span class="note">New question: there is no answer key, so nothing is marked right or wrong.</span></div>` : `<div class="gold"><span class="note">Correct answer:</span><button type="button" id="goldBtn" class="${revealed ? "" : "hid"}" aria-label="Show the correct answer">${esc(q.gold)}</button>${revealed ? "" : `<span class="note">click to show</span>`}</div>`}
+      </div>
+      <div><h4>Transcript</h4><p class="say">${lang}</p><div class="tx doc-wrap">${prose(q.transcript || "(no transcript)")}</div></div>
+    </div>`;
+}
+function meterSVG(sims) {
+  const lo = 0.8, hi = 1.0, W = 600, x = v => 20 + (Math.min(Math.max(v, lo), hi) - lo) / (hi - lo) * (W - 40);
+  const ticks = [0.80, 0.85, 0.90, 0.95, 1.00];
+  return `<svg viewBox="0 0 ${W} 74" role="img" aria-label="Similarity of the retrieved problems against the threshold">
+    <rect x="20" y="30" width="${W - 40}" height="6" rx="3" fill="var(--rule-2)"/>
+    <rect x="${x(D.tau)}" y="30" width="${W - 20 - x(D.tau)}" height="6" rx="3" fill="var(--accent-soft)"/>
+    <line x1="${x(D.tau)}" x2="${x(D.tau)}" y1="18" y2="48" stroke="var(--accent)" stroke-width="2"/>
+    <text x="${x(D.tau)}" y="12" text-anchor="middle" class="acc" style="fill:var(--accent);font:11px var(--f-mono)">τ = ${fmt(D.tau, 3)}</text>
+    ${ticks.map(t => `<text x="${x(t)}" y="64" text-anchor="middle" style="fill:var(--ink-3);font:11px var(--f-mono)">${t.toFixed(2)}</text>`).join("")}
+    ${sims.map((s, i) => `<circle cx="${x(s)}" cy="33" r="7" fill="var(--ink)" stroke="var(--sheet)" stroke-width="2"><title>example ${i + 1}: ${s.toFixed(3)}</title></circle>`).join("")}
+  </svg>`;
+}
+function stageLook(q) {
+  const t = q.tag || {};
+  const hits = q.retrieval;
+  const nHit = Q.filter(x => x.retrieval.length).length;
+  let body;
+  if (!hits.length) {
+    body = `<div class="empty">No solved problem is similar enough: nothing passes the threshold τ = ${fmt(D.tau, 3)}, so the solver works without examples. This is the common case: on 2026, ${nHit} of 204 questions get an example.</div>`;
+  } else {
+    body = hits.map((h, i) => `<div class="kbcard"><div class="h"><b>${esc(h.id)}</b><span>${h.year >= 2019 ? "JEE Advanced " + h.year : "JEEBench"} · ${esc(h.subj)} · ${esc(TYPE[h.type] || h.type)}</span><span>similarity <b>${fmt(h.sim, 3)}</b></span></div>${prose(h.problem)}</div>`).join("");
+  }
+  return `<div class="two">
+    <div><h4>Concept tag</h4><p class="say">The model describes the question in one line. The topic and method form the search key, so problems that need the same method match even when their wording differs.</p>
+      <div class="tag"><div class="k">SUBJECT</div><div>${esc(t.subject)}</div><div class="k">TOPIC</div><div>${esc(t.topic)}</div><div class="k">METHOD</div><div>${esc(t.method)}</div></div>
+      <div class="meter">${meterSVG(hits.map(h => h.sim))}<div class="cap">Similarity of the best matches. Only matches right of τ are shown to the solver (at most 2). τ was tuned on 2019–2024 so that about 70% of matches share the question's topic.</div></div>
+    </div>
+    <div><h4>${hits.length ? `${hits.length} solved example${hits.length > 1 ? "s" : ""} added to the prompt` : "Retrieved examples"}</h4><p class="say">The knowledge base holds ${D.kb.entries} solved problems from 2019–2024 and JEEBench, each with a verified correct solution. Entries too close to any test question were removed.</p>${body}</div>
+  </div>`;
+}
+function stageSolve(q) {
+  const s = q.shown;
+  return `<h4>Solution ${s.sample + 1} of ${q.pool.length / 2}</h4>
+    <p class="say">This is the attempt whose answer the verifier finally picks${q.pool[q.pick].src === "c" ? " (in its corrected form, see the next stage)" : ""}. When the model writes a Python block, generation stops, we run the block in the sandbox, paste the output back and let the model continue.</p>
+    <div class="statrow"><span>code blocks run <b class="num">${s.blocks_ok} / ${s.blocks}</b></span><span>tokens <b class="num">${s.tokens.toLocaleString("en-US")}</b></span><span>finished <b>${s.finish === "length" ? "cut off at the limit" : "normally"}</b></span>${s.fallback ? "<span><b>fell back to plain reasoning</b></span>" : ""}</div>
+    <div class="sol" id="sol">${solutionHTML(s.text, !reduce)}</div>
+    <div class="answer-line"><span class="note">Answer of this attempt</span><span class="ans">${esc(ansText(s.pred))}</span>${mark(s.ok)}</div>`;
+}
+const STOP = { critic_ok: "the critic found no error", unchanged: "the answer stopped changing", max_rounds: "all 3 rounds were used" };
+function stageCheck(q) {
+  const ch = q.chain, s = q.shown.sample;
+  if (!ch) return `<div class="empty">No correction chain was saved for this attempt.</div>`;
+  const rounds = ch.rounds.map((r, i) => {
+    const v = r.error
+      ? `<div class="verdict err">✗ Error${r.step != null ? ` at step ${r.step}` : ""}</div>`
+      : `<div class="verdict okv">✓ No error found</div>`;
+    const forced = r.forced ? `<div class="note">The critic's reply was cut off, so we added "…give my decision. VERDICT:" and let it finish.</div>` : "";
+    const fix = r.fix ? `<div class="fix"><div class="speaker">CORRECTOR · Qwen3-VL-8B</div>
+        <div>Redoes the solution from the flagged step. New answer: <span class="ans">${esc(ansText(r.fix.answer))}</span>${r.fix.failed ? ' <span class="note">(no answer, previous one kept)</span>' : ""}</div>
+        ${r.fix.text ? `<details><summary>Read the corrected solution</summary><div class="doc-wrap">${solutionHTML(r.fix.text, false)}</div></details>` : ""}</div>` : "";
+    return `<div class="round"><div class="rn">R${i + 1}</div><div><div class="speaker">CRITIC · InternVL3.5-8B</div>${v}${r.why ? `<div class="why">${esc(r.why)}</div>` : ""}${forced}${fix}</div></div>`;
+  }).join("");
+  const o = q.pool.find(p => p.src === "o" && p.s === s), c = q.pool.find(p => p.src === "c" && p.s === s);
+  const changed = ch.rounds.some(r => r.error);
+  let gate = "";
+  if (o && c && changed) {
+    const d = c.score - o.score;
+    gate = `<div class="gate"><div><b>Correction gate.</b> The verifier scores the original answer <span class="ans">${esc(ansText(o.pred))}</span> at <span class="num">${fmt(o.score, 2)}</span> and the corrected answer <span class="ans">${esc(ansText(c.pred))}</span> at <span class="num">${fmt(c.score, 2)}</span> (change ${d >= 0 ? "+" : "−"}${fmt(Math.abs(d), 2)}). A correction is accepted unless the score drops by more than 0.08. <span class="note">The gate is its own row in the results table; the final pick looks at all 16 answers.</span></div>
+      <div class="res ${ch.gate_taken ? "mark ok" : "mark no"}">${ch.gate_taken ? "Accepted" : "Blocked"}</div></div>`;
+  }
+  return `<h4>Checking solution ${s + 1}</h4>
+    <p class="say">A different model reads the solution and must name the <b>first wrong step</b>, not just say right or wrong. The corrector keeps everything before that step and can run code again. This stops when the critic is satisfied, the answer stops changing, or after 3 rounds. Here it stopped because ${STOP[ch.stop] || ch.stop}.</p>
+    <div class="rounds">${rounds}</div>${gate}`;
+}
+function stagePick(q) {
+  const order = q.pool.map((p, i) => i).sort((a, b) => q.pool[b].score - q.pool[a].score);
+  const max = Math.max(...q.pool.map(p => p.score), 1e-9);
+  const rows = order.map(i => {
+    const p = q.pool[i];
+    return `<div class="prow ${i === q.pick ? "pick" : ""}" data-i="${i}"><span class="src ${p.src}">${p.src === "c" ? "corrected" : "original"} · ${p.s + 1}</span><span class="pa">${esc(ansText(p.pred))}</span><span class="bar"><i style="width:${(p.score / max * 100).toFixed(1)}%"></i></span><span class="sc num">${fmt(p.score, 3)}</span><span class="mk ${p.ok ? "ok" : "no"}">${q.key === false ? "" : p.ok ? "✓" : "✗"}</span></div>`;
+  }).join("");
+  const votes = q.methods.major.votes;
+    const vrows = votes.map(([k, n]) => `<div class="vote"><span class="ans">${esc(ansText(k))}</span><span class="vb">${Array.from({ length: n }, () => "<i></i>").join("")}</span><span class="num">${n}</span></div>`).join("");
+  const others = q.pool.length - votes.reduce((a, [, n]) => a + n, 0);
+  const f = q.methods.final, mj = q.methods.major;
+  const same = (f.pred ?? "") === (mj.pred ?? "") || f.ok === mj.ok && f.pred == mj.pred;
+  return `<div class="pool">
+    <div><h4>${q.pool.length} candidate answers, ranked by the verifier</h4>
+      <p class="say">${q.pool.length / 2} original attempts and their ${q.pool.length / 2} corrected versions. The ranker scores each one from simple signals: how many others agree, whether the code ran, whether it was cut off, what the critic said. The highest score is the final answer.</p>
+      <div class="phead"><span>attempt</span><span>answer</span><span>verifier score</span><span></span><span></span></div><div class="prows">${rows}</div></div>
+    <div><h4>For comparison: the plain vote</h4>
+      <p class="say">How the same ${q.pool.length} answers vote.</p>
+      <div class="votes">${vrows}${others > 0 ? `<div class="note">${others} more answer${others > 1 ? "s" : ""} with other values</div>` : ""}</div>
+      <div class="callout">Majority vote would pick <span class="ans">${esc(ansText(mj.pred))}</span> ${mark(mj.ok)}<br>The verifier picks <span class="ans">${esc(ansText(f.pred))}</span> ${mark(f.ok)}</div>
+      ${q.key === false ? "" : `<div class="callout">${q.pool.filter(p => p.ok).length} of ${q.pool.length} answers are right.</div>`}
+    </div></div>`;
+}
+function stageResult(q) {
+  const m = q.methods;
+  const saved = q.live ? " (saved run)" : "";
+  const rows = [
+    ...(m.cot0 ? [["One chain-of-thought answer (baseline)" + saved, m.cot0, `right in ${m.cot_rate[0]} of ${m.cot_rate[1]} tries`],
+                  [`Majority vote of ${m.sc.n} chain-of-thought answers` + saved, m.sc, "same token budget as ours"]] : []),
+    [`Majority vote of our ${q.pool.length} answers`, m.major, "no verifier"],
+    [q.live ? "Our framework: the verifier's pick (this live run)" : "Our framework: the verifier's pick", m.final, "", true],
+  ];
+  const nRight = q.pool.filter(p => p.ok).length;
+  if (q.key === false) {
+    return `<table class="cmp"><thead><tr><th>Method</th><th>Answer</th><th></th><th></th></tr></thead><tbody>
+      ${rows.map(([n, r, x, ours]) => `<tr class="${ours ? "ours" : ""}"><td>${n}</td><td class="a">${esc(ansText(r.pred))}</td><td></td><td class="note">${x}</td></tr>`).join("")}</tbody></table>
+      <div class="verdict-box"><div class="big">→</div><div><h5>Final answer: <span class="ans">${esc(ansText(m.final.pred))}</span></h5><p>This is a new question with no answer key, so it is not marked. The verifier's score for the picked answer is ${fmt(q.pool[q.pick].score, 3)}.</p></div></div>`;
+  }
+  const head = { correct: ["✓", "ok", "Right"], selector_miss: ["✗", "no", "Wrong, although a right answer was in the pool"], never_in_pool: ["✗", "no", "Wrong: none of the 16 answers was right"] }[q.outcome];
+  const why = { correct: `The verifier's pick matches the answer key. ${nRight} of the 16 candidates were right.`,
+    selector_miss: `${nRight} of the 16 candidates were right, but the verifier ranked a wrong one first. On 2026, 42 of the 204 questions end like this.`,
+    never_in_pool: `No way of picking could help here; the solver needs to read the question better. On 2026, 42 of the 204 questions end like this, mostly ones that need the diagram.` }[q.outcome];
+  const c = caseOf[q.id];
+  return `<table class="cmp"><thead><tr><th>Method</th><th>Answer</th><th></th><th></th></tr></thead><tbody>
+    ${rows.map(([n, r, x, ours]) => `<tr class="${ours ? "ours" : ""}"><td>${n}</td><td class="a">${esc(ansText(r.pred))}</td><td>${mark(r.ok)}</td><td class="note">${x}</td></tr>`).join("")}
+    <tr class="goldr"><td>Answer key</td><td class="a">${esc(q.gold)}</td><td></td><td></td></tr></tbody></table>
+    <div class="verdict-box"><div class="big ${head[1]}">${head[0]}</div><div><h5>${head[2]}</h5><p>${why}</p>${c ? `<p style="margin-top:8px"><b>${esc(c.t)}.</b> ${esc(c.n)}</p>` : ""}</div></div>`;
+}
+const RENDER = [stageRead, stageLook, stageSolve, stageCheck, stagePick, stageResult];
+
+function afterRender(i) {
+  const el = $("#stage");
+  typeset(el);
+  if (i === 0) {
+    const g = $("#goldBtn");
+    if (g) g.addEventListener("click", () => { revealed = true; g.classList.remove("hid"); g.nextElementSibling?.remove(); });
+  }
+  if (window.__liveHooks) timers.push(setTimeout(() => window.__liveHooks.afterRender(i, cur, el), 0));
+  if (i === 2) {
+    el.querySelectorAll(".out[data-delay]").forEach(o => {
+      const k = +o.dataset.delay, run = el.querySelector(`.run[data-run="${k}"]`);
+      if (!run) return;
+      o.hidden = true;
+      timers.push(setTimeout(() => { run.remove(); o.hidden = false; o.classList.add("fade-in"); }, 700 + (k - 1) * 900));
+    });
+  }
+}
+function go(i) {
+  clearTimers();
+  stageIx = Math.max(0, Math.min(5, i));
+  if (stageIx === 5) revealed = true;
+  const el = $("#stage");
+  el.innerHTML = `<div class="fade-in">${RENDER[stageIx](cur)}</div>`;
+  afterRender(stageIx);
+  document.querySelectorAll(".step").forEach((b, k) => {
+    b.classList.toggle("on", k === stageIx); b.classList.toggle("done", k < stageIx);
+    b.setAttribute("aria-selected", k === stageIx);
+  });
+  $("#railFill").style.width = `calc(${stageIx} * (100% - 100% / 6) / 5)`;
+  $("#pos").textContent = `${stageIx + 1} / 6`;
+  $("#prev").disabled = stageIx === 0;
+  $("#next").disabled = stageIx === 5;
+}
+function load(id, stage = 0) {
+  cur = byId[id]; revealed = false;
+  $("#qtitle").textContent = (cur.live ? "Live run · " : "") + (caseOf[id] ? caseOf[id].t : qname(cur));
+  $("#qchips").innerHTML = [qname(cur).split(" · ").slice(0, 2).join(" · "), TYPE[cur.type], cur.lang, cur.diagram ? "needs the diagram" : "text only"]
+    .map((c, i) => `<span class="chip ${i === 3 && cur.lang === "Hindi" ? "" : ""}">${esc(c)}</span>`).join("");
+  document.querySelectorAll(".case").forEach(b => b.setAttribute("aria-current", b.dataset.id === id));
+  $("#qpick").value = id;
+  go(stage);
+}
+
+// ------------------------------------------------------------------ play
+const DWELL = [7000, 8000, 11000, 9000, 9000, 9000];
+function stopPlay() { playing = false; clearTimeout(playTimer); $("#play").textContent = "▶ Play"; }
+function tick() {
+  if (!playing) return;
+  if (stageIx >= 5) { stopPlay(); return; }
+  playTimer = setTimeout(() => { if (!playing) return; go(stageIx + 1); tick(); }, DWELL[stageIx]);
+}
+$("#play").addEventListener("click", () => {
+  if (playing) { stopPlay(); return; }
+  playing = true; $("#play").textContent = "❚❚ Pause";
+  if (stageIx >= 5) go(0);
+  tick();
+});
+$("#prev").addEventListener("click", () => { stopPlay(); go(stageIx - 1); });
+$("#next").addEventListener("click", () => { stopPlay(); go(stageIx + 1); });
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input,select,textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+  const r = $("#replay").getBoundingClientRect();
+  if (r.bottom < 0 || r.top > innerHeight) return;
+  if (e.key === "ArrowRight") { stopPlay(); go(stageIx + 1); }
+  if (e.key === "ArrowLeft") { stopPlay(); go(stageIx - 1); }
+});
+
+// ------------------------------------------------------------------ case list + select
+$("#caseList").innerHTML = CASES.map(c => {
+  const q = byId[c.id];
+  return `<button class="case ${c.fail ? "fail" : ""}" type="button" data-id="${c.id}"><span class="t">${esc(c.t)}</span><span class="m">${SUBJ[q.subj]} · ${TYPE[q.type]} · ${q.lang}</span></button>`;
+}).join("");
+$("#caseList").addEventListener("click", e => { const b = e.target.closest(".case"); if (b) { stopPlay(); load(b.dataset.id); } });
+const OUTC = { correct: "✓", selector_miss: "✗ (in pool)", never_in_pool: "✗" };
+$("#qpick").innerHTML = ["P1", "P2"].map(p => ["Physics", "Chemistry", "Mathematics"].map(s =>
+  `<optgroup label="Paper ${p.slice(1)} · ${SUBJ[s]}">${Q.filter(q => q.paper === p && q.subj === s).map(q =>
+    `<option value="${q.id}">${TYPE[q.type]} ${q.id.split("-").pop().replace("q", "Q")} · ${q.lang} · ${OUTC[q.outcome]}</option>`).join("")}</optgroup>`).join("")).join("");
+$("#qpick").addEventListener("change", e => { stopPlay(); load(e.target.value); });
+
+// ------------------------------------------------------------------ results table
+const LABEL = {
+  "Baseline": ["One chain-of-thought answer", "the base paper's baseline"],
+  "Self-consistency": ["Majority vote of 18 CoT answers", "same compute as the full framework"],
+  "+ Code sandbox": ["+ Code sandbox, retrieval, transcript", "one answer"],
+  "+ Learned verifier": ["+ Verifier over the 8 code answers", "picks one of 8"],
+  "+ Correction (cross": ["+ Critic and corrector", "one answer"],
+  "+ Correction (gated)": ["+ Correction gate", "one answer"],
+  "framework (verifier": ["Full framework", "verifier picks one of 16"],
+};
+const lab = r => LABEL[Object.keys(LABEL).find(k => r.row.includes(k))] || [r.row, ""];
+function table1(year) {
+  const T = year === 2026 ? T26 : T25;
+  const max = 80, pct = v => (v / max * 100).toFixed(2) + "%";
+  const grid = [0, 20, 40, 60, 80].map(v => `<i class="grid" style="left:${pct(v)}"></i>`).join("");
+  $("#t1").innerHTML = `<div class="t1row head"><span>System</span><span class="hb">Accuracy, %</span><span style="text-align:right">%</span><span class="ht" style="text-align:right">tokens</span></div>` +
+    T.map(r => {
+      const [a, b] = lab(r);
+      const cls = r.row.includes(FINAL) ? "final" : r.row.includes(SC) ? "sc" : "";
+      return `<div class="t1row ${cls}"><span class="lab">${a}<small>${b}</small></span>
+        <span class="track">${grid}<i class="b" style="width:${pct(r.acc)}"></i>${r.ci ? `<i class="ci" style="left:${pct(r.ci[0])};width:${pct(r.ci[1] - r.ci[0])}"></i>` : ""}</span>
+        <span class="val">${fmt(r.acc)}</span><span class="tok">${r.tokens ? (r.tokens / 1000).toFixed(1) + "k" : ""}</span></div>`;
+    }).join("") +
+    `<div class="t1row t1-axis" style="border:0;padding-top:4px"><span></span><span class="axis">${[0, 20, 40, 60, 80].map(v => `<span style="left:${pct(v)}">${v}</span>`).join("")}</span><span></span><span></span></div>`;
+  $("#t1note").textContent = year === 2026
+    ? `JEE Advanced 2026, 204 questions. Full framework vs. same-compute voting: +${fmt(D.vs_sc.y2026.diff)} points (95% interval ${fmt(D.vs_sc.y2026.ci95[0])} to ${fmt(D.vs_sc.y2026.ci95[1])}); McNemar p = ${fmt(D.vs_sc.mcnemar.p, 3)} (${D.vs_sc.mcnemar.a_only} questions only we solve, ${D.vs_sc.mcnemar.b_only} only voting solves). Rows that give one answer are averaged over all attempts: 20 for the baseline, 8 for the others.`
+    : "JEE Advanced 2025, 190 questions. This exam shaped our design choices and may be known to the model, so we report it but do not use it as the headline.";
+  $("#y2026").setAttribute("aria-pressed", year === 2026);
+  $("#y2025").setAttribute("aria-pressed", year === 2025);
+}
+$("#y2026").addEventListener("click", () => table1(2026));
+$("#y2025").addEventListener("click", () => table1(2025));
+
+// ------------------------------------------------------------------ SC curve
+(() => {
+  const pts = Object.entries(D.sc_curve).map(([k, v]) => [+k, v]);
+  const W = 560, H = 300, L = 44, R = 20, T = 20, B = 40;
+  const x = n => L + (n - 1) / 19 * (W - L - R), y = v => T + (64 - v) / (64 - 36) * (H - T - B);
+  const fin = row(T26, FINAL).acc, base = row(T26, BASE).acc;
+  const path = pts.map(([n, v], i) => `${i ? "L" : "M"}${x(n).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  const yt = [40, 45, 50, 55, 60];
+  $("#scCurve").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Majority-vote accuracy against the number of votes, with the full framework as a line">
+    ${yt.map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule-2)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}%</text>`).join("")}
+    ${[1, 5, 10, 15, 18, 20].map(n => `<text x="${x(n)}" y="${H - B + 18}" text-anchor="middle">${n}</text>`).join("")}
+    <text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle" class="lbl">number of chain-of-thought answers voted</text>
+    <line x1="${x(18)}" x2="${x(18)}" y1="${T}" y2="${H - B}" stroke="var(--ink-3)" stroke-dasharray="3 4"/>
+    <text x="${x(18) - 6}" y="${y(38.2)}" text-anchor="end" class="lbl">same tokens as ours (~80k)</text>
+    <line x1="${L}" x2="${W - R}" y1="${y(fin)}" y2="${y(fin)}" stroke="var(--accent)" stroke-width="2"/>
+    <text x="${L + 6}" y="${y(fin) - 8}" class="lbl acc" style="fill:var(--accent)">Full framework ${fmt(fin)}%</text>
+    <path d="${path}" fill="none" stroke="var(--ink)" stroke-width="2"/>
+    ${pts.map(([n, v]) => `<circle cx="${x(n)}" cy="${y(v)}" r="${n === 18 ? 4.5 : 2.5}" fill="${n === 18 ? "var(--ink)" : "var(--sheet)"}" stroke="var(--ink)" stroke-width="1.5"/>`).join("")}
+    <text x="${x(18) + 8}" y="${y(D.sc_curve["18"]) + 16}" class="lbl">${fmt(D.sc_curve["18"])}%</text>
+  </svg>`;
+})();
+
+// ------------------------------------------------------------------ correction figure
+(() => {
+  const c = D.correction;
+  const items = [
+    [fmt(c.detect_rate) + "%", "of wrong solutions are flagged by the critic"],
+    [fmt(c.fix_rate_of_detected) + "%", "of flagged wrong solutions end up right (the base paper reports 1.1–5.2%)"],
+    [fmt(c.false_alarm_rate) + "%", "of right solutions are flagged anyway (false alarms)"],
+    [`${c.wrong_to_right} / ${c.right_to_wrong}`, "answers changed wrong → right / right → wrong, out of " + c.n_chains.toLocaleString("en-US")],
+  ];
+  $("#corrFig").innerHTML = `<div class="figs" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-top:0">${items.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join("")}</div>
+    <p class="note" style="margin-top:16px">False alarms are why the verifier sees both versions of every solution: it can keep the original when the correction made things worse.</p>`;
+})();
+
+// ------------------------------------------------------------------ decomposition
+(() => {
+  const d = D.decomposition, disc = D.discrimination;
+  const W = 560, H = 320, L = 44, R = 24, T = 28, B = 56;
+  const cols = ["Same-compute vote", "Vote over our 16", "Verifier pick"];
+  const x = i => L + 40 + i * ((W - L - R - 80) / 2), y = v => T + (76 - v) / (76 - 48) * (H - T - B);
+  const yt = [50, 55, 60, 65, 70, 75];
+  const series = [["2025", d["2025"], "var(--ink-3)", "6 3"], ["2026", d["2026"], "var(--accent)", ""]];
+  const lines = series.map(([yr, v, col, dash]) => {
+    const vals = [v.matched_sc, v.majority_v3_pool, v.v3_pick];
+    return `<path d="${vals.map((u, i) => `${i ? "L" : "M"}${x(i)},${y(u)}`).join("")}" fill="none" stroke="${col}" stroke-width="2.5" ${dash ? `stroke-dasharray="${dash}"` : ""}/>` +
+      vals.map((u, i) => `<circle cx="${x(i)}" cy="${y(u)}" r="5" fill="var(--sheet)" stroke="${col}" stroke-width="2.5"/><text x="${x(i) + (i === 2 ? 10 : -10)}" y="${y(u) + (yr === "2025" ? -10 : 18)}" text-anchor="${i === 2 ? "start" : "end"}" style="fill:${col};font:600 12px var(--f-mono)">${fmt(u)}</text>`).join("") +
+      `<text x="${x(0) - 10}" y="${y(vals[0]) + (yr === "2025" ? -26 : 34)}" text-anchor="end" style="fill:${col};font:600 12px var(--f-ui)">${yr}</text>`;
+  }).join("");
+  $("#decomp").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Accuracy from same-compute voting to the pool vote to the verifier pick, for 2025 and 2026">
+    ${yt.map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--rule-2)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}%</text>`).join("")}
+    ${cols.map((c, i) => `<line x1="${x(i)}" x2="${x(i)}" y1="${T - 6}" y2="${H - B}" stroke="var(--rule)"/><text x="${x(i)}" y="${H - B + 20}" text-anchor="middle" class="lbl">${c}</text>`).join("")}
+    <text x="${(x(0) + x(1)) / 2}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink);font:600 12px var(--f-ui)">pool gain</text>
+    <text x="${(x(1) + x(2)) / 2}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink);font:600 12px var(--f-ui)">selection gain</text>
+    ${lines}
+  </svg>`;
+  const g = (yr, k) => d[yr][k];
+  const sgn = v => (v >= 0 ? "+" : "−") + fmt(Math.abs(v));
+  $("#decompText").innerHTML = `
+    <div class="figs" style="margin-top:0;grid-template-columns:repeat(2,minmax(0,1fr))">
+      <div><b>${sgn(g("2025", "pool_gain").diff)} / ${sgn(g("2026", "pool_gain").diff)}</b><span>pool gain, 2025 / 2026. Stable across both exams.</span></div>
+      <div><b>${sgn(g("2025", "selection_gain").diff)} / ${sgn(g("2026", "selection_gain").diff)}</b><span>selection gain, 2025 / 2026. It did not carry over to the new exam.</span></div>
+      <div><b>${fmt(disc["2025"].auc_all_candidates, 2)} → ${fmt(disc["2026"].auc_all_candidates, 2)}</b><span>verifier AUC over all answers. It went up.</span></div>
+      <div><b>${fmt(disc["2025"].within_pool.mean, 2)} → ${fmt(disc["2026"].within_pool.mean, 2)}</b><span>AUC inside mixed pools, the part that decides the pick. It went down.</span></div>
+    </div>
+    <p style="margin-top:20px;color:var(--ink-2);max-width:60ch">The overall AUC mostly tells easy questions from hard ones. Picking only matters inside pools that hold both right and wrong answers, and there the verifier got weaker on 2026. So a high AUC alone does not prove good selection. What did carry over is the pool: the sandbox, the corrections and the transcript put the right answer into more pools.</p>`;
+})();
+
+// ------------------------------------------------------------------ question grid
+const flt = { lang: "", subj: "" };
+function grid() {
+  const groups = [["Text only", Q.filter(q => !q.diagram)], ["Needs the diagram", Q.filter(q => q.diagram)]];
+  $("#qgroups").innerHTML = groups.map(([name, qs]) => {
+    const vis = qs.filter(q => (!flt.lang || q.lang === flt.lang) && (!flt.subj || q.subj === flt.subj));
+    const cnt = k => vis.filter(q => q.outcome === k).length;
+    const n = vis.length || 1;
+    return `<div class="qgroup"><h3>${name}</h3>
+      <div class="stat">${vis.length} questions · <b class="num">${fmt(cnt("correct") / n * 100)}%</b> right · ${cnt("selector_miss")} not picked · ${cnt("never_in_pool")} never in the pool</div>
+      <div class="split" aria-hidden="true"><i style="width:${cnt("correct") / n * 100}%;background:var(--ink)"></i><i style="width:${cnt("selector_miss") / n * 100}%;background:var(--ink-3)"></i></div>
+      <div class="tiles">${qs.map(q => {
+        const on = (!flt.lang || q.lang === flt.lang) && (!flt.subj || q.subj === flt.subj);
+        const lbl = `${qname(q)}: ${{ correct: "right", selector_miss: "right answer in the pool, not picked", never_in_pool: "no right answer among the 16" }[q.outcome]}`;
+        return `<button type="button" class="tile ${q.outcome} ${on ? "" : "dim"}" data-id="${q.id}" title="${esc(lbl)}" aria-label="${esc(lbl)}" ${on ? "" : 'tabindex="-1"'}></button>`;
+      }).join("")}</div></div>`;
+  }).join("");
+}
+$("#qgroups").addEventListener("click", e => {
+  const t = e.target.closest(".tile"); if (!t || t.classList.contains("dim")) return;
+  stopPlay(); load(t.dataset.id); $("#replay").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+});
+for (const [sel, key] of [["#flang", "lang"], ["#fsubj", "subj"]]) {
+  $(sel).addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    flt[key] = b.dataset.v;
+    $(sel).querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    grid();
+  });
+}
+
+$("#kbSize").textContent = `${D.kb.entries} solved problems`;
+$("#kbTau").textContent = `τ = ${fmt(D.tau, 3)}`;
+table1(2026);
+grid();
+load(CASES[0].id);
+window.__demo = { D, Q, byId, load, go, solutionHTML, typeset, prose, esc, fmt, qname, TYPE, SUBJ, stopPlay,
+                  get cur() { return cur; }, get stage() { return stageIx; } };
+})();
+</script>
+<script>
+/* Live mode: active only when the page is served by demo_website/live/server.py. Opened as a
+   file or as the online copy, /api/health is unreachable and the page stays a pure replay. */
+(() => {
+"use strict";
+const S = window.__demo;
+if (!S || !/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+const $ = s => document.querySelector(s);
+const { esc, fmt } = S;
+const api = (path, body) => fetch(path, body === undefined ? {} : {
+  method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); });
+let health = null, src = "exam", upload = null, salts = {}, es = null, tick = null, liveN = 0;
+
+// ------------------------------------------------------------------ health / badge
+function setHealth(h) {
+  health = h;
+  const lab = h && h.solver && h.critic;
+  const b = $("#liveBadge");
+  b.hidden = !h; $("#live").hidden = !h;
+  if (!h) return;
+  b.classList.toggle("up", !!lab);
+  b.querySelector("span").textContent = h.test_mode ? "Live · test mode (saved cache)" : lab ? "Live · lab connected" : "Live · lab offline";
+  $("#liveNote").textContent = h.test_mode
+    ? "Test mode: model calls are answered from the saved cache with the frozen seeds, so exam questions reproduce the saved run. New questions need the lab."
+    : lab ? "Both models are loaded on the lab GPUs."
+    : `The lab GPUs are not connected${h.solver || h.critic ? ` (${h.solver ? "critic" : "solver"} missing)` : ""}. Questions run before show their recorded run; everything else on the page still works.`;
+  if (h.active && !watching(h.active.run)) attach(h.active, "Reconnected to the run that was already going.");
+  updateGo();
+}
+function poll() { api("/api/health").then(setHealth).catch(() => setHealth(null)); }
+poll(); setInterval(poll, 10000);
+
+// ------------------------------------------------------------------ form
+$("#liveQ").innerHTML = $("#qpick").innerHTML;
+$("#liveQ").value = "P1-EN-Phys-Num-q2";
+const mode = () => document.querySelector('input[name="lmode"]:checked').value;
+const curUid = () => S.byId[$("#liveQ").value].uid;
+const keyOf = () => src === "exam" ? `${curUid()}__${mode()}__${salts[curUid()] || "live-1"}` : null;
+function updateGo() {
+  if (!health) return;
+  const lab = health.solver && health.critic;
+  const rec = keyOf() && health.recorded.includes(keyOf());
+  $("#liveGo").disabled = !lab && !rec || (src === "new" && !upload) || health.busy;
+  $("#liveGo").textContent = health.busy ? "Another question is running" : lab ? "▶ Run live" : rec ? "Show recorded run" : "▶ Run live";
+  $("#liveAgain").disabled = !lab || src !== "exam";
+}
+["#liveQ"].forEach(s => $(s).addEventListener("change", updateGo));
+document.querySelectorAll('input[name="lmode"]').forEach(r => r.addEventListener("change", updateGo));
+$("#liveSrc").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  src = b.dataset.v;
+  $("#liveSrc").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  $("#srcExam").hidden = src !== "exam"; $("#srcNew").hidden = src !== "new";
+  updateGo();
+});
+function takeFile(f) {
+  if (!f || !f.type.startsWith("image/")) return;
+  const r = new FileReader();
+  r.onload = () => { upload = r.result; $("#dropPrev").src = upload; $("#dropPrev").hidden = false;
+                     $("#dropText").textContent = f.name || "pasted image"; updateGo(); };
+  r.readAsDataURL(f);
+}
+$("#liveFile").addEventListener("change", e => takeFile(e.target.files[0]));
+const drop = $("#drop");
+["dragenter", "dragover"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add("over"); }));
+["dragleave", "drop"].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove("over"); }));
+drop.addEventListener("drop", e => takeFile(e.dataTransfer.files[0]));
+document.addEventListener("paste", e => {
+  if (src !== "new") return;
+  const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith("image/"));
+  if (it) takeFile(it.getAsFile());
+});
+$("#liveForm").addEventListener("submit", e => { e.preventDefault(); start(false); });
+$("#liveAgain").addEventListener("click", () => {
+  const u = curUid(); const k = +(salts[u] || "live-1").split("-")[1] + 1;
+  salts[u] = `live-${k}`; start(false);
+});
+
+// ------------------------------------------------------------------ run view
+const STAGE_NAMES = ["Read", "Look up", "Solve", "Critique", "Verify", "Result"];
+let st = null;
+function view(title, note) {
+  $("#liveOut").innerHTML = `
+    <div class="lv-head"><h3>${esc(title)}</h3><span class="lv-tools"><span class="lv-status" id="lvStatus">starting…</span><button class="btn" type="button" id="lvStop" title="Stop this run">■ Stop</button></span>${note ? `<p class="note" style="flex-basis:100%">${esc(note)}</p>` : ""}</div>
+    <div class="mini-rail" id="lvRail">${STAGE_NAMES.map(n => `<span title="${n}"></span>`).join("")}</div>
+    <div class="lv-body">
+      <div class="lv-panel" id="lvRead" hidden><h4>Transcript <span class="note">written by Qwen3-VL from the image</span></h4><div class="lv-stream" id="lvTx"></div></div>
+      <div class="lv-panel" id="lvLook" hidden></div>
+      <div class="lv-panel" id="lvSolve" hidden><h4 id="lvSolveH">Attempts</h4><div class="lv-chips" id="lvSamples"></div>
+        <div style="margin-top:12px"><div class="note" id="lvFeatH" style="margin-bottom:6px">Attempt 1, as it is written</div><div class="lv-stream" id="lvFeat"><div class="doc caret"></div></div></div></div>
+      <div class="lv-panel" id="lvCheck" hidden><h4>Critic (InternVL3.5-8B) and corrector</h4><div class="lv-rounds" id="lvRounds"></div></div>
+      <div class="lv-panel" id="lvDone" hidden></div>
+    </div>`;
+}
+function railSet(i, status) {
+  const spans = document.querySelectorAll("#lvRail span");
+  spans.forEach((s, k) => {
+    if (k < i || (k === i && status === "done")) { s.className = "done"; }
+    else if (k === i) { s.className = "on"; }
+  });
+}
+let featBuf = "", featRid = "", featTimer = null;
+function featRender(final) {
+  const el = $("#lvFeat"); if (!el) return;
+  const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+  el.innerHTML = `<div class="doc-wrap ${final ? "" : "caret"}">${S.solutionHTML(featBuf, false)}</div>`;
+  if (final) S.typeset(el);
+  if (atBottom || !final) el.scrollTop = el.scrollHeight;
+}
+function sampleOf(rid) { const m = /\|s(\d+)(?:\||$)/.exec(rid || ""); return m ? +m[1] : null; }
+
+const watching = rid => es && es.readyState !== 2 && st && st.run === rid;
+// Shows a run by its id. The server keeps every event of a run and sends them all from the start,
+// so this also works for a run that began before the page was (re)loaded.
+function attach(info, note) {
+  if (es) es.close();
+  clearInterval(tick);
+  view(info.title, note);
+  st = { run: info.run, t0: info.t0 ? info.t0 * 1000 : Date.now(), samples: {}, n: info.n || 8, exam: info.exam || null };
+  featBuf = ""; featRid = ""; statusText = "starting…";
+  tick = setInterval(() => { const s = $("#lvStatus"); if (s && st.running !== false) s.dataset.t = Math.round((Date.now() - st.t0) / 1000); paintStatus(); }, 500);
+  $("#lvStop").addEventListener("click", () => {
+    $("#lvStop").disabled = true; statusText = "stopping…"; paintStatus();
+    api("/api/stop", { run: st.run }).catch(() => { $("#lvStop").disabled = false; });
+  });
+  es = new EventSource(`/api/events/${info.run}`);
+  es.onmessage = m => onEvent(JSON.parse(m.data));
+  es.onerror = () => { if (st.running !== false) { es.close(); } };
+}
+function start(recorded) {
+  if (es) es.close();
+  clearInterval(tick);
+  const body = { mode: mode(), recorded };
+  let title;
+  if (src === "exam") {
+    const q = S.byId[$("#liveQ").value];
+    body.uid = q.uid; body.salt = salts[q.uid] || "live-1"; title = S.qname(q);
+  } else {
+    body.image = upload; body.subject = $("#newSubj").value; body.type = $("#newType").value;
+    body.language = $("#newLang").value; body.diagram = $("#newDiag").checked;
+    title = `New question · ${body.subject} · ${S.TYPE[body.type]}`;
+  }
+  const exam = src === "exam" ? $("#liveQ").value : null;
+  body.title = title; body.exam = exam;
+  view(title);
+  st = { t0: Date.now(), samples: {}, n: mode() === "quick" ? 4 : 8, exam };
+  $("#liveGo").disabled = true;
+  api("/api/run", body).then(r => {
+    if (r.error) return onEvent({ type: "error", message: r.error });
+    if (r.attached) return attach(r.active, "Another question is still running, so it is shown here. Start yours when it has finished.");
+    attach({ run: r.run, title, exam, n: st.n });
+  }).catch(e => onEvent({ type: "error", message: `Could not start the run (${e.message}).` }));
+}
+let statusText = "starting…";
+function paintStatus() {
+  const s = $("#lvStatus"); if (!s) return;
+  const t = Math.round((Date.now() - st.t0) / 1000);
+  s.textContent = st.running === false ? statusText : `${statusText} · ${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
+}
+function chips() {
+  const el = $("#lvSamples"); if (!el) return;
+  el.innerHTML = Array.from({ length: st.n }, (_, s) => {
+    const x = st.samples[s] || {};
+    const cls = x.pred !== undefined ? (x.ok === true ? "ok" : x.ok === false ? "no" : "acc") : st.running === false ? "" : "run";
+    return `<span class="lv-chip ${cls}">#${s + 1} ${x.pred !== undefined ? esc(x.pred ?? "—") : ""} <span style="opacity:.7">${x.tokens ? x.tokens.toLocaleString("en-US") + " tok" : ""}</span></span>`;
+  }).join("");
+}
+function onEvent(ev) {
+  switch (ev.type) {
+    case "recorded":
+      statusText = `recorded run from ${ev.at}`; break;
+    case "stage": {
+      railSet(ev.i, ev.status);
+      const names = ["Reading the question", "Tagging and searching the knowledge base", "Solving with the code sandbox", "Critique and correction", "Verifier scoring the pool", "Done"];
+      if (ev.status === "start") statusText = names[ev.i] + "…";
+      if (ev.i === 0 && ev.status === "start") { $("#lvRead").hidden = false; $("#lvTx").innerHTML = `<div class="doc caret"></div>`; }
+      if (ev.i === 0 && ev.status === "done") { $("#lvTx").innerHTML = S.prose(ev.transcript || ""); S.typeset($("#lvTx")); }
+      if (ev.i === 1 && ev.status === "done") {
+        const t = ev.tag || {}, r = ev.retrieval || [];
+        $("#lvLook").hidden = false;
+        $("#lvLook").innerHTML = `<h4>Concept tag and retrieval</h4><div class="lv-chips"><span class="lv-chip">${esc(t.subject)}</span><span class="lv-chip">${esc(t.topic)}</span><span class="lv-chip">${esc(t.method)}</span></div>
+          <p class="note" style="margin-top:8px">${r.length ? `${r.length} solved example${r.length > 1 ? "s" : ""} added: ${r.map(h => `${esc(h.id)} (similarity ${fmt(h.sim, 3)})`).join(", ")}` : `No solved problem passed the similarity threshold τ = ${fmt(S.D.tau, 3)}; solving without examples.`}</p>`;
+      }
+      if (ev.i === 2 && ev.status === "start") { $("#lvSolve").hidden = false; st.n = ev.n || st.n; chips(); }
+      if (ev.i === 2 && ev.status === "done") {
+        (ev.samples || []).forEach(x => { st.samples[x.s] = { ...st.samples[x.s], pred: x.pred, ok: x.ok, tokens: x.tokens }; });
+        chips(); $("#lvSolveH").textContent = "Attempts: final answers";
+      }
+      if (ev.i === 3 && ev.status === "start") { $("#lvCheck").hidden = false; }
+      break;
+    }
+    case "calls":
+      if (ev.role === "critic") statusText = `InternVL checking ${ev.n} solution${ev.n > 1 ? "s" : ""}…`;
+      else if (ev.kinds.includes("solve") && ev.n > 1) statusText = `Qwen3-VL writing ${ev.n} attempt${ev.n > 1 ? "s" : ""}…`;
+      break;
+    case "stream_start":
+      if (ev.rid !== featRid || ev.role === "critic") {
+        featRid = ev.rid;
+        const corr = /\|corr(\d+)/.exec(ev.rid || "");
+        const crit = ev.role === "critic";
+        $("#lvFeatH").textContent = corr ? `Attempt 1, corrector round ${+corr[1] + 1}, as it is written`
+          : crit ? "Attempt 1, the critic's check (InternVL3.5-8B), as it is written" : "Attempt 1, as it is written";
+      }
+      featBuf = ev.text || ""; featRender(false); break;
+    case "delta":
+      featBuf += ev.text;
+      if (!featTimer) featTimer = setTimeout(() => { featTimer = null; featRender(false); }, 120);
+      break;
+    case "result": {
+      const s = sampleOf(ev.rid);
+      if (ev.role === "solver" && s !== null && /^v3_pot\|/.test(ev.rid || "")) {
+        st.samples[s] = { ...st.samples[s], tokens: (st.samples[s]?.tokens || 0) + (ev.tokens || 0) }; chips();
+      }
+      if (ev.text !== undefined) { featBuf = ev.text; featRender(true); }
+      break;
+    }
+    case "critic": {
+      const row = document.createElement("div"); row.className = "lv-round";
+      row.innerHTML = `<span class="note">Round ${ev.round + 1}</span><span class="lv-chips">${ev.chains.map(c =>
+        `<span class="lv-chip ${c.error ? "no" : "ok"}">#${c.s + 1} ${c.error ? `✗ step ${c.step ?? "?"}` : "✓ no error"}</span>`).join("")}</span>`;
+      $("#lvRounds").append(row); break;
+    }
+    case "corrector": {
+      if (!ev.chains.length) break;
+      const row = document.createElement("div"); row.className = "lv-round";
+      row.innerHTML = `<span class="note">Fixes</span><span class="lv-chips">${ev.chains.map(c =>
+        `<span class="lv-chip acc">#${c.s + 1} → ${esc(c.answer ?? "—")}</span>`).join("")}</span>`;
+      $("#lvRounds").append(row); break;
+    }
+    case "done": return finish(ev.record);
+    case "stopped": {
+      const t = Math.round(ev.seconds || 0);
+      st.running = false; clearInterval(tick); if (es) es.close();
+      statusText = `stopped after ${Math.floor(t / 60)}:${String(t % 60).padStart(2, "0")}`;
+      if ($("#lvStop")) $("#lvStop").hidden = true;
+      document.querySelectorAll("#lvRail span.on").forEach(x => { x.className = ""; });
+      chips(); if (featBuf) featRender(true);
+      $("#lvDone").hidden = false;
+      $("#lvDone").innerHTML = `<h4>Run stopped</h4><p class="note" style="max-width:62ch">The run was stopped before the verifier could pick an answer, so it has no final answer and is not saved as a recorded run. What it produced so far is shown above. Model calls that had already finished are kept in the cache, so running this question again in the same mode resumes close to where it stopped.</p>${st.exam ? `<div class="live-actions" style="margin-top:12px"><button class="btn primary" type="button" id="lvResume">▶ Run it again</button><button class="btn" type="button" id="lvReplay">Replay the saved run</button></div>` : ""}`;
+      $("#lvResume")?.addEventListener("click", () => { src = "exam"; $("#liveQ").value = st.exam; start(false); });
+      $("#lvReplay")?.addEventListener("click", () => { S.load(st.exam); $("#replay").scrollIntoView(); });
+      poll(); break;
+    }
+    case "error":
+      st.running = false; statusText = "stopped"; clearInterval(tick); paintStatus();
+      if ($("#lvStop")) $("#lvStop").hidden = true;
+      $("#lvDone").hidden = false;
+      $("#lvDone").innerHTML = `<div class="lv-err">${esc(ev.message)}</div>${st.exam ? `<div class="live-actions" style="margin-top:12px"><button class="btn" type="button" id="lvReplay">Replay the saved run of this question</button></div>` : ""}`;
+      $("#lvReplay")?.addEventListener("click", () => { S.load(st.exam); $("#replay").scrollIntoView(); });
+      if (es) es.close(); poll(); break;
+  }
+  paintStatus();
+}
+function finish(rec) {
+  st.running = false; clearInterval(tick); if (es) es.close();
+  if ($("#lvStop")) $("#lvStop").hidden = true;
+  for (let i = 0; i < 6; i++) railSet(i, "done");
+  const l = rec.live || {};
+  statusText = statusText.startsWith("recorded") ? statusText : `finished in ${Math.floor(l.seconds / 60)} min ${Math.round(l.seconds % 60)} s`;
+  paintStatus();
+  liveN++;
+  const id = `${rec.id}·live${liveN}`;
+  rec.id = id;
+  S.byId[id] = rec;
+  const saved = st.exam ? S.byId[st.exam] : null;
+  const f = rec.methods.final, key = rec.key !== false;
+  const markF = ok => !key ? "" : ok ? '<span class="mark ok">✓ right</span>' : '<span class="mark no">✗ wrong</span>';
+  $("#lvDone").hidden = false;
+  $("#lvDone").innerHTML = `<div class="lv-final"><div class="big">${!key ? "→" : f.ok ? "✓" : "✗"}</div><div>
+      <h4 style="margin:0">Final answer: <span class="ans">${esc(f.pred ?? "(none)")}</span> ${markF(f.ok)}</h4>
+      <p class="note" style="margin-top:4px">${rec.pool.filter(p => p.ok).length && key ? `${rec.pool.filter(p => p.ok).length} of ${rec.pool.length} candidates right · ` : ""}${l.n_samples} attempts, up to ${l.max_rounds} correction round${l.max_rounds > 1 ? "s" : ""}${key ? ` · answer key ${esc(rec.gold)}` : " · no answer key (new question)"}</p>
+      ${saved ? `<p class="note">Saved frozen run of this question: <span class="ans">${esc(saved.methods.final.pred ?? "(none)")}</span> ${markF(saved.methods.final.ok)}. A live run uses new samples, so the two can differ.</p>` : ""}
+    </div></div>
+    <div class="live-actions"><button class="btn primary" type="button" id="lvOpen">Step through this run ↓</button></div>`;
+  $("#lvOpen").addEventListener("click", () => { S.stopPlay(); S.load(id); $("#replay").scrollIntoView(); });
+  poll();
+}
+
+// ------------------------------------------------------------------ add-ons inside the replay
+const PRESETS = [
+  ["import os", "import os\nprint(os.listdir('/'))"],
+  ["read a file", "print(open('/etc/passwd').read())"],
+  ["endless loop", "while True:\n    pass"],
+  ["memory bomb", "x = [0] * (10**10)"],
+  ["sneaky import", "__import__('os').system('ls')"],
+];
+function sandboxCells(el) {
+  el.querySelectorAll(".cell").forEach(cell => {
+    const hd = cell.querySelector(".hd"), pre = cell.querySelector(":scope > pre");
+    if (!hd || !pre || hd.querySelector(".edit-btn")) return;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "edit-btn"; b.textContent = "Edit and run ▸";
+    hd.lastElementChild.replaceWith(b);
+    b.addEventListener("click", () => {
+      const code = pre.textContent;
+      const ta = document.createElement("textarea"); ta.value = code; ta.spellcheck = false;
+      ta.setAttribute("aria-label", "Python code to run in the sandbox");
+      pre.replaceWith(ta);
+      const bar = document.createElement("div"); bar.className = "sbx-bar";
+      bar.innerHTML = `<button type="button" class="run">Run in our sandbox</button><span>try to break it:</span>${PRESETS.map((p, i) => `<button type="button" data-p="${i}">${p[0]}</button>`).join("")}`;
+      const out = document.createElement("div"); out.className = "out sbx-out";
+      ta.after(bar); bar.after(out);
+      cell.querySelectorAll(":scope > .out:not(.sbx-out), :scope > .run").forEach(x => x.remove());
+      b.remove();
+      const run = () => {
+        out.innerHTML = `<div class="run"><span class="spin"></span>running (python -I, 10 s, 1 GB)…</div>`;
+        api("/api/sandbox", { code: ta.value }).then(r => {
+          const label = r.ok ? `OUTPUT · ran in ${r.seconds} s` : r.error === "blocked" ? "BLOCKED before running · syntax-tree check" : r.timed_out ? "STOPPED · time limit" : `ERROR · ${esc(r.error)}`;
+          out.innerHTML = `<div class="hd"><span>${label}</span></div><pre class="${r.ok ? "" : "blocked"}">${esc(r.output || "(no output)")}</pre>`;
+        }).catch(e => { out.innerHTML = `<pre class="blocked">Sandbox unavailable (${esc(e.message)})</pre>`; });
+      };
+      bar.addEventListener("click", e => {
+        const t = e.target.closest("button"); if (!t) return;
+        if (t.classList.contains("run")) return run();
+        ta.value = PRESETS[+t.dataset.p][1]; run();
+      });
+    });
+  });
+}
+function kbSearch(el, q) {
+  const box = document.createElement("div"); box.className = "kbsearch";
+  box.innerHTML = `<h4>Search the knowledge base yourself</h4><p class="say">Type any topic and method. The same embedding model and similarity are used (tag part only).</p>
+    <form><input type="text" aria-label="Search query" value="${esc(q.tag?.query || "")}"><button class="btn" type="submit">Search</button></form><div class="kbres"></div>`;
+  el.querySelector(".two > div:last-child")?.append(box);
+  const res = box.querySelector(".kbres");
+  box.querySelector("form").addEventListener("submit", e => {
+    e.preventDefault();
+    res.innerHTML = `<p class="note">searching…</p>`;
+    api("/api/retrieve", { query: box.querySelector("input").value, subject: q.subj, twin: q.twin }).then(r => {
+      res.innerHTML = r.hits.map(h => `<div class="kbhit"><b class="${h.above ? "above" : ""}">${fmt(h.sim, 3)}</b><div><b style="font-weight:500">${esc(h.id)}</b> · ${esc(h.topic || "")}${h.above ? " · <span style='color:var(--accent)'>above τ: would be used</span>" : ""}</div></div>`).join("")
+        + `<p class="note" style="margin-top:6px">τ = ${fmt(r.tau, 3)} · ${esc(r.note)}</p>`;
+    }).catch(e => { res.innerHTML = `<p class="note">Search failed (${esc(e.message)})</p>`; });
+  });
+}
+function whatIf(el, q) {
+  const pool = el.querySelector(".pool > div"); if (!pool) return;
+  const bar = document.createElement("div"); bar.className = "whatif";
+  if (q.live) { bar.textContent = "What-if editing works on the saved runs of the 204 questions."; pool.append(bar); return; }
+  bar.innerHTML = `<b>What if?</b> Click a row to see why it got its score; change an answer and the real verifier re-scores all ${q.pool.length}. <button class="btn" type="button" id="wiReset">Reset</button>`;
+  pool.append(bar);
+  const why = document.createElement("div"); why.className = "why"; pool.append(why);
+  const edits = {};
+  let sel = q.pick, last = null;
+  const rows = [...el.querySelectorAll(".prow[data-i]")];
+  const paint = r => {
+    last = r;
+    const max = Math.max(...r.scores, 1e-9);
+    rows.forEach(row => {
+      const i = +row.dataset.i;
+      row.querySelector(".sc").textContent = fmt(r.scores[i], 3);
+      row.querySelector(".bar i").style.width = (r.scores[i] / max * 100).toFixed(1) + "%";
+      const mk = row.querySelector(".mk"); mk.className = `mk ${r.rows[i].ok ? "ok" : "no"}`; mk.textContent = r.rows[i].ok ? "✓" : "✗";
+      row.classList.toggle("pick", i === r.pick); row.classList.toggle("sel", i === sel);
+    });
+    const box = el.querySelector(".prows");
+    rows.sort((a, b) => r.scores[+b.dataset.i] - r.scores[+a.dataset.i]).forEach(x => box.append(x));
+    const c = el.querySelectorAll(".callout")[0];
+    if (c) c.innerHTML = c.innerHTML.replace(/The verifier picks .*$/s, `The verifier picks <span class="ans">${esc(r.pred ?? "(no answer)")}</span> ${r.ok ? '<span class="mark ok">✓ right</span>' : '<span class="mark no">✗ wrong</span>'}`);
+    const w = r.why[sel] || [];
+    const m = Math.max(...w.map(x => Math.abs(x.v)), 1e-9);
+    why.innerHTML = `<div class="note" style="margin-bottom:4px">Why answer ${esc(r.rows[sel].pred ?? "—")} scored ${fmt(r.scores[sel], 3)}: the five features that moved it most</div>` +
+      w.map(x => `<div class="whyrow"><span>${esc(x.f)}</span><span class="wb"><i style="${x.v >= 0 ? `left:50%;width:${x.v / m * 50}%;background:var(--right)` : `right:50%;width:${-x.v / m * 50}%;background:var(--wrong)`}"></i></span><span class="num" style="text-align:right">${x.v >= 0 ? "+" : "−"}${fmt(Math.abs(x.v), 2)}</span></div>`).join("");
+  };
+  const rescore = () => api("/api/verify", { uid: q.uid, edits: Object.values(edits) }).then(paint).catch(() => { bar.textContent = "Re-scoring is unavailable right now."; });
+  rows.forEach(row => {
+    const i = +row.dataset.i, pa = row.querySelector(".pa");
+    row.addEventListener("click", e => { if (e.target.tagName === "INPUT") return; sel = i; if (last) paint(last); });
+    pa.addEventListener("dblclick", () => edit());
+    const edit = () => {
+      const inp = document.createElement("input"); inp.className = "pa-in"; inp.value = pa.textContent.trim();
+      inp.setAttribute("aria-label", "New answer");
+      pa.replaceWith(inp); inp.focus(); inp.select();
+      const done = () => {
+        const v = inp.value.trim(); inp.replaceWith(pa);
+        if (v && v !== pa.textContent) { pa.textContent = v; edits[i] = { ...(edits[i] || { i }), pred: v }; sel = i; rescore(); }
+      };
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") done(); if (e.key === "Escape") inp.replaceWith(pa); });
+      inp.addEventListener("blur", done);
+    };
+    row.title = "Click: why this score · double-click the answer: change it";
+  });
+  bar.querySelector("#wiReset").addEventListener("click", () => { S.go(4); });
+  rescore();
+}
+window.__liveHooks = {
+  afterRender(i, q, el) {
+    if (!health) return;
+    if (i === 1) kbSearch(el, q);
+    if (i === 2 || i === 3) sandboxCells(el);
+    if (i === 4) whatIf(el, q);
+  },
+};
+})();
+</script>
+
+</body>
+</html>
