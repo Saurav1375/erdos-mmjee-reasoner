@@ -31,42 +31,34 @@ and Retrieval on JEE Advanced}
 \begin{abstract}
 According to the mmJEE-Eval benchmark, open vision-language models (VLMs) answer only a small
 share of JEE Advanced questions correctly, and although they notice an error in their own
-reasoning in up to 73\% of cases, they repair it in only 1.1--5.2\%. In this project we test how
-much of this gap can be closed at inference time without any training of the model. A frozen
+reasoning in up to 73\% of cases, they repair it in only 1.1--5.2\%. We test how much of this gap can be closed at inference time without training the model. A frozen
 4-bit Qwen3-VL-8B, running on a single 12\,GB GPU, is combined with four modules: a Python
 sandbox for exact calculation, a critic from a different model family that marks the first wrong
-step, a learned verifier that chooses the final answer, and retrieval of solved examples. Our
-first test year (2025) influenced the design during development and may also have been seen by
-the model, so we prepared a second test year, JEE Advanced 2026 (\NTest{} questions, with the 102
+step, a learned verifier that chooses the final answer, and retrieval of solved examples. Since 2025, our first test year, influenced our design and may have been seen by the model, we used a second test year, JEE Advanced 2026 (\NTest{} questions, with the 102
 Hindi versions cropped by us), fixed an improved system using 2019--2024 data only, and ran it
 on 2026 a single time. The framework scores \ThreeAcc\% on 2026, compared with \ThreeBase\% for a
 single answer, and is \ThreeVsSc{} points above majority voting with the same compute (95\% CI
 [\ThreeVsScLo, \ThreeVsScHi], $p{=}$\ThreeVsScP). Between 14 and 19\% of the errors found by the
-critic end up corrected. We also tested eight further ideas, each with a pass rule written down
-in advance, and none of them passed. Splitting the gain into two parts shows why. The part that
+critic end up corrected. We tested eight more ideas with predefined pass rules. None passed. We separated the gain into contributions from the candidate pool and the verifier. The part that
 comes from the larger and more varied pool of candidate answers is similar in both years
 (\VbPoolTwentyFive{} and \VbPoolTwentySix{} points), whereas the part contributed by the learned
 selector drops from \VbSelTwentyFive{} to \VbSelTwentySix{} points, even though its overall AUC
-increases. Questions that depends on a diagram are still the weakest group (\ThreeImg\% against
+increases. Questions requiring diagrams remain the weakest group (\ThreeImg\% against
 \ThreeTxt\% for text-only questions).
 \end{abstract}
 
 % ==============================================================================================
 \section{Introduction}
-Recent vision-language models obtain high scores on the common multimodal reasoning benchmarks,
-and its often unclear how much of this reflects scientific reasoning and how much reflects
+Recent vision-language models score well on common multimodal benchmarks, but it is unclear how much of this reflects scientific reasoning and how much reflects
 familiarity with the question style. mmJEE-Eval~\cite{mmjee} was built to study this question.
 It contains 1{,}460 questions from India's JEE Advanced exam (2019--2025) in English and Hindi,
-and each question is given to the model as an image. Three of its findings motivated our
-project. Open models solve 37--45\% of the held out 2025 questions, against 77--84\% for the
+and each question is given to the model as an image. Three findings from mmJEE-Eval motivated our work. Open models solve 37--45\% of the held out 2025 questions, against 77--84\% for the
 best closed models. Numerical questions, where an exact calculation is needed, account for
 44.7\% of the benchmark. Finally, models detect errors in their own reasoning in 21--73\% of
 cases but manage to fix only 1.1--5.2\% of them. The benchmark paper reports these weaknesses
 without attempting to reduce them.
 
-Our project asks how far \emph{test-time} methods, which do not change the model's weights, can
-narrow this gap for a small open model on ordinary lab hardware. The framework in
-Fig.~\ref{fig:arch} consists of four modules. The first is a \emph{code sandbox}: the model
+We investigate whether \emph{test-time} methods can narrow this gap without changing the model's weights, for a small open model on ordinary lab hardware. Fig.~\ref{fig:arch} shows the four modules. The \emph{code sandbox} handles calculations: the model
 writes each calculation as Python, which we execute in a restricted process~\cite{pot,pal}. The
 second is \emph{agentic correction}, where a model from another family identifies the first wrong
 step and the solver rewrites the solution from that step onwards~\cite{selfrefine,critic}. The
@@ -74,12 +66,7 @@ third is a \emph{learned verifier} that gives every candidate answer a score and
 highest-scoring one~\cite{cobbe,xgboost}. The fourth \emph{retrieves} verified solutions of earlier
 problems that use the same method~\cite{rag}.
 
-Gains from test-time methods are easy to overstate, and we took three precautions. Since these
-methods spend more compute than a single answer, we compare them with majority voting that is
-given the same compute~\cite{selfconsistency}. Since the methods have many settings, we made
-sure that the test questions played no part in choosing them. Since the model may have been
-trained on past exam papers, we needed a test exam that appeared after its release.
-Fig.~\ref{fig:design} shows how the study is organized around these points. After a pilot and a
+To avoid overstating the gains, we used three evaluation controls. We compare against majority voting at matched compute~\cite{selfconsistency} because these methods use more tokens than a single answer. We selected the method settings without using the test questions. To reduce possible contamination from earlier exams, we used an exam held after the model's release. Fig.~\ref{fig:design} summarizes the development and testing sequence. After a pilot and a
 full run on 2025 (Phase~2), the final test was moved to the 2026 exam, all rules were fixed
 before it was run, and every idea tried afterwards is reported, including those that failed.
 
@@ -131,8 +118,7 @@ took place after the freeze, so their results on the test years are marked post-
 images, and it also includes a contamination test and a study of single-pass self-correction.
 JEEBench~\cite{jeebench} (text) and OlympiadBench~\cite{olympiadbench} (bilingual olympiad
 problems) are related benchmarks.
-\textbf{Tool use.} Program-of-thought prompting~\cite{pot} and PAL~\cite{pal} let the model hand
-arithmetic to an interpreter.
+\textbf{Tool use.} Program-of-thought prompting~\cite{pot} and PAL~\cite{pal} use an interpreter for arithmetic.
 \textbf{Sampling and voting.} Self-consistency~\cite{selfconsistency} samples several chains of
 thought and takes a majority vote.
 \textbf{Self-correction.} Self-Refine~\cite{selfrefine} and CRITIC~\cite{critic} alternate
@@ -148,9 +134,9 @@ context.
 \textbf{Benchmark.} An mmJEE-Eval item is a single image holding the question, its options and
 any figure, together with metadata (subject, question type, year, language and the gold answer).
 There are four question types (numerical, single-correct MCQ, multiple-correct MCQ and
-matching), and 30.3\% of the questions can not be answered without the diagram.
+matching), and 30.3\% of the questions cannot be answered without the diagram.
 
-\textbf{Splits.} The data is split by exam year (Table~\ref{tab:splits}). The years 2019--2024
+\textbf{Splits.} We split the data by exam year (Table~\ref{tab:splits}). The years 2019--2024
 (1{,}270 questions) are used for training and development, and 2024 serves as the dev year. The
 2025 exam (\NPost{} questions) was our test year in Phase~2. It was later used for the pilot,
 it influenced several design decisions and the model may have seen it, so every 2025 number
@@ -158,13 +144,11 @@ reported after Phase~2 is marked as post-hoc.
 
 \textbf{Clean test year.} JEE Advanced 2026 took place after Qwen3-VL was released. The dataset
 has its 102 English questions, and we added the 102 Hindi versions ourselves. Each Hindi question
-was cropped from the official hindi paper, matched to its English twin by paper, subject and
+was cropped from the official Hindi paper, matched to its English twin by paper, subject and
 question number, and given the answer from the English key. An automatic check confirmed every
 pairing, and 14 crops, among them all size outliers, were inspected by hand. While doing this we
-found and fix three bugs in our parser; in one of them, the Hindi word for ``part'' inside a
-physics question had been read as a section heading. Fig.~\ref{fig:example} shows one pair. Our
-crops do not look exactly like the dataset images, and for this reason we also give results
-separately for each language.
+found and fixed three bugs in our parser; in one of them, the Hindi word for ``part'' inside a
+physics question had been read as a section heading. Fig.~\ref{fig:example} shows one pair. Because our crops differ from the dataset images, we report results separately for each language.
 
 \begin{table}[!t]
 \centering\footnotesize
@@ -202,7 +186,7 @@ one answer, we report the accuracy of that answer.
 of them whose generated tokens add up to at least the system's own token count.
 
 \textbf{Leakage control.} Test questions and their twins never appear in a training pool.
-Knowledge-base entries that are close to any 2025 or 2026 question were deleted, and no 2025 or
+We removed knowledge-base entries similar to any 2025 or 2026 question, and no 2025 or
 2026 data was used when the final system was frozen.
 
 % ==============================================================================================
@@ -241,24 +225,20 @@ is trained on automatically labelled answers from 2019--2024.}
 
 \subsection{Modules}
 The full prompts are reproduced in Appendix~\ref{app:prompts}.
-\textbf{A. Code sandbox (program of thought).} The solver writes its solution as numbered steps
-and places every calculation in a \texttt{python} block. Each block is executed in a separate
+\textbf{A. Code sandbox (program of thought).} The solver writes numbered steps, with calculations placed in \texttt{python} blocks. Each block is executed in a separate
 subprocess (\texttt{python -I}) after an AST check that admits math, NumPy, SymPy and SciPy and
-rejects any file or network access, with limits on time, memory and output size. The output is
-inserted into the solution and generation than continues. Before a block runs, the earlier
+rejects any file or network access, with limits on time, memory and output size. The output is inserted into the solution, after which generation continues. Before a block runs, the earlier
 blocks of the same solution are executed again so that their variables are available. When the
 solution ends without a \verb|\boxed{}| answer, a plain CoT answer is used instead.
 
 \textbf{B. Agentic correction.} The critic, InternVL3.5-8B, comes from a different model family
 than the solver. It reads a solution and either names the first wrong step or replies
-\texttt{NO\_ERROR}. The corrector, which is the solver model again, keeps the steps before the
-flagged one and works out the remainder anew. Atmost three rounds are run, and the loop ends
+\texttt{NO\_ERROR}. The same solver acts as the corrector, keeping the earlier steps and reworking the solution from the flagged step. At most three rounds are run, and the loop ends
 early if the critic accepts the solution or the answer stays the same for two rounds. If a critic
 reply is cut off, we append a short cue asking for the decision and let the critic continue
 greedily for a few tokens (\emph{verdict forcing}).
 
-\textbf{C. Learned verifier.} The scorer can mark every answer sampled on 2019--2024 as right or
-wrong, so labelled training data is available without manual annotation (in Phase~2, 10{,}160
+\textbf{C. Learned verifier.} We label the 2019--2024 sampled answers using the scorer, without manual annotation (in Phase~2, 10{,}160
 answers, of which 45.5\% were correct). The features are hand crafted: length, number of steps,
 whether the code ran, truncation, hedging words, format, agreement with the other answers in the
 pool and in each half of it, critic flags, number of rounds and whether the answer changed. In
@@ -267,8 +247,7 @@ solutions and their 8 corrected versions) and returns the answer with the highes
 
 \textbf{D. Retrieval.} The model first writes a one-line tag naming the topic and the method. We
 embed this tag with bge~\cite{bge}, search with FAISS~\cite{faiss} and take at most two verified worked solutions of the same subject from earlier
-years. They are added to the prompt as examples of the method only when their similarity is above
-a threshold $\tau$, so that weakly related problems are left out.
+years. We include these examples only when their similarity exceeds a threshold $\tau$, excluding weak matches.
 
 \subsection{From the Phase-2 system to the final system}
 We chose every change below using only 2019--2024 data, with a rule set before testing: a
@@ -292,22 +271,19 @@ score goes up by more than $\delta{=}$\GateDelta, with $\delta$ picked on other 
 has its own row in the results, but the final answer is still the verifier's pick from the full
 pool.
 \end{itemize}
-We froze the configuration and commited it to the repository before the first 2026 run.
+We froze the configuration and committed it to the repository before the first 2026 run.
 
 \input{generated/t_devab.tex}
 
 % ==============================================================================================
 \section{Experimental setup}
 Qwen3-VL-8B-Instruct~\cite{qwen3vl} is the solver and also writes the transcript, and
-InternVL3.5-8B~\cite{internvl35} is the critic. Both are frozen and quantised to 4 bits with AWQ.
-the base paper's model, Qwen2.5-VL-7B, is used for the reproduction and for one bridge
+InternVL3.5-8B~\cite{internvl35} is the critic. Both are frozen and quantised to 4 bits with AWQ. The base paper's model, Qwen2.5-VL-7B, is used for the reproduction and for one bridge
 experiment. Each lab PC has one NVIDIA RTX 3060 (12\,GB) and 15\,GB of RAM, and the models are
 served with vLLM~\cite{vllm} in offline batch mode, one model at a time.
 
 All rows use temperature 0.7, top-$p$ 0.8, top-$k$ 20 and a limit of 4{,}096 tokens per call. We
-draw 20 CoT samples per question and 8 samples for PoT and correction. Each model call is stored
-in an SQLite cache with a fixed seed, so a run that stops halfway can be resumed and gives the
-same results.
+draw 20 CoT samples per question and 8 samples for PoT and correction. We cache each model call in SQLite using fixed seeds, allowing interrupted runs to resume reproducibly.
 
 % ==============================================================================================
 \section{Phase 2: building and testing on 2025}\label{sec:p2}
@@ -320,11 +296,9 @@ reach the 4{,}096-token limit.
 
 \textbf{Pilot.} We then ran all modules end to end on 40 test questions. Accuracy went up with
 each module (29.5\% for a single answer, 41.2\% with the code sandbox and 57.5\% for the full
-framework), and the full framework was 22.5 points above matched SC (CI [7.5, 37.5]). Forty
-questions gives only a rough first estimate, and the pilot was more useful for finding problems.
+framework), and the full framework was 22.5 points above matched SC (CI [7.5, 37.5]). The 40-question pilot gave a rough accuracy estimate but was more useful for identifying implementation problems.
 We read 1{,}520 solution traces and 640 correction chains and found seven problems in the method
-(Table~\ref{tab:fixes}). Before the big GPU runs we went through the code again and found 11 more
-bugs, for example a crash in the verifier's cross-validation, features that were computed
+(Table~\ref{tab:fixes}). Before the full GPU runs, we reviewed the code again and found 11 additional bugs, for example a crash in the verifier's cross-validation, features that were computed
 differently in training and at test time, and confidence intervals that ignored the link between
 twin questions. Each fix is covered by a regression test.
 
@@ -352,7 +326,7 @@ Batch aborted & one 12{,}303-token prompt & retry request by request \\
 
 \textbf{Full run on 2025.} Table~\ref{tab:p2} and Fig.~\ref{fig:p2} show the results as modules are
 added one by one. The full framework reaches 65.3\%, against 43.2\% for one answer, and is 12.1
-points above matched SC (CI [4.2, 20.5], McNemar $p{=}0.001$). There are 35 question that only
+points above matched SC (CI [4.2, 20.5], McNemar $p{=}0.001$). There are 35 questions that only
 the framework solves and 12 that only SC solves. With the code sandbox, accuracy on numerical
 questions goes from 40.2\% to 50.4\%, and overall accuracy rises by 5.0 points ($p{=}0.012$). The
 verifier gives the largest single increase (+11.8, CI [6.8, 16.6]), while retrieval adds 2.1
@@ -366,7 +340,7 @@ and 42.6\% on 2025, which gives no indication that the model had memorised 2025.
 \label{fig:p2}
 \end{figure}
 
-\textbf{Open questions after Phase 2.} Three observations guided the rest of the study. First,
+\textbf{Open questions after Phase 2.} Three findings from Phase~2 informed our later experiments. First,
 on the 2025 pool the Phase-2 verifier picked 65.3\%, almost the same as a plain majority vote over
 the same 16 answers (65.8\%, oracle 85.3\%). Most of the gain therefore came from the variety of
 the pool and little from the choice among its answers. Second, retrieval was used for only 30 of
@@ -382,9 +356,7 @@ which buys \ThreeScN{} samples for matched SC, and SC with these samples reaches
 framework is \ThreeVsSc{} points higher (CI [\ThreeVsScLo, \ThreeVsScHi]); it solves \ThreeFwOnly{}
 questions that SC gets wrong, while SC solves \ThreeScOnly{} that the framework gets wrong. The
 Phase-2 framework, run again without changes, reaches \TwoAcc\% and is \TwoVsSc{} points above
-its own matched SC ($p{=}$\TwoVsScP). Our main claim, that the framework does better than
-majority voting at the same compute, thus also holds on an exam written after the model was
-released. In Fig.~\ref{fig:compute}, every row of the framework lies above the SC curve at the
+its own matched SC ($p{=}$\TwoVsScP). The 2026 results therefore support our main claim: the framework outperforms majority voting at matched compute. In Fig.~\ref{fig:compute}, every row of the framework lies above the SC curve at the
 corresponding cost.
 
 \begin{figure*}[t]
@@ -406,8 +378,7 @@ answers. Dots: rows of Fig.~\ref{fig:main}; large dots: the full frameworks.}
 
 \input{generated/t_compare.tex}
 
-\textbf{Final vs.\ Phase-2 framework.} The paired tests are in Table~\ref{tab:cmp}. The solver of the
-final system is clearly stronger. Its PoT answers are \PotVsDiff{} points better than those of the
+\textbf{Final vs.\ Phase-2 framework.} The paired tests are in Table~\ref{tab:cmp}. The final solver performs better on the PoT comparison. Its PoT answers are \PotVsDiff{} points better than those of the
 Phase-2 system (CI [\PotVsLo, \PotVsHi]), and continuation on its own adds \ExtVsDiff{} points to
 CoT. For the complete frameworks the difference is \VsDiff{} points (CI [\VsLo, \VsHi],
 $p{=}$\VsP), which is not significant with \NTest{} questions. On the post-hoc 2025 set the same
@@ -423,8 +394,7 @@ difference between the two years (Sec.~\ref{sec:ver}).
 
 \textbf{Results by group.} Accuracy improves in every group (Fig.~\ref{fig:bd}). On 2026 English questions reach \ThreeEn\% and
 Hindi questions \ThreeHin\%, and text-only questions reach \ThreeTxt\% while diagram questions
-reach only \ThreeImg\%. The code sandbox and correction improve the reasoning, but they cannot
-help when the model has read the figure wrongly. Some of the Hindi gap on 2026 could also be
+reach only \ThreeImg\%. The code sandbox and correction cannot resolve errors caused by misreading a figure. Some of the Hindi gap on 2026 could also be
 caused by our own crops.
 
 
@@ -433,9 +403,7 @@ caused by our own crops.
 Table~\ref{tab:corr} uses the measures defined in the base paper. In round~1 the critic flags
 \EpThree\% of the wrong solutions of the final system, and \EcThree\% of the flagged errors are
 fixed in that round. Counting all rounds, 14--19\% of the detected errors end with a correct
-answer (Fig.~\ref{fig:corr}). The base paper reports 1.1--5.2\% for single-pass correction. We
-think the difference come from three sources: the feedback points to a specific step, it comes
-from a second model, and the solver can check its numbers in the sandbox. The critic also flags
+answer (Fig.~\ref{fig:corr}). The base paper reports 1.1--5.2\% for single-pass correction. Three factors may explain the difference: step-specific feedback, a separate critic model, and numerical checks in the sandbox. The critic also flags
 \FaThree\% of the \emph{correct} solutions, and some of these are then changed from right to
 wrong. Since the final solver is stronger, fewer of its solutions are wrong to begin with, and
 the absolute gain from correction is smaller than in Phase~2.
@@ -456,7 +424,7 @@ difference is not significant, because the gate also rejects some correct fixes.
 
 \subsection{The verifier as a classifier and as a selector}\label{sec:ver}
 \input{generated/t_verifier.tex}
-Judged as a classifier of single answers the verifier carries over well to 2026, with an AUC of
+As a classifier of individual answers, the verifier maintains a high AUC on 2026, with an AUC of
 \VerAucTest{} on the 2026 pool (Table~\ref{tab:ver}). Judged by the answer it picks, however, it
 brings no gain on the clean year. It picks a right answer for \ThreePick\% of the questions,
 while majority voting over the same 16 answers gives \ThreeMaj\% and the oracle \ThreeOracle\%.
@@ -481,7 +449,7 @@ years, so the probe shows no sign of memorisation.
 \label{fig:probe}
 \end{figure}
 
-\textbf{Bridge to the papers model.} With Qwen2.5-VL-7B the framework gives no improvement. One
+\textbf{Bridge to the paper's model.} With Qwen2.5-VL-7B the framework gives no improvement. One
 answer scores \QBase\%, matched SC \QSc\% and the framework \QFull\% (\QVsSc{} against SC, CI
 [\QVsScLo, \QVsScHi]). At an accuracy of about 14\% most candidates are wrong, and agreement
 between answers, the critic and the verifier then provide little useful information. The
@@ -493,7 +461,7 @@ larger on 2025 than on 2026, which fits with some optimism on a year that influe
 
 % ==============================================================================================
 \section{Can selection or retrieval be improved?}\label{sec:sel}
-After the main result we worked on its two weak points, selection and retrieval. By this time we
+After the main test, we investigated selection and retrieval, the two weaker components. By this time we
 had already seen results on both test years, so all 2025 and 2026 numbers in this section and the
 next are post-hoc. Every choice was still made on 2019--2024 data, following a plan committed
 before the runs.
@@ -545,7 +513,7 @@ Oracle & \VfOracle & \\
 with its length features removed, which tests the length explanation directly; its accuracy goes
 down. The second is a neural verifier, a ModernBERT-base cross-encoder~\cite{modernbert}
 fine-tuned on the English transcript, the answer and the end of the solution (1{,}024 tokens),
-with one fold per training year. It does learn something useful (candidate AUC \VfAuc, between
+with one fold per training year. The neural verifier achieves a candidate AUC of \VfAuc{} (between
 \VfAucLo{} and \VfAucHi{} across years), and used as a weight in the vote it is better than plain
 majority voting, but as a ranker it is worse than the handcrafted model. The third adds the
 neural score to the ranker as one more feature. The fourth retrains all of the above with
@@ -566,7 +534,7 @@ below zero, so cards were not adopted under our rule. The second idea extends th
 with \VfOlyEntries{} verified OlympiadBench solutions, which are released under Apache-2.0. LOYO
 coverage then falls from \VfCovThree\% to \VfCovFour\%, because the new close neighbours push up
 the tuned threshold while being retrieved only \VfOlyHits{} times themselves. On 2026, retrieval
-changes for \VfKbChanged{} questions and the accuracy stays the same. We didnot use coaching
+changes for \VfKbChanged{} questions and the accuracy stays the same. We did not use coaching
 material, because of its licences and the risk of overlap with the test questions.
 
 % ==============================================================================================
@@ -583,8 +551,7 @@ pick beats that vote. The pool gain is about the same in both years (\VbPoolTwen
 \VbSelTwentySix. The verifier's overall AUC is in fact higher on 2026 (\VbAucAllTwentySix{}
 against \VbAucAllTwentyFive), because most of it comes from telling easy questions from hard
 ones. Picking only matters in pools with both right and wrong answers, and inside those pools the
-mean AUC falls from \VbAucInTwentyFive{} to \VbAucInTwentySix. So a high overall AUC does not mean
-that a verifier picks well.
+mean AUC falls from \VbAucInTwentyFive{} to \VbAucInTwentySix. Overall AUC therefore does not reliably measure how well the verifier selects among candidates in mixed pools.
 
 \begin{figure}[t]
 \centering
@@ -669,18 +636,17 @@ lowers the ranker's LOYO accuracy, and the diagram-first reading does not help o
 
 % ==============================================================================================
 \section{Discussion}
-\textbf{What holds on the clean year.} For both frameworks, sampling with code, correction by a
+\textbf{Findings supported by the 2026 test.} For both frameworks, sampling with code, correction by a
 second model and answer selection together beat voting over plain CoT at the same cost. The
 transcript and the continuation make the solver clearly stronger, and pointing the corrector to
 one wrong step fixes far more errors than the single-pass correction in the base paper.
 
-\textbf{What does not hold.} The learned selector beat majority voting under LOYO and on 2025 but
+\textbf{Results that did not generalize.} The learned selector beat majority voting under LOYO and on 2025 but
 not on 2026, and none of the fixes tried in Secs.~\ref{sec:sel} and~\ref{sec:diag} brought this
 back. Retrieval has only a small effect, because few questions get examples.
 
-\textbf{What still fails.} Diagram and Hindi questions are still well behind, and about two in
-five PoT answers are still cut off. As the gain comes mostly from the pool, the next step is to
-get a right answer into more pools. For diagram questions this means reading the figure better,
+\textbf{Remaining failure cases.} Diagram and Hindi questions are still well behind, and about two in
+five PoT answers are still cut off. Since most of the gain comes from candidate generation, future work should focus on increasing the number of pools containing a correct answer. For diagram questions this means reading the figure better,
 since better reasoning or selection cannot fix a figure that was read wrong.
 
 \section{Limitations}
@@ -694,14 +660,14 @@ dev year rest on only about 30 questions where retrieval is used, and the diagra
 run on a single dev year.
 
 \section{Conclusion and future work}
-On an exam year that the model cannot have seen, a frozen 8B VLM combined with a code sandbox,
+On an exam held after the model's release, a frozen 8B VLM combined with a code sandbox,
 correction by a second model and answer selection improves accuracy from \ThreeBase\% to
 \ThreeAcc\% and exceeds majority voting at the same compute by \ThreeVsSc{} points. The result of
 the Phase-2 framework also holds on this year (\TwoVsSc). The gain comes from a better pool of
 candidate answers and is stable across years, whereas the learned selection is fragile, and
 none of the eight ideas tested after the freeze changed this.
 
-We see four directions for future work. (1) Diagram questions are the largest group of failures,
+Our results suggest four areas for further investigation. (1) Diagram questions are the largest group of failures,
 and they need better reading of figures, for instance a stronger vision model used only to
 describe the diagram, or a solver that is allowed to look at parts of the image again. (2) Hindi
 questions would benefit from crops that match the style of the dataset and from checking the

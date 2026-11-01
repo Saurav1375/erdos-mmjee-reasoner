@@ -70,7 +70,7 @@ Full framework vs. matched self-consistency: **+12.1 points** [+4.2, +20.5], McN
 | **3. v3 framework and clean 2026 test** | [`phase-3`](../../tree/phase-3) | Clean 2026 test (Hindi twins built from the official papers); frozen v3 (adaptive budget, transcript block, RAG v3, verifier v3 with correction gate); v2 re-run on 2026; Qwen2.5 bridge to the paper; memorisation probes; final report | [`docs/phases/PHASE3.md`](docs/phases/PHASE3.md) |
 | **4. Final phase (post-hoc)** | [`phase-4`](../../tree/phase-4) | Selector diagnosis; neural ModernBERT verifier, length-free and stacked rankers, v3-style training pools (two GPUs); matched RAG seeds, method cards, open-licensed KB; one-shot post-hoc evaluation; final report v4 | [`docs/phases/PHASE4.md`](docs/phases/PHASE4.md) |
 | **4b. Final diagnostics (post-hoc)** | [`phase-4b`](../../tree/phase-4b) | Gain decomposition (pool vs selection), within-pool AUC; answer-level verifier; diagram-first transcript (2024 dev); final report v4b | [`docs/phases/PHASE4B.md`](docs/phases/PHASE4B.md) |
-| **Final submission** | [`final`](../../tree/final) | Final paper (IEEE, 12 pages) and slides; demo website with replay of all 204 test questions and a live mode; demo videos | [§8.6](#86-final-submission) |
+| **Final submission** | [`final`](../../tree/final) | Final paper (IEEE, 11 pages) and slides; demo website with replay of all 204 test questions and a live mode; demo videos | [§8.6](#86-final-submission) |
 
 `main` always points to the latest published phase, which is currently the **final submission** (`final`). Each
 phase document lists its goals, the issues encountered, and the future enhancements.
